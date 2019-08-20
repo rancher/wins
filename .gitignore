@@ -1,0 +1,26 @@
+# IDE
+.idea/
+
+# CMake
+cmake-build-debug/
+cmake-build-release/
+
+# Binaries for programs and plugins
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Output of the go coverage tool, specifically when used with ginkgo
+*.coverprofile
+
+# MAC file
+.DS_Store
