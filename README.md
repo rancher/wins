@@ -125,13 +125,15 @@ For integration test, please run the below command in `PowerShell`:
 > make.bat integration
 ```
 
+> Note: Don't use `bin/wins.exe` after integration testing. Please `make.bat build` again.
+
 If want both of them, please run the below command in `PowerShell`:
 
 ``` powershell
 > make.bat all
 ```
 
-# License
+## License
 
 Copyright (c) 2014-2019 [Rancher Labs, Inc.](http://rancher.com)
 

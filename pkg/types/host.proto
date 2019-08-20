@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package wins;
+
+import "common.proto";
+
+option go_package = "types";
+
+service HostService {
+    rpc GetVersion (Void) returns (HostGetVersionResponse) {
+    }
+}
+
+message HostGetVersionResponse {
+    HostVersion Data = 1;
+}
+
+message HostVersion {
+    string CurrentMajorVersionNumber = 1;
+    string CurrentMinorVersionNumber = 2;
+    string CurrentBuildNumber = 3;
+    string UBR = 4;
+    string ReleaseId = 5;
+    string BuildLabEx = 6;
+    string CurrentBuild = 7;
+}

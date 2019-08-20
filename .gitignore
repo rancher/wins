@@ -12,6 +12,7 @@ bin/
 *.dll
 *.so
 *.dylib
+*.test-*
 
 # Test binary, build with `go test -c`
 *.test
@@ -21,6 +22,10 @@ bin/
 
 # Output of the go coverage tool, specifically when used with ginkgo
 *.coverprofile
+
+# Rancher
+Dockerfile.Dapper[0-9]*
+.cache/
 
 # MAC file
 .DS_Store

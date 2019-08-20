@@ -1,0 +1,7 @@
+ARG SERVERCORE_VERSION
+
+FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION}
+SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+COPY bin/wins-container.exe /Windows/wins.exe
+COPY tests/integration/docker/upgrade.ps1 /Windows/
+ENTRYPOINT ["powershell", "-NoLogo", "-NonInteractive", "-File", "c:/Windows/upgrade.ps1"]

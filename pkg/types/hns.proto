@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package wins;
+
+option go_package = "types";
+
+service HnsService {
+    rpc GetNetwork (HnsGetNetworkRequest) returns (HnsGetNetworkResponse) {
+    }
+}
+
+message HnsGetNetworkRequest {
+    oneof Options {
+        string Address = 1;
+        string Name = 2;
+    }
+}
+
+message HnsGetNetworkResponse {
+    HnsNetwork Data = 1;
+}
+
+message HnsNetwork {
+    string ID = 1;
+    string Type = 2;
+    repeated HnsNetworkSubnet Subnets = 3;
+    string ManagementIP = 4;
+}
+
+message HnsNetworkSubnet {
+    string AddressCIDR = 1;
+    string GatewayAddress = 2;
+}

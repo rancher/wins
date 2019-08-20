@@ -1,0 +1,116 @@
+package config
+
+import (
+	"io/ioutil"
+	"os"
+	"strings"
+
+	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
+	"github.com/rancher/wins/pkg/defaults"
+)
+
+func DefaultConfig() *Config {
+	return &Config{
+		Listen: defaults.NamedPipeName,
+		WhiteList: WhiteListConfig{
+			ProcessPaths: []string{},
+		},
+		Upgrade: UpgradeConfig{
+			Mode:         "watching",
+			WatchingPath: defaults.UpgradeWatchingPath,
+		},
+	}
+}
+
+type Config struct {
+	Debug     bool            `yaml:"debug",json:"debug"`
+	Listen    string          `yaml:"listen",json:"listen"`
+	WhiteList WhiteListConfig `yaml:"white_list",json:"whiteList"`
+	Upgrade   UpgradeConfig   `yaml:"upgrade",json:"upgrade"`
+}
+
+func (c *Config) Validate() error {
+	if strings.TrimSpace(c.Listen) == "" {
+		return errors.New("listen could not be blank")
+	}
+
+	// validate white list field
+	if err := c.WhiteList.Validate(); err != nil {
+		return errors.Wrap(err, "failed to validate white list field")
+	}
+
+	// validate upgrade field
+	if err := c.Upgrade.Validate(); err != nil {
+		return errors.Wrap(err, "failed to validate upgrade field")
+	}
+
+	return nil
+}
+
+type WhiteListConfig struct {
+	ProcessPaths []string `yaml:"process_paths",json:"processPaths"`
+}
+
+func (c *WhiteListConfig) Validate() error {
+	// process path
+	for _, processPath := range c.ProcessPaths {
+		if strings.TrimSpace(processPath) == "" {
+			return errors.New("could not accept blank path as process white list")
+		}
+	}
+	return nil
+}
+
+type UpgradeConfig struct {
+	Mode         string `yaml:"mode",json:"mode"`
+	WatchingPath string `yaml:"watching_path",json:"watchingPath"`
+}
+
+func (c *UpgradeConfig) Validate() error {
+	switch strings.TrimSpace(c.Mode) {
+	case "watching":
+		if strings.TrimSpace(c.WatchingPath) == "" {
+			return errors.New("could not accept blank path as watching path")
+		}
+	case "none", "":
+	default:
+		return errors.Errorf("could not accept %q as upgrade mode", c.Mode)
+	}
+
+	return nil
+}
+
+func (c *UpgradeConfig) IsWatchingMode() bool {
+	return c.Mode == "watching"
+}
+
+func LoadConfig(path string, v *Config) error {
+	if v == nil {
+		return errors.New("config could not be nil")
+	}
+
+	stat, err := os.Stat(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return errors.Wrap(err, "could not load config")
+		}
+		return nil
+	} else if stat.IsDir() {
+		return errors.New("could not load config from directory")
+	}
+
+	if err := DecodeConfig(path, v); err != nil {
+		return errors.Wrap(err, "could not decode config")
+	}
+
+	return v.Validate()
+}
+
+func DecodeConfig(path string, v *Config) error {
+	bs, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return yaml.Unmarshal(bs, v)
+}

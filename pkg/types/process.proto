@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package wins;
+
+import "common.proto";
+
+option go_package = "types";
+
+service ProcessService {
+    rpc Start (ProcessStartRequest) returns (ProcessStartResponse) {
+    }
+    rpc Wait (ProcessWaitRequest) returns (stream ProcessWaitResponse) {
+    }
+    rpc KeepAlive(stream ProcessKeepAliveRequest) returns (Void) {
+    }
+}
+
+message ProcessStartRequest {
+    string Checksum = 1;
+    string Path = 2;
+    repeated string Args = 3;
+    repeated ProcessExpose Exposes = 4;
+    repeated string Envs = 5;
+    string Dir = 6;
+}
+
+message ProcessStartResponse {
+    ProcessName Data = 1;
+}
+
+message ProcessWaitRequest {
+    ProcessName Data = 1;
+}
+
+message ProcessWaitResponse {
+    oneof Options {
+        bytes StdOut = 1;
+        bytes StdErr = 2;
+    }
+}
+
+message ProcessKeepAliveRequest {
+    ProcessName Data = 1;
+}
+
+enum RunExposeProtocol {
+    TCP = 0;
+    UDP = 1;
+}
+
+message ProcessExpose {
+    int32 Port = 1;
+    RunExposeProtocol Protocol = 2;
+}
+
+message ProcessName {
+    string Value = 1;
+}

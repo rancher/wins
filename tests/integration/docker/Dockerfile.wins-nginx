@@ -1,0 +1,21 @@
+ARG SERVERCORE_VERSION
+
+FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION}
+SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+RUN $URL = 'http://nginx.org/download/nginx-1.17.3.zip'; \
+    \
+    Write-Host ('Downloading Nginx from {0}...'  -f $URL); \
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -UseBasicParsing -OutFile c:\nginx.zip -Uri $URL; \
+    \
+    Write-Host 'Expanding ...'; \
+    Expand-Archive -Force -Path c:\nginx.zip -DestinationPath c:\etc\.; \
+    Rename-Item -Force -Path c:\etc\nginx-1.17.3 -NewName nginx; \
+    \
+    Write-Host 'Cleaning ...'; \
+    Remove-Item -Force -Path c:\nginx.zip | Out-Null; \
+    \
+    Write-Host 'Complete.'
+COPY bin/wins-container.exe /Windows/wins.exe
+COPY tests/integration/docker/nginx.ps1 /Windows/
+ENTRYPOINT ["powershell", "-NoLogo", "-NonInteractive", "-File", "c:/Windows/nginx.ps1"]

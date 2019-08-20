@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package wins;
+
+import "common.proto";
+
+option go_package = "types";
+
+service RouteService {
+    rpc Add (RouteAddRequest) returns (Void) {
+    }
+}
+
+message RouteAddRequest {
+    repeated string Addresses = 1;
+}

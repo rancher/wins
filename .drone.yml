@@ -1,0 +1,39 @@
+---
+kind: pipeline
+name: windows-1809
+
+platform:
+  os: windows
+  arch: amd64
+  version: 1809
+
+steps:
+  - name: build
+    pull: default
+    image: maiwj/dapper:windows-1809
+    commands:
+      - dapper.exe -f Dockerfile.dapper ci
+    volumes:
+      - name: docker_pipe
+        path: \\\\.\\pipe\\docker_engine
+
+  - name: github_binary_release
+    image: plugins/github-release
+    settings:
+      api_key:
+        from_secret: github_token
+      files:
+        - "bin/wins.exe"
+    when:
+      instance:
+        - drone-publish.rancher.io
+      ref:
+        - refs/head/master
+        - refs/tags/*
+      event:
+        - tag
+
+volumes:
+  - name: docker_pipe
+    host:
+      path: \\\\.\\pipe\\docker_engine

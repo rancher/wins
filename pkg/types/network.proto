@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package wins;
+
+option go_package = "types";
+
+service NetworkService {
+    rpc Get (NetworkGetRequest) returns (NetworkGetResponse) {
+    }
+}
+
+message NetworkGetRequest {
+    oneof Options {
+        string Address = 1;
+        string Name = 2;
+    }
+}
+
+message NetworkGetResponse {
+    NetworkAdapter Data = 1;
+}
+
+message NetworkAdapter {
+    string InterfaceIndex = 1;
+    string GatewayAddress = 2;
+    string SubnetCIDR = 3;
+    string HostName = 4;
+    string AddressCIDR = 5;
+}

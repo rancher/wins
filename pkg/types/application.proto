@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package wins;
+
+import "common.proto";
+
+option go_package = "types";
+
+service ApplicationService {
+    rpc Info (Void) returns (ApplicationInfoResponse) {
+    }
+}
+
+message ApplicationInfoResponse {
+    ApplicationInfo Info = 1;
+}
+
+message ApplicationInfo {
+    string Checksum = 1;
+    string Version = 2;
+    string Commit = 3;
+}
