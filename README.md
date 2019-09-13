@@ -2,7 +2,7 @@
 
 `wins` is a way to operate the Windows host inside the Windows container.
 
-## How to use
+## How to use 
 
 ### Modules
 ```
