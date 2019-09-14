@@ -17,13 +17,18 @@ steps:
       - name: docker_pipe
         path: \\\\.\\pipe\\docker_engine
 
+  - name: stage-binaries
+    image: maiwj/dapper:windows-1809
+    commands:
+      - "Get-ChildItem -Path ./bin; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/; Get-ChildItem -Path ./package/"
+
   - name: github_binary_release
     image: plugins/github-release
     settings:
       api_key:
         from_secret: github_token
       files:
-        - "bin/wins.exe"
+        - "package/*"
     when:
       instance:
         - drone-publish.rancher.io
