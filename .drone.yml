@@ -28,15 +28,7 @@ steps:
       api_key:
         from_secret: github_token
       files:
-        - "package/*"
-    when:
-      instance:
-        - drone-publish.rancher.io
-      ref:
-        - refs/head/master
-        - refs/tags/*
-      event:
-        - tag
+        - "package/win.exe"
 
 volumes:
   - name: docker_pipe
