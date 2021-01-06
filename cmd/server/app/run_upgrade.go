@@ -14,12 +14,12 @@ import (
 )
 
 func setupUpgrading(ctx context.Context, cfg *config.Config) error {
-	isInteractive, err := svc.IsAnInteractiveSession()
+	isWindowsService, err := svc.IsWindowsService()
 	if err != nil {
-		return errors.Wrap(err, "could not detect the interactive state")
+		return errors.Wrap(err, "could not detect whether the current process is running as a Windows service")
 	}
-	if isInteractive {
-		logrus.Warn("could not upgrade during windows service interacting")
+	if !isWindowsService {
+		logrus.Warn("cannot upgrade unless the current process is being executed as a Windows service")
 		return nil
 	}
 
@@ -31,6 +31,12 @@ func setupUpgrading(ctx context.Context, cfg *config.Config) error {
 	return nil
 }
 
+// enableWatchingMode sets up a file system notification-based watcher on the config.Upgrade.WatchingPath directory.
+// If a write is detected in to a file in that directory, the watcher computes whether the SHA1 hash of the binary
+// within that path differs from the current binary that is being executed.
+// If there is a change in the hash, it moves the updated binary to the current binary's path and returns with exit code 1.
+// The exit code of 1 triggers the Windows service that is backing wins to execute a failure action (see run.go) after
+// a certain number of seconds that will restart the wins binary with the newly updated contents
 func enableWatchingMode(ctx context.Context, cfg *config.Config) error {
 	if !cfg.Upgrade.IsWatchingMode() {
 		return nil
