@@ -22,8 +22,8 @@ if ! [[ "$0" =~ "scripts/protoc-gen" ]]; then
 	error "must be run from repository root"
 fi
 
-if ! [[ $(protoc --version) =~ "3.7.1" ]]; then
-	error "could not find protoc 3.7.1, is it installed + in PATH?"
+if ! [[ $(protoc --version) =~ "3.14.0" ]]; then
+	error "could not find protoc 3.14.0, is it installed + in PATH?"
 fi
 
 GOGOPROTO_ROOT="${GOPATH}/src/github.com/gogo/protobuf"

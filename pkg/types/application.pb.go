@@ -8,8 +8,11 @@ import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	io "io"
 	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -21,7 +24,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type ApplicationInfoResponse struct {
 	Info *ApplicationInfo `protobuf:"bytes,1,opt,name=Info,proto3" json:"Info,omitempty"`
@@ -41,7 +44,7 @@ func (m *ApplicationInfoResponse) XXX_Marshal(b []byte, deterministic bool) ([]b
 		return xxx_messageInfo_ApplicationInfoResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +90,7 @@ func (m *ApplicationInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, err
 		return xxx_messageInfo_ApplicationInfo.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -190,6 +193,14 @@ type ApplicationServiceServer interface {
 	Info(context.Context, *Void) (*ApplicationInfoResponse, error)
 }
 
+// UnimplementedApplicationServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedApplicationServiceServer struct {
+}
+
+func (*UnimplementedApplicationServiceServer) Info(ctx context.Context, req *Void) (*ApplicationInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Info not implemented")
+}
+
 func RegisterApplicationServiceServer(s *grpc.Server, srv ApplicationServiceServer) {
 	s.RegisterService(&_ApplicationService_serviceDesc, srv)
 }
@@ -228,7 +239,7 @@ var _ApplicationService_serviceDesc = grpc.ServiceDesc{
 func (m *ApplicationInfoResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -236,27 +247,34 @@ func (m *ApplicationInfoResponse) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *ApplicationInfoResponse) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ApplicationInfoResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	if m.Info != nil {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintApplication(dAtA, i, uint64(m.Info.Size()))
-		n1, err := m.Info.MarshalTo(dAtA[i:])
-		if err != nil {
-			return 0, err
+		{
+			size, err := m.Info.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintApplication(dAtA, i, uint64(size))
 		}
-		i += n1
+		i--
+		dAtA[i] = 0xa
 	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func (m *ApplicationInfo) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -264,39 +282,49 @@ func (m *ApplicationInfo) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *ApplicationInfo) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ApplicationInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Checksum) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintApplication(dAtA, i, uint64(len(m.Checksum)))
-		i += copy(dAtA[i:], m.Checksum)
+	if len(m.Commit) > 0 {
+		i -= len(m.Commit)
+		copy(dAtA[i:], m.Commit)
+		i = encodeVarintApplication(dAtA, i, uint64(len(m.Commit)))
+		i--
+		dAtA[i] = 0x1a
 	}
 	if len(m.Version) > 0 {
-		dAtA[i] = 0x12
-		i++
+		i -= len(m.Version)
+		copy(dAtA[i:], m.Version)
 		i = encodeVarintApplication(dAtA, i, uint64(len(m.Version)))
-		i += copy(dAtA[i:], m.Version)
+		i--
+		dAtA[i] = 0x12
 	}
-	if len(m.Commit) > 0 {
-		dAtA[i] = 0x1a
-		i++
-		i = encodeVarintApplication(dAtA, i, uint64(len(m.Commit)))
-		i += copy(dAtA[i:], m.Commit)
+	if len(m.Checksum) > 0 {
+		i -= len(m.Checksum)
+		copy(dAtA[i:], m.Checksum)
+		i = encodeVarintApplication(dAtA, i, uint64(len(m.Checksum)))
+		i--
+		dAtA[i] = 0xa
 	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func encodeVarintApplication(dAtA []byte, offset int, v uint64) int {
+	offset -= sovApplication(v)
+	base := offset
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
 		v >>= 7
 		offset++
 	}
 	dAtA[offset] = uint8(v)
-	return offset + 1
+	return base
 }
 func (m *ApplicationInfoResponse) Size() (n int) {
 	if m == nil {
@@ -333,14 +361,7 @@ func (m *ApplicationInfo) Size() (n int) {
 }
 
 func sovApplication(x uint64) (n int) {
-	for {
-		n++
-		x >>= 7
-		if x == 0 {
-			break
-		}
-	}
-	return n
+	return (math_bits.Len64(x|1) + 6) / 7
 }
 func sozApplication(x uint64) (n int) {
 	return sovApplication(uint64((x << 1) ^ uint64((int64(x) >> 63))))
@@ -586,6 +607,7 @@ func (m *ApplicationInfo) Unmarshal(dAtA []byte) error {
 func skipApplication(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0
+	depth := 0
 	for iNdEx < l {
 		var wire uint64
 		for shift := uint(0); ; shift += 7 {
@@ -617,10 +639,8 @@ func skipApplication(dAtA []byte) (n int, err error) {
 					break
 				}
 			}
-			return iNdEx, nil
 		case 1:
 			iNdEx += 8
-			return iNdEx, nil
 		case 2:
 			var length int
 			for shift := uint(0); ; shift += 7 {
@@ -641,55 +661,30 @@ func skipApplication(dAtA []byte) (n int, err error) {
 				return 0, ErrInvalidLengthApplication
 			}
 			iNdEx += length
-			if iNdEx < 0 {
-				return 0, ErrInvalidLengthApplication
-			}
-			return iNdEx, nil
 		case 3:
-			for {
-				var innerWire uint64
-				var start int = iNdEx
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return 0, ErrIntOverflowApplication
-					}
-					if iNdEx >= l {
-						return 0, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					innerWire |= (uint64(b) & 0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				innerWireType := int(innerWire & 0x7)
-				if innerWireType == 4 {
-					break
-				}
-				next, err := skipApplication(dAtA[start:])
-				if err != nil {
-					return 0, err
-				}
-				iNdEx = start + next
-				if iNdEx < 0 {
-					return 0, ErrInvalidLengthApplication
-				}
-			}
-			return iNdEx, nil
+			depth++
 		case 4:
-			return iNdEx, nil
+			if depth == 0 {
+				return 0, ErrUnexpectedEndOfGroupApplication
+			}
+			depth--
 		case 5:
 			iNdEx += 4
-			return iNdEx, nil
 		default:
 			return 0, fmt.Errorf("proto: illegal wireType %d", wireType)
 		}
+		if iNdEx < 0 {
+			return 0, ErrInvalidLengthApplication
+		}
+		if depth == 0 {
+			return iNdEx, nil
+		}
 	}
-	panic("unreachable")
+	return 0, io.ErrUnexpectedEOF
 }
 
 var (
-	ErrInvalidLengthApplication = fmt.Errorf("proto: negative length found during unmarshaling")
-	ErrIntOverflowApplication   = fmt.Errorf("proto: integer overflow")
+	ErrInvalidLengthApplication        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowApplication          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupApplication = fmt.Errorf("proto: unexpected end of group")
 )
