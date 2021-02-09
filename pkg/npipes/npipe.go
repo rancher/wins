@@ -16,7 +16,7 @@ type Dialer func(context.Context, string) (net.Conn, error)
 
 // NewDialer creates a Dialer to connect to a named pipe by `path`.
 func NewDialer(path string, timeout time.Duration) (Dialer, error) {
-	path, err := parsePath(path)
+	path, err := ParsePath(path)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func NewDialer(path string, timeout time.Duration) (Dialer, error) {
 // 	- https://docs.microsoft.com/en-us/windows/desktop/secauthz/security-descriptor-string-format
 //  - https://docs.microsoft.com/en-us/windows/desktop/secauthz/ace-strings
 func New(path, sddl string, bufferSize int32) (net.Listener, error) {
-	path, err := parsePath(path)
+	path, err := ParsePath(path)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func GetFullPath(name string) string {
 	return fmt.Sprintf("npipe:////./pipe/%s", name)
 }
 
-func parsePath(path string) (string, error) {
+func ParsePath(path string) (string, error) {
 	sps := strings.SplitN(path, "://", 2)
 	if len(sps) != 2 {
 		return "", errors.Errorf("could not recognize path: %s", path)
