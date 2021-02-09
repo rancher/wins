@@ -14,4 +14,5 @@ const (
 // windows npipe name
 const (
 	NamedPipeName = "rancher_wins"
+	ProxyPipeName = "rancher_wins_proxy"
 )

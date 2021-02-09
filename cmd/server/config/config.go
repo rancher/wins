@@ -13,8 +13,10 @@ import (
 func DefaultConfig() *Config {
 	return &Config{
 		Listen: defaults.NamedPipeName,
+		Proxy:  defaults.ProxyPipeName,
 		WhiteList: WhiteListConfig{
 			ProcessPaths: []string{},
+			ProxyPorts:   []int{},
 		},
 		Upgrade: UpgradeConfig{
 			Mode:         "watching",
@@ -26,6 +28,7 @@ func DefaultConfig() *Config {
 type Config struct {
 	Debug     bool            `yaml:"debug",json:"debug"`
 	Listen    string          `yaml:"listen",json:"listen"`
+	Proxy     string          `yaml:"proxy",json:"proxy"`
 	WhiteList WhiteListConfig `yaml:"white_list",json:"whiteList"`
 	Upgrade   UpgradeConfig   `yaml:"upgrade",json:"upgrade"`
 }
@@ -50,6 +53,7 @@ func (c *Config) Validate() error {
 
 type WhiteListConfig struct {
 	ProcessPaths []string `yaml:"process_paths",json:"processPaths"`
+	ProxyPorts   []int    `yaml:"proxy_ports",json:"proxyPorts"`
 }
 
 func (c *WhiteListConfig) Validate() error {
@@ -57,6 +61,11 @@ func (c *WhiteListConfig) Validate() error {
 	for _, processPath := range c.ProcessPaths {
 		if strings.TrimSpace(processPath) == "" {
 			return errors.New("could not accept blank path as process white list")
+		}
+	}
+	for _, proxyPort := range c.ProxyPorts {
+		if proxyPort < 0 || proxyPort > 0xFFFF {
+			return errors.New("could not accept invalid port number in proxy ports")
 		}
 	}
 	return nil

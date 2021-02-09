@@ -10,6 +10,7 @@ import (
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/profilings"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 )
@@ -98,7 +99,8 @@ func _runAction(cliCtx *cli.Context) error {
 		return errors.Wrapf(err, "failed to setup grpc middlewares")
 	}
 
-	server, err := apis.NewServer(cfg.Listen, serverOptions)
+	logrus.Debugf("Proxy port whitelist: %v", cfg.WhiteList.ProxyPorts)
+	server, err := apis.NewServer(cfg.Listen, serverOptions, cfg.Proxy, cfg.WhiteList.ProxyPorts)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create server")
 	}
