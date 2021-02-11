@@ -33,8 +33,12 @@ func _addRequestParser(cliCtx *cli.Context) error {
 	}
 
 	// parse
+	var err error
 	_addRequest = &types.RouteAddRequest{}
-	_addRequest.Addresses = addressList.Get()
+	_addRequest.Addresses, err = addressList.Get()
+	if err != nil {
+		return errors.Wrapf(err, "failed to parse --addresses")
+	}
 	for idx, address := range _addRequest.Addresses {
 		if !strings.Contains(address, "/") {
 			_addRequest.Addresses[idx] = fmt.Sprintf("%s/32", address)
