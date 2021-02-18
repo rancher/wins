@@ -84,7 +84,7 @@ func _runAction(cliCtx *cli.Context) error {
 		return errors.Wrapf(err, "failed to load config from %s", cfgPath)
 	}
 
-	err = setupUpgrading(ctx, cfg)
+	err = setupUpgrading(ctx, cfg, cfgPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to setup upgrading")
 	}

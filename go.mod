@@ -14,6 +14,7 @@ require (
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
+	github.com/hashicorp/go-multierror v1.1.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.8
 	github.com/nxadm/tail v1.4.6 // indirect
