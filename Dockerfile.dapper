@@ -64,6 +64,7 @@ RUN pushd c:\; \
 
 # install gcc via cygwin: https://cygwin.com/faq/faq.html#faq.setup.cli
 # step after cleanup is workaround for docker found in https://github.com/moby/moby/issues/41058#issuecomment-721156197
+# If https://mirror.clarkson.edu/cygwin/ is broken, you can replace it with any other mirror from https://cygwin.com/mirrors.html
 RUN pushd c:\; \
     $URL = 'https://cygwin.com/setup-x86_64.exe'; \
     \
