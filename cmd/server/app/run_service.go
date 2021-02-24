@@ -101,6 +101,7 @@ func registerService() error {
 
 		serviceConfigFailureActions = 2
 	)
+	// serviceFailureActions correspond to https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsa
 	type serviceFailureActions struct {
 		ResetPeriod  uint32
 		RebootMsg    *uint16
@@ -108,17 +109,20 @@ func registerService() error {
 		ActionsCount uint32
 		Actions      uintptr
 	}
+	// scAction corresponds to https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-sc_action
 	type scAction struct {
 		Type  uint32
 		Delay uint32
 	}
+	// Defines that wins should try to restart the service after 5s, 10s, and 15s. If it still fails, wins does not try to restart the service anymore
 	t := []scAction{
 		{Type: scActionRestart, Delay: uint32(5 * time.Second / time.Millisecond)},
 		{Type: scActionRestart, Delay: uint32(10 * time.Second / time.Millisecond)},
 		{Type: scActionRestart, Delay: uint32(15 * time.Second / time.Millisecond)},
-		{Type: scActionNone,},
+		{Type: scActionNone},
 	}
 	lpInfo := serviceFailureActions{ResetPeriod: uint32(5 * time.Minute / time.Second), ActionsCount: uint32(len(t)), Actions: uintptr(unsafe.Pointer(&t[0]))}
+	// Arguments provided adhere to https://docs.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-changeserviceconfig2w
 	err = windows.ChangeServiceConfig2(w.Handle, serviceConfigFailureActions, (*byte)(unsafe.Pointer(&lpInfo)))
 	if err != nil {
 		return errors.Wrap(err, "could not add failure action")
@@ -162,13 +166,18 @@ func unregisterService() error {
 }
 
 func runService(ctx context.Context, server *apis.Server) error {
-	// process windows service
+	// If the process is not currently executing as a Windows service, assume that this is an interactive session.
+	// debug.Run runs the binary that the service points to directly on the user's console and reacts to user actions
+	// e.g. clicking on Ctrl-C
 	run := debug.Run
-	isInteractive, err := svc.IsAnInteractiveSession()
+	isWindowsService, err := svc.IsWindowsService()
 	if err != nil {
 		return err
 	}
-	if !isInteractive {
+	if isWindowsService {
+		// If we can detect that this is a Windows service that is already running, execute it as a Service instead
+		// after configuring logrus to print logs to Event Tracing for Windows (ETW) and the service's Event Log
+
 		run = svc.Run
 
 		logrus.SetOutput(ioutil.Discard)
@@ -185,7 +194,10 @@ func runService(ctx context.Context, server *apis.Server) error {
 			logrus.AddHook(hook)
 		}
 
-		// Stack dump
+		// Creates a Win32 event defined on a Global scope at stackdump-{pid} that can be signaled by
+		// built-in adminstrators of the Windows machine or by the local system.
+		// If this Win32 event (Global//stackdump-{pid}) is signaled, a goroutine launched by this call
+		// will dump the current stack trace into {windowsTemporaryDirectory}/{default.WindowsServiceName}.{pid}.stack.logs
 		profilings.SetupDumpStacks(defaults.WindowsServiceName, os.Getpid())
 	}
 
@@ -228,14 +240,19 @@ func (h *serviceHandler) Execute(_ []string, r <-chan svc.ChangeRequest, s chan<
 		h.errC <- h.srv.Serve(ctx)
 	}()
 
-	s <- svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown | svc.Accepted(windows.SERVICE_ACCEPT_PARAMCHANGE)}
+	s <- svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown | svc.AcceptParamChange}
 
+	// The following loop configures the Windows service to respond to ChangeRequests from the Windows Service Manager
+	// It uses Go Labels to break out of the switch statement and the loop on recieving a Stop ChangeRequest
+	// See https://medium.com/golangspec/labels-in-go-4ffd81932339
 Loop:
 	for c := range r {
 		switch c.Cmd {
 		case svc.Interrogate:
+			// Update the service's current status to the one provided by the ChangeRequest
 			s <- c.CurrentStatus
 		case svc.Stop, svc.Shutdown:
+			// Cleanup before finishing execution
 			s <- svc.Status{State: svc.StopPending, Accepts: 0}
 			// stop wins server
 			h.srv.Close()

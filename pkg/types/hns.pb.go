@@ -8,8 +8,11 @@ import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	io "io"
 	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -21,7 +24,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type HnsGetNetworkRequest struct {
 	// Types that are valid to be assigned to Options:
@@ -44,7 +47,7 @@ func (m *HnsGetNetworkRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte
 		return xxx_messageInfo_HnsGetNetworkRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -70,10 +73,10 @@ type isHnsGetNetworkRequest_Options interface {
 }
 
 type HnsGetNetworkRequest_Address struct {
-	Address string `protobuf:"bytes,1,opt,name=Address,proto3,oneof"`
+	Address string `protobuf:"bytes,1,opt,name=Address,proto3,oneof" json:"Address,omitempty"`
 }
 type HnsGetNetworkRequest_Name struct {
-	Name string `protobuf:"bytes,2,opt,name=Name,proto3,oneof"`
+	Name string `protobuf:"bytes,2,opt,name=Name,proto3,oneof" json:"Name,omitempty"`
 }
 
 func (*HnsGetNetworkRequest_Address) isHnsGetNetworkRequest_Options() {}
@@ -100,70 +103,12 @@ func (m *HnsGetNetworkRequest) GetName() string {
 	return ""
 }
 
-// XXX_OneofFuncs is for the internal use of the proto package.
-func (*HnsGetNetworkRequest) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _HnsGetNetworkRequest_OneofMarshaler, _HnsGetNetworkRequest_OneofUnmarshaler, _HnsGetNetworkRequest_OneofSizer, []interface{}{
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*HnsGetNetworkRequest) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
 		(*HnsGetNetworkRequest_Address)(nil),
 		(*HnsGetNetworkRequest_Name)(nil),
 	}
-}
-
-func _HnsGetNetworkRequest_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
-	m := msg.(*HnsGetNetworkRequest)
-	// Options
-	switch x := m.Options.(type) {
-	case *HnsGetNetworkRequest_Address:
-		_ = b.EncodeVarint(1<<3 | proto.WireBytes)
-		_ = b.EncodeStringBytes(x.Address)
-	case *HnsGetNetworkRequest_Name:
-		_ = b.EncodeVarint(2<<3 | proto.WireBytes)
-		_ = b.EncodeStringBytes(x.Name)
-	case nil:
-	default:
-		return fmt.Errorf("HnsGetNetworkRequest.Options has unexpected type %T", x)
-	}
-	return nil
-}
-
-func _HnsGetNetworkRequest_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
-	m := msg.(*HnsGetNetworkRequest)
-	switch tag {
-	case 1: // Options.Address
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Options = &HnsGetNetworkRequest_Address{x}
-		return true, err
-	case 2: // Options.Name
-		if wire != proto.WireBytes {
-			return true, proto.ErrInternalBadWireType
-		}
-		x, err := b.DecodeStringBytes()
-		m.Options = &HnsGetNetworkRequest_Name{x}
-		return true, err
-	default:
-		return false, nil
-	}
-}
-
-func _HnsGetNetworkRequest_OneofSizer(msg proto.Message) (n int) {
-	m := msg.(*HnsGetNetworkRequest)
-	// Options
-	switch x := m.Options.(type) {
-	case *HnsGetNetworkRequest_Address:
-		n += 1 // tag and wire
-		n += proto.SizeVarint(uint64(len(x.Address)))
-		n += len(x.Address)
-	case *HnsGetNetworkRequest_Name:
-		n += 1 // tag and wire
-		n += proto.SizeVarint(uint64(len(x.Name)))
-		n += len(x.Name)
-	case nil:
-	default:
-		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
-	}
-	return n
 }
 
 type HnsGetNetworkResponse struct {
@@ -184,7 +129,7 @@ func (m *HnsGetNetworkResponse) XXX_Marshal(b []byte, deterministic bool) ([]byt
 		return xxx_messageInfo_HnsGetNetworkResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -231,7 +176,7 @@ func (m *HnsNetwork) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return xxx_messageInfo_HnsNetwork.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -297,7 +242,7 @@ func (m *HnsNetworkSubnet) XXX_Marshal(b []byte, deterministic bool) ([]byte, er
 		return xxx_messageInfo_HnsNetworkSubnet.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -401,6 +346,14 @@ type HnsServiceServer interface {
 	GetNetwork(context.Context, *HnsGetNetworkRequest) (*HnsGetNetworkResponse, error)
 }
 
+// UnimplementedHnsServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedHnsServiceServer struct {
+}
+
+func (*UnimplementedHnsServiceServer) GetNetwork(ctx context.Context, req *HnsGetNetworkRequest) (*HnsGetNetworkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNetwork not implemented")
+}
+
 func RegisterHnsServiceServer(s *grpc.Server, srv HnsServiceServer) {
 	s.RegisterService(&_HnsService_serviceDesc, srv)
 }
@@ -439,7 +392,7 @@ var _HnsService_serviceDesc = grpc.ServiceDesc{
 func (m *HnsGetNetworkRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -447,40 +400,59 @@ func (m *HnsGetNetworkRequest) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *HnsGetNetworkRequest) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HnsGetNetworkRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	if m.Options != nil {
-		nn1, err := m.Options.MarshalTo(dAtA[i:])
-		if err != nil {
-			return 0, err
+		{
+			size := m.Options.Size()
+			i -= size
+			if _, err := m.Options.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
 		}
-		i += nn1
 	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func (m *HnsGetNetworkRequest_Address) MarshalTo(dAtA []byte) (int, error) {
-	i := 0
-	dAtA[i] = 0xa
-	i++
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HnsGetNetworkRequest_Address) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i -= len(m.Address)
+	copy(dAtA[i:], m.Address)
 	i = encodeVarintHns(dAtA, i, uint64(len(m.Address)))
-	i += copy(dAtA[i:], m.Address)
-	return i, nil
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
 }
 func (m *HnsGetNetworkRequest_Name) MarshalTo(dAtA []byte) (int, error) {
-	i := 0
-	dAtA[i] = 0x12
-	i++
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HnsGetNetworkRequest_Name) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i -= len(m.Name)
+	copy(dAtA[i:], m.Name)
 	i = encodeVarintHns(dAtA, i, uint64(len(m.Name)))
-	i += copy(dAtA[i:], m.Name)
-	return i, nil
+	i--
+	dAtA[i] = 0x12
+	return len(dAtA) - i, nil
 }
 func (m *HnsGetNetworkResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -488,27 +460,34 @@ func (m *HnsGetNetworkResponse) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *HnsGetNetworkResponse) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HnsGetNetworkResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	if m.Data != nil {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintHns(dAtA, i, uint64(m.Data.Size()))
-		n2, err := m.Data.MarshalTo(dAtA[i:])
-		if err != nil {
-			return 0, err
+		{
+			size, err := m.Data.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintHns(dAtA, i, uint64(size))
 		}
-		i += n2
+		i--
+		dAtA[i] = 0xa
 	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func (m *HnsNetwork) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -516,47 +495,57 @@ func (m *HnsNetwork) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *HnsNetwork) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HnsNetwork) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.ID) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintHns(dAtA, i, uint64(len(m.ID)))
-		i += copy(dAtA[i:], m.ID)
-	}
-	if len(m.Type) > 0 {
-		dAtA[i] = 0x12
-		i++
-		i = encodeVarintHns(dAtA, i, uint64(len(m.Type)))
-		i += copy(dAtA[i:], m.Type)
+	if len(m.ManagementIP) > 0 {
+		i -= len(m.ManagementIP)
+		copy(dAtA[i:], m.ManagementIP)
+		i = encodeVarintHns(dAtA, i, uint64(len(m.ManagementIP)))
+		i--
+		dAtA[i] = 0x22
 	}
 	if len(m.Subnets) > 0 {
-		for _, msg := range m.Subnets {
-			dAtA[i] = 0x1a
-			i++
-			i = encodeVarintHns(dAtA, i, uint64(msg.Size()))
-			n, err := msg.MarshalTo(dAtA[i:])
-			if err != nil {
-				return 0, err
+		for iNdEx := len(m.Subnets) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Subnets[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintHns(dAtA, i, uint64(size))
 			}
-			i += n
+			i--
+			dAtA[i] = 0x1a
 		}
 	}
-	if len(m.ManagementIP) > 0 {
-		dAtA[i] = 0x22
-		i++
-		i = encodeVarintHns(dAtA, i, uint64(len(m.ManagementIP)))
-		i += copy(dAtA[i:], m.ManagementIP)
+	if len(m.Type) > 0 {
+		i -= len(m.Type)
+		copy(dAtA[i:], m.Type)
+		i = encodeVarintHns(dAtA, i, uint64(len(m.Type)))
+		i--
+		dAtA[i] = 0x12
 	}
-	return i, nil
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintHns(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *HnsNetworkSubnet) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -564,33 +553,42 @@ func (m *HnsNetworkSubnet) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *HnsNetworkSubnet) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HnsNetworkSubnet) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.AddressCIDR) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintHns(dAtA, i, uint64(len(m.AddressCIDR)))
-		i += copy(dAtA[i:], m.AddressCIDR)
-	}
 	if len(m.GatewayAddress) > 0 {
-		dAtA[i] = 0x12
-		i++
+		i -= len(m.GatewayAddress)
+		copy(dAtA[i:], m.GatewayAddress)
 		i = encodeVarintHns(dAtA, i, uint64(len(m.GatewayAddress)))
-		i += copy(dAtA[i:], m.GatewayAddress)
+		i--
+		dAtA[i] = 0x12
 	}
-	return i, nil
+	if len(m.AddressCIDR) > 0 {
+		i -= len(m.AddressCIDR)
+		copy(dAtA[i:], m.AddressCIDR)
+		i = encodeVarintHns(dAtA, i, uint64(len(m.AddressCIDR)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func encodeVarintHns(dAtA []byte, offset int, v uint64) int {
+	offset -= sovHns(v)
+	base := offset
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
 		v >>= 7
 		offset++
 	}
 	dAtA[offset] = uint8(v)
-	return offset + 1
+	return base
 }
 func (m *HnsGetNetworkRequest) Size() (n int) {
 	if m == nil {
@@ -682,14 +680,7 @@ func (m *HnsNetworkSubnet) Size() (n int) {
 }
 
 func sovHns(x uint64) (n int) {
-	for {
-		n++
-		x >>= 7
-		if x == 0 {
-			break
-		}
-	}
-	return n
+	return (math_bits.Len64(x|1) + 6) / 7
 }
 func sozHns(x uint64) (n int) {
 	return sovHns(uint64((x << 1) ^ uint64((int64(x) >> 63))))
@@ -1203,6 +1194,7 @@ func (m *HnsNetworkSubnet) Unmarshal(dAtA []byte) error {
 func skipHns(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0
+	depth := 0
 	for iNdEx < l {
 		var wire uint64
 		for shift := uint(0); ; shift += 7 {
@@ -1234,10 +1226,8 @@ func skipHns(dAtA []byte) (n int, err error) {
 					break
 				}
 			}
-			return iNdEx, nil
 		case 1:
 			iNdEx += 8
-			return iNdEx, nil
 		case 2:
 			var length int
 			for shift := uint(0); ; shift += 7 {
@@ -1258,55 +1248,30 @@ func skipHns(dAtA []byte) (n int, err error) {
 				return 0, ErrInvalidLengthHns
 			}
 			iNdEx += length
-			if iNdEx < 0 {
-				return 0, ErrInvalidLengthHns
-			}
-			return iNdEx, nil
 		case 3:
-			for {
-				var innerWire uint64
-				var start int = iNdEx
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return 0, ErrIntOverflowHns
-					}
-					if iNdEx >= l {
-						return 0, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					innerWire |= (uint64(b) & 0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				innerWireType := int(innerWire & 0x7)
-				if innerWireType == 4 {
-					break
-				}
-				next, err := skipHns(dAtA[start:])
-				if err != nil {
-					return 0, err
-				}
-				iNdEx = start + next
-				if iNdEx < 0 {
-					return 0, ErrInvalidLengthHns
-				}
-			}
-			return iNdEx, nil
+			depth++
 		case 4:
-			return iNdEx, nil
+			if depth == 0 {
+				return 0, ErrUnexpectedEndOfGroupHns
+			}
+			depth--
 		case 5:
 			iNdEx += 4
-			return iNdEx, nil
 		default:
 			return 0, fmt.Errorf("proto: illegal wireType %d", wireType)
 		}
+		if iNdEx < 0 {
+			return 0, ErrInvalidLengthHns
+		}
+		if depth == 0 {
+			return iNdEx, nil
+		}
 	}
-	panic("unreachable")
+	return 0, io.ErrUnexpectedEOF
 }
 
 var (
-	ErrInvalidLengthHns = fmt.Errorf("proto: negative length found during unmarshaling")
-	ErrIntOverflowHns   = fmt.Errorf("proto: integer overflow")
+	ErrInvalidLengthHns        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowHns          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupHns = fmt.Errorf("proto: unexpected end of group")
 )

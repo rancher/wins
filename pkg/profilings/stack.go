@@ -7,13 +7,13 @@ import (
 	"runtime"
 	"unsafe"
 
-	"github.com/Microsoft/go-winio"
-	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/converters"
+	"github.com/rancher/wins/pkg/defaults"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/windows"
 )
 
+// DumpStacks returns up to (1 << 15) bytes of the current processes's stack trace as a string
 func DumpStacks() string {
 	var (
 		buf       []byte
@@ -29,6 +29,7 @@ func DumpStacks() string {
 	return converters.UnsafeBytesToString(buf)
 }
 
+// DumpStacksToFile dumps the stack trace of all current goroutines to the file path provided
 func DumpStacksToFile(filename string) {
 	if filename == "" {
 		return
@@ -45,6 +46,10 @@ func DumpStacksToFile(filename string) {
 	f.WriteString(stacksdump)
 }
 
+// SetupDumpStacks creates a goroutine that listens for any signals passed to the Win32 event stackdump-{pid}
+// that is defined on a Global level; each time a signal is detected to this event, it will dump the a stack
+// trace across all goroutines (up to 1 << 15 bytes) to a file within the Windows machine's temp directory.
+// By default, this event can only be signaled by built-in administrators and the local system.
 func SetupDumpStacks(serviceName string, pid int) {
 	if serviceName == "" {
 		return
@@ -55,7 +60,7 @@ func SetupDumpStacks(serviceName string, pid int) {
 	// signaled. ACL'd to builtin administrators and local system
 	event := fmt.Sprintf("Global\\stackdump-%d", pid)
 	ev, _ := windows.UTF16PtrFromString(event)
-	sd, err := winio.SddlToSecurityDescriptor(defaults.PermissionBuiltinAdministratorsAndLocalSystem)
+	sd, err := windows.SecurityDescriptorFromString(defaults.PermissionBuiltinAdministratorsAndLocalSystem)
 	if err != nil {
 		logrus.Errorf("Failed to get security descriptor for debug stackdump event %s: %v", event, err)
 		return
@@ -63,7 +68,7 @@ func SetupDumpStacks(serviceName string, pid int) {
 	var sa windows.SecurityAttributes
 	sa.Length = uint32(unsafe.Sizeof(sa))
 	sa.InheritHandle = 1
-	sa.SecurityDescriptor = uintptr(unsafe.Pointer(&sd[0]))
+	sa.SecurityDescriptor = sd
 	h, err := windows.CreateEvent(&sa, 0, 0, ev)
 	if h == 0 || err != nil {
 		logrus.Errorf("Failed to create debug stackdump event %s: %v", event, err)

@@ -1,4 +1,4 @@
-FROM golang:1.12-windowsservercore
+FROM golang:1.15-windowsservercore
 SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 ARG DAPPER_HOST_ARCH
@@ -6,7 +6,7 @@ ENV HOST_ARCH=${DAPPER_HOST_ARCH} ARCH=${DAPPER_HOST_ARCH}
 
 # install docker
 RUN pushd c:\; \
-    $URL = 'https://github.com/StefanScherer/docker-cli-builder/releases/download/18.09.6/docker.exe'; \
+    $URL = 'https://github.com/StefanScherer/docker-cli-builder/releases/download/19.03.14/docker.exe'; \
     \
     Write-Host ('Downloading docker from {0} ...' -f $URL); \
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
@@ -17,7 +17,7 @@ RUN pushd c:\; \
 
 # upgrade git
 RUN pushd c:\; \
-    $URL = 'https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-64-bit.zip'; \
+    $URL = 'https://github.com/git-for-windows/git/releases/download/v2.30.1.windows.1/MinGit-2.30.1-64-bit.zip'; \
     \
     Write-Host ('Downloading git from {0} ...' -f $URL); \
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
@@ -34,7 +34,7 @@ RUN pushd c:\; \
 
 # install golangci-lint
 RUN pushd c:\; \
-    $URL = 'https://github.com/golangci/golangci-lint/releases/download/v1.17.1/golangci-lint-1.17.1-windows-amd64.zip'; \
+    $URL = 'https://github.com/golangci/golangci-lint/releases/download/v1.36.0/golangci-lint-1.36.0-windows-amd64.zip'; \
     \
     Write-Host ('Downloading golangci from {0} ...' -f $URL); \
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
@@ -47,7 +47,7 @@ RUN pushd c:\; \
     Remove-Item -Force -Recurse -Path c:\golangci-lint.zip; \
     \
     Write-Host 'Updating PATH ...'; \
-    [Environment]::SetEnvironmentVariable('PATH', ('c:\golangci-lint-1.17.1-windows-amd64\;{0}' -f $env:PATH), [EnvironmentVariableTarget]::Machine); \
+    [Environment]::SetEnvironmentVariable('PATH', ('c:\golangci-lint-1.36.0-windows-amd64\;{0}' -f $env:PATH), [EnvironmentVariableTarget]::Machine); \
     \
     Write-Host 'Complete.'; \
     popd;
@@ -63,6 +63,8 @@ RUN pushd c:\; \
     popd;
 
 # install gcc via cygwin: https://cygwin.com/faq/faq.html#faq.setup.cli
+# step after cleanup is workaround for docker found in https://github.com/moby/moby/issues/41058#issuecomment-721156197
+# If https://mirror.clarkson.edu/cygwin/ is broken, you can replace it with any other mirror from https://cygwin.com/mirrors.html
 RUN pushd c:\; \
     $URL = 'https://cygwin.com/setup-x86_64.exe'; \
     \
@@ -73,7 +75,7 @@ RUN pushd c:\; \
     \
     Write-Host 'Installing gcc ...'; \
     $PACKAGES = 'mingw64-x86_64-gcc-core,mingw64-x86_64-gcc-g++'; \
-    Start-Process -NoNewWindow -Wait -FilePath 'c:\cygwin64\setup.exe' -ArgumentList ('-q -d -X -s {0} -D -L -R {1} -l {2} -P {3}' -f 'http://cygwin.mirrors.pair.com/', 'C:/cygwin64', $env:TEMP, $PACKAGES); \
+    Start-Process -NoNewWindow -Wait -FilePath 'c:\cygwin64\setup.exe' -ArgumentList ('-q -d -X -s {0} -D -L -R {1} -l {2} -P {3}' -f 'https://mirror.clarkson.edu/cygwin/', 'C:/cygwin64', $env:TEMP, $PACKAGES); \
     \
     Write-Host 'Cleaning ...'; \
     Remove-Item -Force -Recurse -Path $env:TEMP/*; \
@@ -82,39 +84,9 @@ RUN pushd c:\; \
     [Environment]::SetEnvironmentVariable('PATH', ('c:\cygwin64\bin\;c:\cygwin64\sbin\;{0}' -f $env:PATH), [EnvironmentVariableTarget]::Machine); \
     \
     Write-Host 'Complete.'; \
-    popd;
-
-# patch windows signal support: https://github.com/golang/go/pull/33311
-RUN pushd c:\; \
-    $URL = 'https://nchc.dl.sourceforge.net/project/gnuwin32/patch/2.5.9-7/patch-2.5.9-7-bin.zip'; \
     \
-    Write-Host ('Downloading patch from {0} ...' -f $URL); \
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-    Invoke-WebRequest -UseBasicParsing -OutFile c:\patch.zip -Uri $URL; \
+    Get-ChildItem -Path C:\cygwin64 -Recurse -Attributes ReparsePoint | Remove-Item; \
     \
-    Write-Host 'Expanding ...'; \
-    Expand-Archive -Path c:\patch.zip -DestinationPath c:\patch; \
-    \
-    Write-Host 'Cleaning ...'; \
-    Remove-Item -Force -Recurse -Path c:\patch.zip; \
-    \
-    Write-Host 'Updating PATH ...'; \
-    [Environment]::SetEnvironmentVariable('PATH', ('c:\patch\bin\;{0}' -f $env:PATH), [EnvironmentVariableTarget]::Machine); \
-    \
-    Write-Host 'Complete.'; \
-    popd;
-RUN pushd c:\go; \
-    $URL = 'https://github.com/tianon/go/commit/9e05d631b542393f5ebb0eb3747157c8bd0de635.diff'; \
-    \
-    Write-Host ('Patching https://github.com/golang/go/pull/33311 ...'); \
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-    Invoke-WebRequest -UseBasicParsing -OutFile c:\go\windows-signal.diff -Uri $URL; \
-    patch.exe --verbose -p1 -i windows-signal.diff; \
-    \
-    Write-Host 'Cleaning ...'; \
-    Remove-Item -Force -Path c:\go\windows-signal.diff; \
-    \
-    Write-Host 'Complete.'; \
     popd;
 
 ENV DAPPER_ENV REPO TAG DRONE_TAG
