@@ -18,7 +18,7 @@ goto :eof
 
 :.dapper
 if not exist .dapper.exe (
-    bitsadmin.exe /rawreturn /transfer dappwer-download https://releases.rancher.com/dapper/latest/dapper-Windows-x86_64.exe %~dp0\.dapper.exe
+    bitsadmin /rawreturn /transfer dappwer-download https://releases.rancher.com/dapper/latest/dapper-Windows-x86_64.exe %~dp0\.dapper.exe
     .dapper.exe -v
 )
 goto :eof

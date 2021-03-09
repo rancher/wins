@@ -1,3 +1,5 @@
+#Requires -Version 5.0
+
 $ErrorActionPreference = 'Stop'
 $WarningPreference = 'SilentlyContinue'
 $VerbosePreference = 'SilentlyContinue'

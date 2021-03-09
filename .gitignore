@@ -8,7 +8,6 @@ cmake-build-release/
 
 # Binaries for programs and plugins
 bin/*
-package/*
 !.gitkeep
 *.exe
 *.exe~
