@@ -31,6 +31,7 @@ steps:
     - sha256
     files:
       - bin/wins.exe
+      - charts/*
   when:
     instance:
       - drone-publish.rancher.io
