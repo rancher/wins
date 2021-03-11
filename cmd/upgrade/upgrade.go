@@ -99,9 +99,9 @@ func _upgradeAction(cliCtx *cli.Context) (err error) {
 	if err != nil {
 		logrus.Errorf("upgrade failed, attempting to ensure rancher-wins service is not stopped: %v", err)
 		out, restartServiceErr := powershell.RunCommand(restartServicePS1)
-		if err != nil {
+		if restartServiceErr != nil {
 			if len(out) > 0 {
-				logrus.Debugf("logs from upgrade.ps1 \n%s\nEOF", out)
+				logrus.Debugf("logs from restartService.ps1 \n%s\nEOF", out)
 			}
 			logrus.Errorf("unable to restart rancher-wins service: %v", restartServiceErr)
 		}
