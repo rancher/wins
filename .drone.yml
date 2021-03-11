@@ -346,7 +346,7 @@ steps:
       - VERSION=${DRONE_TAG}
     context: package/windows
     custom_dns: 1.1.1.1
-    dockerfile: package/windows/Dockerfile.20H2
+    dockerfile: package/windows/Dockerfile
     username:
       from_secret: docker_username
     password:
