@@ -8,37 +8,431 @@ platform:
   version: 1809
 
 steps:
-  - name: build
-    pull: default
-    image: maiwj/dapper:windows-1809
-    commands:
-      - dapper.exe -f Dockerfile.dapper ci
-    volumes:
-      - name: docker_pipe
-        path: \\\\.\\pipe\\docker_engine
+- name: build
+  pull: always
+  image: rancher/dapper:v0.5.4
+  commands:
+    - dapper.exe -f Dockerfile.dapper -d ci
+  volumes:
+    - name: docker_pipe
+      path: \\\\.\\pipe\\docker_engine
 
-  - name: stage-binaries
-    image: maiwj/dapper:windows-1809
-    commands:
-      - "Get-ChildItem -Path ./bin; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/; Get-ChildItem -Path ./package/"
+- name: stage-binaries
+  image: rancher/dapper:v0.5.4
+  commands:
+    - "Get-ChildItem -Path ./bin; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/; Get-ChildItem -Path ./package/"
 
-  - name: github_binary_release
-    image: plugins/github-release
-    settings:
-      api_key:
-        from_secret: github_token
-      files:
-        - bin/wins.exe
-    when:
-      instance:
-        - drone-publish.rancher.io
-      ref:
-        - refs/head/master
-        - refs/tags/*
-      event:
-        - tag
+- name: github_binary_release
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: github_token
+    checksum:
+    - sha256
+    files:
+      - bin/wins.exe
+  when:
+    instance:
+      - drone-publish.rancher.io
+    ref:
+      - refs/head/master
+      - refs/tags/*
+    event:
+      - tag
+
+- name: docker-publish
+  image: plugins/docker
+  settings:
+    build_args:
+    - SERVERCORE_VERSION=1809
+    - ARCH=amd64
+    - VERSION=${DRONE_TAG}
+    context: package/windows
+    custom_dns: 1.1.1.1
+    dockerfile: package/windows/Dockerfile
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    repo: rancher/wins
+    tag: ${DRONE_TAG}-windows-1809
+  volumes:
+  - name: docker_pipe
+    path: \\\\.\\pipe\\docker_engine
+  when:
+    event:
+    - tag
+    ref:
+    - refs/heads/master
+    - refs/tags/*
+
+- name: slack_notify
+  image: plugins/slack
+  settings:
+    template: "Build {{build.link}} failed to publish an image/artifact.\n"
+    username: Drone_Publish
+    webhook:
+      from_secret: slack_webhook
+  when:
+    event:
+      exclude:
+      - pull_request
+    instance:
+    - drone-publish.rancher.io
+    status:
+    - failure
 
 volumes:
   - name: docker_pipe
     host:
       path: \\\\.\\pipe\\docker_engine
+
+trigger:
+  event:
+    exclude:
+    - promote
+
+---
+kind: pipeline
+name: windows-1903
+
+platform:
+  os: windows
+  arch: amd64
+  version: 1903
+
+steps:
+- name: build
+  pull: always
+  image: rancher/dapper:v0.5.4
+  commands:
+    - dapper.exe -f Dockerfile.dapper -d ci
+  volumes:
+    - name: docker_pipe
+      path: \\\\.\\pipe\\docker_engine
+
+- name: docker-publish
+  image: plugins/docker
+  settings:
+    build_args:
+    - SERVERCORE_VERSION=1903
+    - ARCH=amd64
+    - VERSION=${DRONE_TAG}
+    context: package/windows
+    custom_dns: 1.1.1.1
+    dockerfile: package/windows/Dockerfile
+    password:
+      from_secret: docker_password
+    repo: rancher/wins
+    tag: ${DRONE_TAG}-windows-1903
+    username:
+      from_secret: docker_username
+  volumes:
+  - name: docker_pipe
+    path: \\\\.\\pipe\\docker_engine
+  when:
+    event:
+    - tag
+    ref:
+    - refs/heads/master
+    - refs/tags/*
+
+- name: slack_notify
+  image: plugins/slack
+  settings:
+    template: "Build {{build.link}} failed to publish an image/artifact.\n"
+    username: Drone_Publish
+    webhook:
+      from_secret: slack_webhook
+  when:
+    event:
+      exclude:
+      - pull_request
+    instance:
+    - drone-publish.rancher.io
+    status:
+    - failure
+
+volumes:
+- name: docker_pipe
+  host:
+    path: \\\\.\\pipe\\docker_engine
+
+trigger:
+  event:
+    exclude:
+    - promote
+
+---
+kind: pipeline
+name: windows-1909
+
+platform:
+  os: windows
+  arch: amd64
+  version: 1909
+
+steps:
+- name: build
+  pull: always
+  image: rancher/dapper:v0.5.4
+  commands:
+    - dapper.exe -f Dockerfile.dapper -d ci
+  volumes:
+    - name: docker_pipe
+      path: \\\\.\\pipe\\docker_engine
+
+- name: docker-publish
+  image: plugins/docker
+  settings:
+    build_args:
+    - SERVERCORE_VERSION=1909
+    - ARCH=amd64
+    - VERSION=${DRONE_TAG}
+    context: package/windows
+    custom_dns: 1.1.1.1
+    dockerfile: package/windows/Dockerfile
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    repo: rancher/wins
+    tag: ${DRONE_TAG}-windows-1909
+  volumes:
+  - name: docker_pipe
+    path: \\\\.\\pipe\\docker_engine
+  when:
+    event:
+    - tag
+    ref:
+    - refs/heads/master
+    - refs/tags/*
+
+- name: slack_notify
+  image: plugins/slack
+  settings:
+    template: "Build {{build.link}} failed to publish an image/artifact.\n"
+    username: Drone_Publish
+    webhook:
+      from_secret: slack_webhook
+  when:
+    event:
+      exclude:
+      - pull_request
+    instance:
+    - drone-publish.rancher.io
+    status:
+    - failure
+
+volumes:
+- name: docker_pipe
+  host:
+    path: \\\\.\\pipe\\docker_engine
+
+trigger:
+  event:
+    exclude:
+    - promote
+---
+kind: pipeline
+name: windows-2004
+
+platform:
+  os: windows
+  arch: amd64
+  version: 2004
+
+# remove this and use upstream images when https://github.com/drone/drone-git/pull/25 is merged
+clone:
+  disable: true
+
+steps:
+- name: clone
+  image: luthermonson/drone-git:windows-2004-amd64
+
+- name: build
+  pull: always
+  image: rancher/dapper:v0.5.4
+  commands:
+    - dapper.exe -f Dockerfile.dapper -d ci
+  volumes:
+    - name: docker_pipe
+      path: \\\\.\\pipe\\docker_engine
+
+- name: docker-publish
+  image: luthermonson/drone-docker:2004
+  settings:
+    build_args:
+      - SERVERCORE_VERSION=2004
+      - ARCH=amd64
+      - VERSION=${DRONE_TAG}
+    context: package/windows
+    custom_dns: 1.1.1.1
+    dockerfile: package/windows/Dockerfile
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    repo: rancher/wins
+    tag: ${DRONE_TAG}-windows-2004
+  volumes:
+    - name: docker_pipe
+      path: \\\\.\\pipe\\docker_engine
+  when:
+    event:
+      - tag
+    ref:
+      - refs/heads/master
+      - refs/tags/*
+
+- name: slack_notify
+  image: plugins/slack
+  settings:
+    template: "Build {{build.link}} failed to publish an image/artifact.\n"
+    username: Drone_Publish
+    webhook:
+      from_secret: slack_webhook
+  when:
+    event:
+      exclude:
+        - pull_request
+    instance:
+      - drone-publish.rancher.io
+    status:
+      - failure
+
+volumes:
+  - name: docker_pipe
+    host:
+      path: \\\\.\\pipe\\docker_engine
+
+trigger:
+  event:
+    exclude:
+      - promote
+
+---
+kind: pipeline
+name: windows-20H2
+
+platform:
+  os: windows
+  arch: amd64
+  version: 20H2
+
+# remove this and use upstream images when https://github.com/drone/drone-git/pull/25 is merged
+clone:
+  disable: true
+
+steps:
+- name: clone
+  image: luthermonson/drone-git:windows-20H2-amd64
+
+- name: build
+  pull: always
+  image: rancher/dapper:v0.5.4
+  commands:
+    - dapper.exe -f Dockerfile.dapper -d ci
+  volumes:
+    - name: docker_pipe
+      path: \\\\.\\pipe\\docker_engine
+
+- name: docker-publish
+  image: luthermonson/drone-docker:20H2
+  settings:
+    build_args:
+      - SERVERCORE_VERSION=20H2
+      - ARCH=amd64
+      - VERSION=${DRONE_TAG}
+    context: package/windows
+    custom_dns: 1.1.1.1
+    dockerfile: package/windows/Dockerfile
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    repo: rancher/wins
+    tag: ${DRONE_TAG}-windows-20H2
+  volumes:
+    - name: docker_pipe
+      path: \\\\.\\pipe\\docker_engine
+  when:
+    event:
+      - tag
+    ref:
+      - refs/heads/master
+      - refs/tags/*
+
+- name: slack_notify
+  image: plugins/slack
+  settings:
+    template: "Build {{build.link}} failed to publish an image/artifact.\n"
+    username: Drone_Publish
+    webhook:
+      from_secret: slack_webhook
+  when:
+    event:
+      exclude:
+        - pull_request
+    instance:
+      - drone-publish.rancher.io
+    status:
+      - failure
+
+volumes:
+  - name: docker_pipe
+    host:
+      path: \\\\.\\pipe\\docker_engine
+
+trigger:
+  event:
+    exclude:
+      - promote
+---
+kind: pipeline
+name: manifest
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: push-manifest
+  image: plugins/manifest
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    spec: manifest.tmpl
+  when:
+    event:
+    - tag
+
+- name: slack_notify
+  image: plugins/slack
+  settings:
+    template: "Build {{build.link}} failed to push manifests.\n"
+    username: Drone_Publish
+    webhook:
+      from_secret: slack_webhook
+  when:
+    event:
+      exclude:
+      - pull_request
+    instance:
+    - drone-publish.rancher.io
+    status:
+    - failure
+
+trigger:
+  event:
+    exclude:
+    - promote
+
+depends_on:
+- windows-1809
+- windows-1903
+- windows-1909
+- windows-2004
+- windows-20H2

@@ -1,3 +1,4 @@
+#Requires -Version 5.0
 $ErrorActionPreference = 'Stop'
 
 Import-Module -WarningAction Ignore -Name "$PSScriptRoot\utils.psm1"
@@ -19,7 +20,7 @@ $env:COMMIT = $COMMIT
 $VERSION = "${COMMIT}${DIRTY}"
 if ((-not $DIRTY) -and ($GIT_TAG))
 {
-    $VERSION = "$GIT_TAG"
+    $VERSION = "${GIT_TAG}"
 }
 $env:VERSION = $VERSION
 
@@ -29,3 +30,6 @@ if (-not $ARCH)
     $ARCH = "amd64"
 }
 $env:ARCH = $ARCH
+
+Write-Host "ARCH: $ARCH"
+Write-Host "VERSION: $VERSION"
