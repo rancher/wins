@@ -12,7 +12,7 @@ Invoke-Script -File "$PSScriptRoot\ci.ps1"
 
 & "$PSScriptRoot\version.ps1" | Out-Null
 
-$baseTag = "wmi-exporter-package:$($env:VERSION)"
+$baseTag = "wins:$($env:VERSION)"
 $currentTag = "rancher/$baseTag"
 $pushTag = "$PushImageToLibrary/$baseTag"
 
