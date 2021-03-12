@@ -247,6 +247,9 @@ clone:
   disable: true
 
 steps:
+- name: clone
+  image: luthermonson/drone-git:windows-2004-amd64
+
 - name: build
   pull: always
   image: rancher/dapper:v0.5.4
@@ -255,9 +258,6 @@ steps:
   volumes:
     - name: docker_pipe
       path: \\\\.\\pipe\\docker_engine
-
-- name: clone
-  image: luthermonson/drone-git:windows-2004-amd64
 
 - name: docker-publish
   image: luthermonson/drone-docker:2004
@@ -325,6 +325,9 @@ clone:
   disable: true
 
 steps:
+- name: clone
+  image: luthermonson/drone-git:windows-20H2-amd64
+
 - name: build
   pull: always
   image: rancher/dapper:v0.5.4
@@ -333,9 +336,6 @@ steps:
   volumes:
     - name: docker_pipe
       path: \\\\.\\pipe\\docker_engine
-
-- name: clone
-  image: luthermonson/drone-git:windows-20H2-amd64
 
 - name: docker-publish
   image: luthermonson/drone-docker:20H2
