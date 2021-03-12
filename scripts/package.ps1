@@ -26,14 +26,16 @@ if ($env:DRONE_TAG) {
 }
 
 # Get release id as image tag suffix
-$RELEASE_ID = $env:RELEASE_ID
-$IMAGE = ('{0}/wins:{1}-windows-{2}' -f $REPO, $TAG, $RELEASE_ID)
+$HOST_RELEASE_ID = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' -ErrorAction Ignore).ReleaseId
+$IMAGE = ('{0}/wins:{1}-windows-{2}' -f $REPO, $TAG, $HOST_RELEASE_ID)
+if (-not $HOST_RELEASE_ID) {
+    Log-Fatal "release ID not found"
+}
 
 $ARCH = $env:ARCH
 
 docker build `
-    --isolation hyperv `
-    --build-arg SERVERCORE_VERSION=$RELEASE_ID `
+    --build-arg SERVERCORE_VERSION=$HOST_RELEASE_ID `
     --build-arg ARCH=$ARCH `
     --build-arg VERSION=$TAG `
     -t $IMAGE `
