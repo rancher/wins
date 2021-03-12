@@ -8,6 +8,7 @@ import (
 	"github.com/mattn/go-colorable"
 	"github.com/rancher/wins/cmd/client"
 	"github.com/rancher/wins/cmd/server"
+	"github.com/rancher/wins/cmd/upgrade"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/sirupsen/logrus"
@@ -53,6 +54,9 @@ func main() {
 
 		// cli
 		client.NewCommand(),
+
+		// upgrade
+		upgrade.NewCommand(),
 	}
 
 	if err := app.Run(os.Args); err != nil && err != io.EOF {
