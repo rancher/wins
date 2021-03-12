@@ -55,8 +55,6 @@ $winsOut = wins.exe cli prc run --path=$winsUpgradePath --args="up --wins-args=`
 
 Write-Host $winsOut
 
-$winsCopyPath = "c:\host\etc\rancher\wins\rancher-wins-$winsUpgradeFilename"
-
 if ($winsOut -match ".* rpc error: code = Unavailable desc = transport is closing") {
     Write-Host "Successfully upgraded"
     exit 0
