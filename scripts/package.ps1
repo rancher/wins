@@ -5,6 +5,10 @@ Invoke-Expression -Command "$PSScriptRoot\version.ps1"
 
 $DIR_PATH = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $SRC_PATH = (Resolve-Path "$DIR_PATH\..").Path
+
+# Reference binary in ./bin/wins.exe
+Copy-Item -Force -Path $SRC_PATH\bin\wins.exe -Destination $SRC_PATH\package\windows | Out-Null
+
 cd $SRC_PATH\package\windows
 
 
@@ -40,5 +44,9 @@ docker build `
     --build-arg VERSION=$TAG `
     -t $IMAGE `
     -f Dockerfile .
+
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
 
 Write-Host "Built $IMAGE`n"
