@@ -20,7 +20,7 @@ steps:
 - name: stage-binaries
   image: rancher/dapper:v0.5.4
   commands:
-    - "Get-ChildItem -Path ./bin; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
+    - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
 - name: github_binary_release
   image: plugins/github-release
@@ -31,7 +31,7 @@ steps:
     - sha256
     files:
       - bin/wins.exe
-      - charts/*
+      - dist/rancher-wins-upgrader-*.tgz
   when:
     instance:
       - drone-publish.rancher.io
@@ -115,7 +115,7 @@ steps:
 - name: stage-binaries
   image: rancher/dapper:v0.5.4
   commands:
-    - "Get-ChildItem -Path ./bin; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
+    - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
 - name: docker-publish
   image: plugins/docker
@@ -191,7 +191,7 @@ steps:
 - name: stage-binaries
   image: rancher/dapper:v0.5.4
   commands:
-    - "Get-ChildItem -Path ./bin; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
+    - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
 - name: docker-publish
   image: plugins/docker
@@ -273,7 +273,7 @@ steps:
 - name: stage-binaries
   image: rancher/dapper:v0.5.4
   commands:
-    - "Get-ChildItem -Path ./bin; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
+    - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
 - name: docker-publish
   image: luthermonson/drone-docker:2004
@@ -356,7 +356,7 @@ steps:
 - name: stage-binaries
   image: rancher/dapper:v0.5.4
   commands:
-    - "Get-ChildItem -Path ./bin; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
+    - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
 - name: docker-publish
   image: luthermonson/drone-docker:20H2
