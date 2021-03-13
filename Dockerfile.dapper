@@ -89,6 +89,25 @@ RUN pushd c:\; \
     \
     popd;
 
+RUN pushd c:\; \
+    $URL = 'https://get.helm.sh/helm-v3.5.3-windows-amd64.zip'; \
+    \
+    Write-Host ('Downloading helm from {0} ...' -f $URL); \
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -UseBasicParsing -OutFile c:\helm.zip -Uri $URL; \
+    \
+    Write-Host 'Expanding ...'; \
+    Expand-Archive -Path c:\helm.zip -DestinationPath c:\; \
+    \
+    Write-Host 'Cleaning ...'; \
+    Remove-Item -Force -Recurse -Path c:\helm.zip; \
+    \
+    Write-Host 'Updating PATH ...'; \
+    [Environment]::SetEnvironmentVariable('PATH', ('c:\helm-v3.5.3-windows-amd64\;{0}' -f $env:PATH), [EnvironmentVariableTarget]::Machine); \
+    \
+    Write-Host 'Complete.'; \
+    popd;
+
 ENV DAPPER_ENV REPO TAG DRONE_TAG
 ENV DAPPER_SOURCE /gopath/src/github.com/rancher/wins
 ENV DAPPER_OUTPUT ./bin

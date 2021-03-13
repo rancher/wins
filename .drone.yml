@@ -31,7 +31,7 @@ steps:
     - sha256
     files:
       - bin/wins.exe
-      - charts/*
+      - bin/rancher-wins-upgrader-*.tgz
   when:
     instance:
       - drone-publish.rancher.io
