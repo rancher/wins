@@ -80,7 +80,7 @@ func _upgradeRequestParser(cliCtx *cli.Context) (err error) {
 	if strings.Contains(winsArgs, "--unregister") {
 		return fmt.Errorf(`cannot provide "--unregister" to --wins-args`)
 	}
-	if !strings.Contains(winsArgs, "--register") {
+	if strings.Contains(winsArgs, "--register") {
 		return fmt.Errorf(`cannot provide "--register" to --wins-args`)
 	}
 	return nil
