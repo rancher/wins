@@ -1,6 +1,7 @@
 package flags
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/urfave/cli"
@@ -27,6 +28,7 @@ func (f *listValue) Get() []string {
 		return nil
 	}
 	ret := strings.Split(f.String(), valueSeparator)
+	sort.Strings(ret)
 	return ret
 }
 
