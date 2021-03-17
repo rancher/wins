@@ -67,23 +67,13 @@ func _runRequestParser(cliCtx *cli.Context) (err error) {
 	}
 	var exposes []*types.ProcessExpose
 	if exposesList := flags.GetListValue(cliCtx, "exposes"); !exposesList.IsEmpty() {
-		exposesListValue, err := exposesList.Get()
-		if err != nil {
-			return errors.Wrapf(err, "failed to parse --exposes")
-		}
-		exposes, err = parseExposes(exposesListValue)
+		exposes, err = parseExposes(exposesList.Get())
 		if err != nil {
 			return errors.Wrapf(err, "failed to parse --exposes %s", exposes)
 		}
 	}
-	args, err := flags.GetListValue(cliCtx, "args").Get()
-	if err != nil {
-		return errors.Wrapf(err, "failed to parse --args")
-	}
-	envs, err := flags.GetListValue(cliCtx, "envs").Get()
-	if err != nil {
-		return errors.Wrapf(err, "failed to parse --envs")
-	}
+	args := flags.GetListValue(cliCtx, "args").Get()
+	envs := flags.GetListValue(cliCtx, "envs").Get()
 	dir := cliCtx.String("dir")
 	if dir == "" {
 		dir = filepath.Dir(path)

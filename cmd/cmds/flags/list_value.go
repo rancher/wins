@@ -1,7 +1,7 @@
 package flags
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -22,40 +22,12 @@ func (f *listValue) String() string {
 	return string(*f)
 }
 
-func (f *listValue) Get() ([]string, error) {
+func (f *listValue) Get() []string {
 	if f == nil || f.IsEmpty() {
-		return nil, nil
+		return nil
 	}
-
-	// Split the string by spaces, but respect escaped quotes
-	var ret []string
-	inEscapedDoubleQuotes := false
-	inEscapedSingleQuotes := false
-	currVal := ""
-	for _, c := range f.String() {
-		if string(c) == "\"" && !inEscapedSingleQuotes {
-			// toggle if not in single quotes
-			inEscapedDoubleQuotes = !inEscapedDoubleQuotes
-		}
-		if string(c) == "'" && !inEscapedDoubleQuotes {
-			// toggle if not in single quotes
-			inEscapedSingleQuotes = !inEscapedSingleQuotes
-		}
-		if string(c) == " " && !inEscapedDoubleQuotes && !inEscapedSingleQuotes {
-			// found an item to add the the list of args
-			ret = append(ret, currVal)
-			currVal = ""
-			continue // do not add the space to the entry
-		}
-		currVal += string(c)
-	}
-	// Check if input is malformed for the last entry
-	if inEscapedDoubleQuotes || inEscapedSingleQuotes {
-		return nil, fmt.Errorf("malformed listValue contains an unpaired escaped quote")
-	}
-	// Add the final field
-	ret = append(ret, currVal)
-	return ret, nil
+	ret := strings.Split(f.String(), valueSeparator)
+	return ret
 }
 
 func (f *listValue) IsEmpty() bool {
