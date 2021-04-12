@@ -3,9 +3,9 @@ name: rancher-wins-upgrader
 version: 0.0.1
 appVersion: 0.1.0
 annotations:
-  catalog.rancher.io/certified: rancher
-  catalog.rancher.io/namespace: cattle-wins-system
-  catalog.rancher.io/release-name: rancher-wins-upgrader
+  catalog.cattle.io/certified: rancher
+  catalog.cattle.io/namespace: cattle-wins-system
+  catalog.cattle.io/release-name: rancher-wins-upgrader
   catalog.cattle.io/os: windows
 description: Manages upgrading the wins server version and configuration across all of your Windows nodes
 maintainers:
