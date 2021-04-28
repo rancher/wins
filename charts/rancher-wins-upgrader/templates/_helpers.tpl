@@ -29,8 +29,17 @@ release: {{ .Release.Name }}
 provider: kubernetes
 {{- end -}}
 
+{{- define "winsUpgrader.validatePathPrefix" -}}
+{{- $pathPrefix := (required "Must provide value for .Values.global.cattle.rkeWindowsPathPrefix" .Values.global.cattle.rkeWindowsPathPrefix) -}}
+{{- if (contains "\\" $pathPrefix) -}}
+{{- fail ".Values.global.cattle.rkeWindowsPathPrefix must not contain backslashes" -}}
+{{- else if (not (hasSuffix "/" $pathPrefix)) -}}
+{{- fail ".Values.global.cattle.rkeWindowsPathPrefix must end in '/'" -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "winsUpgrader.winsHostPath" -}}
-{{ .Values.global.cattle.rkeWindowsPrefixPath | replace "\\\\" "/" }}etc/rancher/wins
+{{ .Values.global.cattle.rkeWindowsPathPrefix }}etc/rancher/wins
 {{- end -}}
 
 {{- define "winsUpgrader.winsMasqueradeHostPath" -}}
