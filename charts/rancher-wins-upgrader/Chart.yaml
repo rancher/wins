@@ -1,7 +1,7 @@
 apiVersion: v2
 name: rancher-wins-upgrader
 version: 0.0.1
-appVersion: 0.1.0
+appVersion: 0.1.1
 annotations:
   catalog.cattle.io/certified: rancher
   catalog.cattle.io/namespace: cattle-wins-system

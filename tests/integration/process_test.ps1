@@ -35,8 +35,8 @@ Describe "process" {
         $config = @{
             whiteList = @{
                 processPaths = @(
-                    "c:\otherpath"
-                    "c:\etc\nginx\nginx.exe"
+                    "C:\otherpath"
+                    "C:\etc\nginx\nginx.exe"
                 )
             }
         }
@@ -82,7 +82,7 @@ Describe "process" {
         $config = @{
             whiteList = @{
                 processPaths = @(
-                    "c:\otherpath"
+                    "C:\otherpath"
                 )
             }
         }
