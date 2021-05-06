@@ -25,6 +25,7 @@ winsConfigs:
     whiteList:
       processPaths:
         - {{ default "c:\\" .Values.global.cattle.rkeWindowsPathPrefix | replace "/" "\\" }}etc\rancher\wins\wins-upgrade.exe
+        - {{ default "c:\\" .Values.global.cattle.rkeWindowsPathPrefix | replace "/" "\\" }}etc\rancher\powershell.exe
         - {{ default "c:\\" .Values.global.cattle.rkeWindowsPathPrefix | replace "/" "\\" }}etc\windows-exporter\windows-exporter.exe
         - {{ default "c:\\" .Values.global.cattle.rkeWindowsPathPrefix | replace "/" "\\" }}etc\wmi-exporter\wmi-exporter.exe
         - {{ default "c:\\" .Values.global.cattle.rkeWindowsPathPrefix | replace "/" "\\" }}etc\kubernetes\bin\kube-proxy.exe
