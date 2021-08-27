@@ -8,9 +8,10 @@ $SRC_PATH = (Resolve-Path "$PSScriptRoot\..").Path
 Push-Location $SRC_PATH
 
 Invoke-Expression -Command "$SRC_PATH\tests\integration\integration_suite_test.ps1"
-if (-not $?)
+if ($LASTEXITCODE -ne 0)
 {
     Log-Fatal "integration test failed"
+    exit $LASTEXITCODE
 }
 
 Pop-Location

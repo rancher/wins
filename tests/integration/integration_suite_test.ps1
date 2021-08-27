@@ -9,8 +9,9 @@ Get-ChildItem -Path $PSScriptRoot\docker -Name Dockerfile.* | ForEach-Object {
         --build-arg SERVERCORE_VERSION=$SERVERCORE_VERSION `
         -t $tag `
         -f $PSScriptRoot\docker\$dockerfile .
-    if (-not $?) {
+    if ($LASTEXITCODE -ne 0) {
         Log-Fatal "Failed to build testing docker image"
+        exit $LASTEXITCODE
     }
 }
 
@@ -20,6 +21,10 @@ New-Item -Type Directory -Force -ErrorAction Ignore -Path @(
 )  | Out-Null
 Get-ChildItem -Path $PSScriptRoot -Name *.ps1 -Exclude $MyInvocation.MyCommand.Name | ForEach-Object {
     Invoke-Expression -Command "$PSScriptRoot\$_"
+    if ($LASTEXITCODE -ne 0) {
+        Log-Fatal "Failed to pass $PSScriptRoot\$_"
+        exit $LASTEXITCODE
+    }
 }
 Remove-Item -Recurse -Force -ErrorAction Ignore -Path @(
     "c:\etc\rancher\wins"
