@@ -6,9 +6,10 @@ Import-Module -Name @(
 
 # clean interferences
 try {
-    Get-NetRoute -PolicyStore ActiveStore | Where-Object {($_.DestinationPrefix -eq "7.7.7.7/32")} | ForEach-Object {Remove-NetRoute -Confirm:$false -InterfaceIndex $_.ifIndex -DestinationPrefix $_.DestinationPrefix -NextHop $_.NextHop -PolicyStore ActiveStore -ErrorAction Stop | Out-Null}
+    Get-NetRoute -PolicyStore ActiveStore | Where-Object { ($_.DestinationPrefix -eq "7.7.7.7/32") } | ForEach-Object { Remove-NetRoute -Confirm:$false -InterfaceIndex $_.ifIndex -DestinationPrefix $_.DestinationPrefix -NextHop $_.NextHop -PolicyStore ActiveStore -ErrorAction Stop | Out-Null }
     Get-Process -Name "wins" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
-} catch {
+}
+catch {
     Log-Warn $_.Exception.Message
 }
 
@@ -25,7 +26,7 @@ Describe "route" {
         Get-Process -Name "wins" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
 
         # clean route
-        Get-NetRoute -PolicyStore ActiveStore | Where-Object {($_.DestinationPrefix -eq "7.7.7.7/32")} | ForEach-Object {Remove-NetRoute -Confirm:$false -InterfaceIndex $_.ifIndex -DestinationPrefix $_.DestinationPrefix -NextHop $_.NextHop -PolicyStore ActiveStore -ErrorAction Stop | Out-Null}
+        Get-NetRoute -PolicyStore ActiveStore | Where-Object { ($_.DestinationPrefix -eq "7.7.7.7/32") } | ForEach-Object { Remove-NetRoute -Confirm:$false -InterfaceIndex $_.ifIndex -DestinationPrefix $_.DestinationPrefix -NextHop $_.NextHop -PolicyStore ActiveStore -ErrorAction Stop | Out-Null }
     }
 
     It "add" {
@@ -39,7 +40,7 @@ Describe "route" {
 
         # verify
         Start-Sleep -Seconds 5
-        Get-NetRoute -PolicyStore ActiveStore | Where-Object {($_.DestinationPrefix -eq "7.7.7.7/32")} | Measure-Object | Select-Object -ExpandProperty Count | Should Be 1
+        Get-NetRoute -PolicyStore ActiveStore | Where-Object { ($_.DestinationPrefix -eq "7.7.7.7/32") } | Measure-Object | Select-Object -ExpandProperty Count | Should Be 1
     }
 
 }

@@ -7,7 +7,8 @@ Import-Module -Name @(
 # clean interferences
 try {
     Get-Process -Name "wins" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
-} catch {
+}
+catch {
     Log-Warn $_.Exception.Message
 }
 
@@ -35,7 +36,7 @@ Describe "host" {
 
         # verify
         $expectedObj = $ret.Output | ConvertFrom-Json
-        $actualObj = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' | Select-Object -Property CurrentMajorVersionNumber,CurrentMinorVersionNumber,CurrentBuildNumber,UBR,ReleaseId,BuildLabEx,CurrentBuild
+        $actualObj = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' | Select-Object -Property CurrentMajorVersionNumber, CurrentMinorVersionNumber, CurrentBuildNumber, UBR, ReleaseId, BuildLabEx, CurrentBuild
         $actualObj.CurrentMajorVersionNumber -eq $expectedObj.CurrentMajorVersionNumber | Should Be $true
         $actualObj.CurrentMinorVersionNumber -eq $expectedObj.CurrentMinorVersionNumber | Should Be $true
         $actualObj.CurrentBuildNumber -eq $expectedObj.CurrentBuildNumber | Should Be $true

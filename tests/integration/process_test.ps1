@@ -7,9 +7,10 @@ Import-Module -Name @(
 # clean interferences
 try {
     Get-Process -Name "rancher-wins-*" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
-    Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*" -ErrorAction Ignore | ForEach-Object {Remove-NetFirewallRule -Name $_.Name -PolicyStore ActiveStore -ErrorAction Ignore} | Out-Null
+    Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*" -ErrorAction Ignore | ForEach-Object { Remove-NetFirewallRule -Name $_.Name -PolicyStore ActiveStore -ErrorAction Ignore } | Out-Null
     Get-Process -Name "wins" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
-} catch {
+}
+catch {
     Log-Warn $_.Exception.Message
 }
 
@@ -26,7 +27,7 @@ Describe "process" {
 
         # stop nginx process & firewall rules
         Get-Process -Name "rancher-wins-*" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
-        Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*" -ErrorAction Ignore | ForEach-Object {Remove-NetFirewallRule -Name $_.Name -PolicyStore ActiveStore -ErrorAction Ignore} | Out-Null
+        Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*" -ErrorAction Ignore | ForEach-Object { Remove-NetFirewallRule -Name $_.Name -PolicyStore ActiveStore -ErrorAction Ignore } | Out-Null
         Get-Process -Name "wins" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
     }
 
