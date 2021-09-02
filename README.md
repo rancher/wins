@@ -107,7 +107,7 @@ OPTIONS:
 
 ## Build
 ``` powershell
-> make.bat build
+> .\make build
 ```
 
 ## Testing
@@ -116,21 +116,21 @@ There are not any Docker-in-Docker supported Windows images for now, `rancher/wi
 For validation test, which could be embedded into a containerized CI flow, please run the below command in `PowerShell`:
 
 ``` powershell
-> make.bat
+> .\make
 ```
 
 For integration test, please run the below command in `PowerShell`:
 
 ``` powershell
-> make.bat integration
+> .\make integration
 ```
 
-> Note: Don't use `bin/wins.exe` after integration testing. Please `make.bat build` again.
+> Note: Don't use `bin/wins.exe` after integration testing. Please `.\make build` again.
 
 If want both of them, please run the below command in `PowerShell`:
 
 ``` powershell
-> make.bat all
+> .\make all
 ```
 
 ## License
