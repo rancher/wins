@@ -6,35 +6,30 @@ $VerbosePreference = 'SilentlyContinue'
 $DebugPreference = 'SilentlyContinue'
 $InformationPreference = 'SilentlyContinue'
 
-function Log-Info
-{
+function Log-Info {
     Write-Host -NoNewline -ForegroundColor Blue "INFO: "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($Args -join " "))
 }
 
-function Log-Warn
-{
+function Log-Warn {
     Write-Host -NoNewline -ForegroundColor DarkYellow "WARN: "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 }
 
-function Log-Error
-{
+function Log-Error {
     Write-Host -NoNewline -ForegroundColor DarkRed "ERRO "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 }
 
 
-function Log-Fatal
-{
+function Log-Fatal {
     Write-Host -NoNewline -ForegroundColor DarkRed "FATA: "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 
     exit 255
 }
 
-function Invoke-Script
-{
+function Invoke-Script {
     param (
         [parameter(Mandatory = $true)] [string]$File
     )
@@ -44,7 +39,8 @@ function Invoke-Script
         if (-not $?) {
             Log-Fatal "Failed to invoke $File"
         }
-    } catch {
+    }
+    catch {
         Log-Fatal "Could not invoke $File, $($_.Exception.Message)"
     }
 }

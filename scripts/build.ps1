@@ -4,8 +4,7 @@ $ErrorActionPreference = 'Stop'
 
 Import-Module -WarningAction Ignore -Name "$PSScriptRoot\utils.psm1"
 
-function Build
-{
+function Build {
     param (
         [parameter(Mandatory = $true)] [string]$Version,
         [parameter(Mandatory = $true)] [string]$Commit,

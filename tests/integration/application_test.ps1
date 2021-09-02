@@ -7,7 +7,8 @@ Import-Module -Name @(
 # clean interferences
 try {
     Get-Process -Name "wins" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
-} catch {
+}
+catch {
     Log-Warn $_.Exception.Message
 }
 

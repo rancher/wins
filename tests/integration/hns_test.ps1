@@ -8,7 +8,8 @@ Import-Module -Name @(
 # clean interferences
 try {
     Get-Process -Name "wins" -ErrorAction Ignore | Stop-Process -Force -ErrorAction Ignore
-} catch {
+}
+catch {
     Log-Warn $_.Exception.Message
 }
 
@@ -22,9 +23,10 @@ Describe "hns" {
         # create a HNS network
         try {
             New-HNSNetwork -Type "L2Bridge" -AddressPrefix "192.168.255.0/30" -Gateway "192.168.255.1" -Name "test-cbr0" | Out-Null
-        } catch {}
+        }
+        catch {}
         while ($true) {
-            $n = Get-HnsNetwork -ErrorAction Ignore | Where-Object {$_.Name -eq "test-cbr0"}
+            $n = Get-HnsNetwork -ErrorAction Ignore | Where-Object { $_.Name -eq "test-cbr0" }
             if ($n) {
                 Start-Sleep -Seconds 5
                 break
@@ -35,9 +37,9 @@ Describe "hns" {
 
     AfterEach {
         # clean HNS network
-        Get-HnsNetwork -ErrorAction Ignore | Where-Object {$_.Name -eq "test-cbr0"} | Remove-HnsNetwork -ErrorAction Ignore
+        Get-HnsNetwork -ErrorAction Ignore | Where-Object { $_.Name -eq "test-cbr0" } | Remove-HnsNetwork -ErrorAction Ignore
         while ($true) {
-            $n = Get-HnsNetwork -ErrorAction Ignore | Where-Object {$_.Name -eq "test-cbr0"}
+            $n = Get-HnsNetwork -ErrorAction Ignore | Where-Object { $_.Name -eq "test-cbr0" }
             if (-not $n) {
                 Start-Sleep -Seconds 5
                 break

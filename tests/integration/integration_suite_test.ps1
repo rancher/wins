@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 $SERVERCORE_VERSION = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' | Select-Object -ExpandProperty ReleaseId
 Get-ChildItem -Path $PSScriptRoot\docker -Name Dockerfile.* | ForEach-Object {
     $dockerfile = $_
-    $tag = $dockerfile -replace "Dockerfile.",""
+    $tag = $dockerfile -replace "Dockerfile.", ""
     docker build `
         --build-arg SERVERCORE_VERSION=$SERVERCORE_VERSION `
         -t $tag `

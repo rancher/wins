@@ -1,31 +1,26 @@
-function Log-Info
-{
+function Log-Info {
     Write-Host -NoNewline -ForegroundColor Blue "INFO "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 }
 
-function Log-Warn
-{
+function Log-Warn {
     Write-Host -NoNewline -ForegroundColor DarkYellow "WARN "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 }
 
-function Log-Error
-{
+function Log-Error {
     Write-Host -NoNewline -ForegroundColor DarkRed "ERRO "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 }
 
-function Log-Fatal
-{
+function Log-Fatal {
     Write-Host -NoNewline -ForegroundColor DarkRed "FATA "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 
     exit 255
 }
 
-function Execute-Binary
-{
+function Execute-Binary {
     param (
         [parameter(Mandatory = $true)] [string]$FilePath,
         [parameter(Mandatory = $false)] [string[]]$ArgumentList,
@@ -36,16 +31,17 @@ function Execute-Binary
     if ($Backgroud) {
         if ($ArgumentList) {
             return Start-Process -WindowStyle Hidden -FilePath $FilePath -ArgumentList $ArgumentList -PassThru
-        } else {
+        }
+        else {
             return Start-Process -WindowStyle Hidden -FilePath $FilePath -PassThru
         }
     }
 
-    if (-not $PassThru)
-    {
+    if (-not $PassThru) {
         if ($ArgumentList) {
             Start-Process -NoNewWindow -Wait -FilePath $FilePath -ArgumentList $ArgumentList
-        } else {
+        }
+        else {
             Start-Process -NoNewWindow -Wait -FilePath $FilePath
         }
         return
@@ -58,13 +54,15 @@ function Execute-Binary
     try {
         if ($ArgumentList) {
             Start-Process -NoNewWindow -Wait -FilePath $FilePath -ArgumentList $ArgumentList -RedirectStandardOutput $stdout.FullName -RedirectStandardError $stderr.FullName -ErrorAction Ignore
-        } else {
+        }
+        else {
             Start-Process -NoNewWindow -Wait -FilePath $FilePath -RedirectStandardOutput $stdout.FullName -RedirectStandardError $stderr.FullName -ErrorAction Ignore
         }
 
         $stdoutContent = Get-Content -Raw $stdout.FullName
         $stderrContent = Get-Content -Raw $stderr.FullName
-    } catch {
+    }
+    catch {
         $stderrContent = $_.Exception.Message
     }
 
@@ -75,26 +73,25 @@ function Execute-Binary
         if (-not ([string]::IsNullOrEmpty($stdoutContent))) {
             if (($stdoutContent -match 'FATA') -or ($stdoutContent -match 'ERRO')) {
                 return @{
-                    Ok = $false
+                    Ok     = $false
                     Output = $stdoutContent
                 }
             }
         }
 
         return @{
-            Ok = $true
+            Ok     = $true
             Output = $stdoutContent
         }
     }
 
     return @{
-        Ok = $false
+        Ok     = $false
         Output = $stderrContent
     }
 }
 
-function Judge
-{
+function Judge {
     param(
         [parameter(Mandatory = $true, ValueFromPipeline = $true)] [scriptBlock]$Block,
         [parameter(Mandatory = $false)] [int]$Timeout = 30,
@@ -111,7 +108,8 @@ function Judge
                 Start-Sleep -s 5
                 break
             }
-        } elseif ($Reverse) {
+        }
+        elseif ($Reverse) {
             Start-Sleep -s 5
             break
         }
@@ -130,8 +128,7 @@ function Judge
 
 }
 
-function Wait-Ready
-{
+function Wait-Ready {
     param(
         [parameter(Mandatory = $true)] $Path,
         [parameter(Mandatory = $false)] [int]$Timeout = 30,

@@ -28,7 +28,8 @@ if ($?) {
     docker rmi "$pushTag-bak" | Out-Null
     docker rmi $currentTag | Out-Null
     Write-Host "$pushTag was PUSHED"
-} else {
+}
+else {
     docker tag "$pushTag-bak" $pushTag | Out-Null
     docker rmi "$pushTag-bak" | Out-Null
     Write-Host -ForegroundColor Red "$pushTag has something wrong while PUSHING"
