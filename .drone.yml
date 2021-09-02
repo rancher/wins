@@ -108,7 +108,7 @@ clone:
 
 steps:
 - name: clone
-  image: luthermonson/drone-git:windows-2004-amd64
+  image: rancher/drone-images:git-2004
 
 - name: build
   pull: always
@@ -125,7 +125,7 @@ steps:
     - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
 - name: docker-publish
-  image: luthermonson/drone-docker:2004
+  image: rancher/drone-images:docker-2004
   settings:
     build_args:
       - SERVERCORE_VERSION=2004
@@ -191,7 +191,7 @@ clone:
 
 steps:
 - name: clone
-  image: luthermonson/drone-git:windows-20H2-amd64
+  image: rancher/drone-images:git-20H2
 
 - name: build
   pull: always
@@ -208,7 +208,7 @@ steps:
     - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
 - name: docker-publish
-  image: luthermonson/drone-docker:20H2
+  image: rancher/drone-images:docker-20H2
   settings:
     build_args:
       - SERVERCORE_VERSION=20H2
