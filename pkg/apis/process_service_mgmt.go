@@ -14,7 +14,7 @@ import (
 	"unsafe"
 
 	"github.com/pkg/errors"
-	"github.com/rancher/wins/pkg/powershells"
+	"github.com/rancher/wins/pkg/powershell"
 	"github.com/sirupsen/logrus"
 )
 
@@ -51,13 +51,7 @@ func (p *process) kill(ctx context.Context) error {
 	}
 
 	// remove firewall route
-	psb := &powershells.Builder{}
-	ps, err := psb.Build()
-	if err != nil {
-		return errors.Wrapf(err, "could not build firewall mgmt PowerShell")
-	}
-	removeFirewallRulePsCommand := fmt.Sprintf(`Get-NetFirewallRule -PolicyStore ActiveStore -Name %s-* | ForEach-Object {Remove-NetFirewallRule -Name $_.Name -PolicyStore ActiveStore -ErrorAction Ignore | Out-Null}`, p.name)
-	err = ps.ExecuteCommand(ctx, removeFirewallRulePsCommand)
+	_, err := powershell.RunCommandf(`Get-NetFirewallRule -PolicyStore ActiveStore -Name %s-* | ForEach-Object {Remove-NetFirewallRule -Name $_.Name -PolicyStore ActiveStore -ErrorAction Ignore | Out-Null}`, p.name)
 	if err != nil {
 		return errors.Wrapf(err, "could not remove firewall rules")
 	}
@@ -152,13 +146,7 @@ func (s *processService) create(ctx context.Context, path string, dir string, ar
 
 	// create firewall rules if needed
 	if fwrules != "" {
-		psb := &powershells.Builder{}
-		ps, err := psb.Build()
-		if err != nil {
-			return nil, errors.Wrapf(err, "could not build firewall mgmt PowerShell")
-		}
-		newFirewallRulePsCommand := fmt.Sprintf(`"%s" -split ' ' | ForEach-Object {$ruleMd = $_ -split '-'; $ruleName = "%s-$_"; New-NetFirewallRule -Name $ruleName -DisplayName $ruleName -Action Allow -Protocol $ruleMd[0] -LocalPort $ruleMd[1] -Enabled True -PolicyStore ActiveStore -ErrorAction Ignore | Out-Null}`, fwrules, pname)
-		err = ps.ExecuteCommand(ctx, newFirewallRulePsCommand)
+		_, err = powershell.RunCommandf(`"%s" -split ' ' | ForEach-Object {$ruleMd = $_ -split '-'; $ruleName = "%s-$_"; New-NetFirewallRule -Name $ruleName -DisplayName $ruleName -Action Allow -Protocol $ruleMd[0] -LocalPort $ruleMd[1] -Enabled True -PolicyStore ActiveStore -ErrorAction Ignore | Out-Null}`, fwrules, pname)
 		if err != nil {
 			return nil, errors.Wrapf(err, "could not create process firewall rules")
 		}
