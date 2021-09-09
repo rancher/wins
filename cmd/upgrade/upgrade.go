@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/rancher/wins/cmd/upgrade/internal/powershell"
+	"github.com/rancher/wins/pkg/powershell"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
