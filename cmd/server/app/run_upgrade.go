@@ -62,7 +62,7 @@ func enableWatchingMode(ctx context.Context, cfg *config.Config) error {
 
 	updateHandler := func(watchErr error, watchEvent fsnotify.Event) {
 		if watchErr != nil {
-			logrus.Errorf("error while watching: %v")
+			logrus.Errorf("error while watching: %v", watchErr)
 			return
 		}
 
