@@ -1,5 +1,8 @@
 # Rancher Wins
 
+[![Build Status](https://drone-publish.rancher.io/api/badges/rancher/wins/status.svg?ref=refs/heads/main)](https://drone-pr.rancher.io/rancher/wins)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rancher/wins)](https://goreportcard.com/report/github.com/rancher/wins)
+
 `wins` is a way to operate the Windows host inside the Windows container.
 
 ## How to use
@@ -135,7 +138,7 @@ If want both of them, please run the below command in `PowerShell`:
 
 ## License
 
-Copyright (c) 2014-2019 [Rancher Labs, Inc.](http://rancher.com)
+Copyright (c) 2014-2021 [Rancher Labs, Inc.](http://rancher.com)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
