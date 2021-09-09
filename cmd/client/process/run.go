@@ -194,7 +194,7 @@ func _runAction(cliCtx *cli.Context) (err error) {
 			if err := keepAliveStream.Send(&types.ProcessKeepAliveRequest{
 				Data: &types.ProcessName{Value: processName},
 			}); err != nil {
-				logrus.Error("Failed to keep alive: %v", err)
+				logrus.Errorf("Failed to keep alive: %v", err)
 				return
 			}
 
