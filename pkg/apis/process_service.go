@@ -167,7 +167,7 @@ func (s *processService) KeepAlive(stream types.ProcessService_KeepAliveServer) 
 	}
 
 	if pname == "" {
-		return status.Errorf(codes.InvalidArgument, "could not find process with a blank string", pname)
+		return status.Errorf(codes.InvalidArgument, "could not find process with a blank string %s", pname)
 	}
 
 	p, err := s.getFromPool(pname)
