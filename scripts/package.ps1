@@ -9,7 +9,7 @@ $SRC_PATH = (Resolve-Path "$DIR_PATH\..").Path
 # Reference binary in ./bin/wins.exe
 Copy-Item -Force -Path $SRC_PATH\bin\wins.exe -Destination $SRC_PATH\package\windows | Out-Null
 
-cd $SRC_PATH\package\windows
+Set-Location -Path $SRC_PATH\package\windows
 
 
 $TAG = $env:TAG
