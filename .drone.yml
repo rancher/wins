@@ -10,7 +10,7 @@ platform:
 steps:
 - name: build
   pull: always
-  image: rancher/dapper:v0.5.4
+  image: rancher/dapper:v0.5.6
   commands:
     - dapper.exe -f Dockerfile.dapper -d ci
   volumes:
@@ -18,7 +18,7 @@ steps:
       path: \\\\.\\pipe\\docker_engine
 
 - name: stage-binaries
-  image: rancher/dapper:v0.5.4
+  image: rancher/dapper:v0.5.6
   commands:
     - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
@@ -96,7 +96,7 @@ steps:
 
 - name: build
   pull: always
-  image: rancher/dapper:v0.5.4
+  image: rancher/dapper:v0.5.6
   commands:
     - dapper.exe -f Dockerfile.dapper -d ci
   volumes:
@@ -104,7 +104,7 @@ steps:
       path: \\\\.\\pipe\\docker_engine
 
 - name: stage-binaries
-  image: rancher/dapper:v0.5.4
+  image: rancher/dapper:v0.5.6
   commands:
     - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
@@ -163,7 +163,7 @@ steps:
 
 - name: build
   pull: always
-  image: rancher/dapper:v0.5.4
+  image: rancher/dapper:v0.5.6
   commands:
     - dapper.exe -f Dockerfile.dapper -d ci
   volumes:
@@ -171,7 +171,7 @@ steps:
       path: \\\\.\\pipe\\docker_engine
 
 - name: stage-binaries
-  image: rancher/dapper:v0.5.4
+  image: rancher/dapper:v0.5.6
   commands:
     - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
