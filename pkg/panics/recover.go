@@ -10,7 +10,7 @@ func Log() {
 	}
 }
 
-func DealWith(handler func (recoverObj interface{})) {
+func DealWith(handler func(recoverObj interface{})) {
 	if r := recover(); r != nil {
 		if handler != nil {
 			handler(r)
