@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-func Inet_ntoa(ipnr uint32, isBig bool) string {
+func InetNtoa(ipnr uint32, isBig bool) string {
 	ip := net.IPv4(0, 0, 0, 0)
 	var bo binary.ByteOrder
 	if isBig {
@@ -17,7 +17,7 @@ func Inet_ntoa(ipnr uint32, isBig bool) string {
 	return ip.String()
 }
 
-func Inet_aton(ip string, isBig bool) uint32 {
+func InetAton(ip string, isBig bool) uint32 {
 	var bo binary.ByteOrder
 	if isBig {
 		bo = binary.BigEndian

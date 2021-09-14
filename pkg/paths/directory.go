@@ -22,9 +22,8 @@ func IncludeFiles(path string, filenames ...string) (bool, error) {
 		if err != nil {
 			if os.IsNotExist(err) {
 				return false, nil
-			} else {
-				return false, errors.Wrapf(err, "%s could not be touched", fpath)
 			}
+			return false, errors.Wrapf(err, "%s could not be touched", fpath)
 		} else if fs.IsDir() {
 			return false, errors.Errorf("%s is directory", fpath)
 		}

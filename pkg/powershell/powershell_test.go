@@ -40,7 +40,7 @@ func TestExecuteCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			o, err := RunCommand(tt.args.command)
 			if err != nil && !tt.error {
-				t.Errorf("error occured, " + err.Error())
+				t.Errorf("error occurred, " + err.Error())
 			}
 
 			if !tt.error {

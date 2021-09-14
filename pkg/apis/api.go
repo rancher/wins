@@ -44,7 +44,7 @@ func (s *Server) Serve(ctx context.Context) error {
 	types.RegisterProcessServiceServer(srv, &processService{})
 	types.RegisterApplicationServiceServer(srv, &applicationService{})
 
-	errg, ctx := errgroup.WithContext(ctx)
+	errg, _ := errgroup.WithContext(ctx)
 
 	errg.Go(func() error {
 		logrus.Infof("Listening on %v", s.listener.Addr())

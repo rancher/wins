@@ -26,11 +26,11 @@ func DefaultConfig() *Config {
 }
 
 type Config struct {
-	Debug     bool            `yaml:"debug",json:"debug"`
-	Listen    string          `yaml:"listen",json:"listen"`
-	Proxy     string          `yaml:"proxy",json:"proxy"`
-	WhiteList WhiteListConfig `yaml:"white_list",json:"whiteList"`
-	Upgrade   UpgradeConfig   `yaml:"upgrade",json:"upgrade"`
+	Debug     bool            `yaml:"debug" json:"debug"`
+	Listen    string          `yaml:"listen" json:"listen"`
+	Proxy     string          `yaml:"proxy" json:"proxy"`
+	WhiteList WhiteListConfig `yaml:"white_list" json:"white_list"`
+	Upgrade   UpgradeConfig   `yaml:"upgrade" json:"upgrade"`
 }
 
 func (c *Config) Validate() error {
@@ -52,8 +52,8 @@ func (c *Config) Validate() error {
 }
 
 type WhiteListConfig struct {
-	ProcessPaths []string `yaml:"process_paths",json:"processPaths"`
-	ProxyPorts   []int    `yaml:"proxy_ports",json:"proxyPorts"`
+	ProcessPaths []string `yaml:"process_paths" json:"processPaths"`
+	ProxyPorts   []int    `yaml:"proxy_ports" json:"proxyPorts"`
 }
 
 func (c *WhiteListConfig) Validate() error {
@@ -72,8 +72,8 @@ func (c *WhiteListConfig) Validate() error {
 }
 
 type UpgradeConfig struct {
-	Mode         string `yaml:"mode",json:"mode"`
-	WatchingPath string `yaml:"watching_path",json:"watchingPath"`
+	Mode         string `yaml:"mode" json:"mode"`
+	WatchingPath string `yaml:"watching_path" json:"watchingPath"`
 }
 
 func (c *UpgradeConfig) Validate() error {

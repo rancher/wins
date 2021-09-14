@@ -122,24 +122,24 @@ func nativeToNetworkAdatper(idx int, gw string, address string, mask string, hn 
 func getDefaultAdapterIndex() (int, error) {
 	// find out how big our buffer needs to be
 	b := make([]byte, 1)
-	ft := (*syscalls.IpForwardTable)(unsafe.Pointer(&b[0]))
+	ft := (*syscalls.IPForwardTable)(unsafe.Pointer(&b[0]))
 	ol := uint32(0)
-	syscalls.GetIpForwardTable(ft, &ol, false)
+	syscalls.GetIPForwardTable(ft, &ol, false)
 
 	// start to get table
 	b = make([]byte, ol)
-	ft = (*syscalls.IpForwardTable)(unsafe.Pointer(&b[0]))
-	if err := syscalls.GetIpForwardTable(ft, &ol, false); err != nil {
+	ft = (*syscalls.IPForwardTable)(unsafe.Pointer(&b[0]))
+	if err := syscalls.GetIPForwardTable(ft, &ol, false); err != nil {
 		return -1, err
 	}
 
 	// iterate to find
 	for i := 0; i < int(ft.NumEntries); i++ {
-		row := *(*syscalls.IpForwardRow)(unsafe.Pointer(
+		row := *(*syscalls.IPForwardRow)(unsafe.Pointer(
 			uintptr(unsafe.Pointer(&ft.Table[0])) + uintptr(i)*uintptr(unsafe.Sizeof(ft.Table[0])), // head idx + offset
 		))
 
-		if converters.Inet_ntoa(row.ForwardDest, false) != "0.0.0.0" {
+		if converters.InetNtoa(row.ForwardDest, false) != "0.0.0.0" {
 			continue
 		}
 

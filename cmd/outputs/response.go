@@ -8,7 +8,7 @@ import (
 	"github.com/rancher/wins/pkg/converters"
 )
 
-func Json(w io.Writer, obj interface{}) error {
+func JSON(w io.Writer, obj interface{}) error {
 	if obj == nil {
 		return nil
 	}
@@ -21,11 +21,11 @@ func Json(w io.Writer, obj interface{}) error {
 		return fprint(w, converters.UnsafeBytesToString(bytes))
 	}
 
-	objJson, err := converters.ToJson(obj)
+	json, err := converters.ToJSON(obj)
 	if err != nil {
 		return err
 	}
-	return fprint(w, objJson)
+	return fprint(w, json)
 }
 
 func fprint(w io.Writer, obj interface{}) (err error) {

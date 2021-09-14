@@ -34,33 +34,33 @@ func (s *routeService) Add(ctx context.Context, req *types.RouteAddRequest) (res
 
 	// find out how big our buffer needs to be
 	b := make([]byte, 1)
-	ft := (*syscalls.IpForwardTable)(unsafe.Pointer(&b[0]))
+	ft := (*syscalls.IPForwardTable)(unsafe.Pointer(&b[0]))
 	ol := uint32(0)
-	syscalls.GetIpForwardTable(ft, &ol, false)
+	syscalls.GetIPForwardTable(ft, &ol, false)
 
 	// start to get table
 	b = make([]byte, ol)
-	ft = (*syscalls.IpForwardTable)(unsafe.Pointer(&b[0]))
-	if err := syscalls.GetIpForwardTable(ft, &ol, false); err != nil {
+	ft = (*syscalls.IPForwardTable)(unsafe.Pointer(&b[0]))
+	if err := syscalls.GetIPForwardTable(ft, &ol, false); err != nil {
 		return nil, status.Errorf(codes.Internal, "could not get IP table: %v", err)
 	}
 
 	// iterate to find
 	for i := 0; i < int(ft.NumEntries); i++ {
-		row := *(*syscalls.IpForwardRow)(unsafe.Pointer(
+		row := *(*syscalls.IPForwardRow)(unsafe.Pointer(
 			uintptr(unsafe.Pointer(&ft.Table[0])) + uintptr(i)*uintptr(unsafe.Sizeof(ft.Table[0])), // head idx + offset
 		))
 
-		if converters.Inet_ntoa(row.ForwardDest, false) != "0.0.0.0" {
+		if converters.InetNtoa(row.ForwardDest, false) != "0.0.0.0" {
 			continue
 		}
 
 		for _, addrIPN := range addrIPNs {
 			ip, mask := ipnetToString(addrIPN)
 			// clone route configuration
-			row.ForwardDest = converters.Inet_aton(ip, false)
-			row.ForwardMask = converters.Inet_aton(mask, false)
-			err := syscalls.CreateIpForwardEntry(&row)
+			row.ForwardDest = converters.InetAton(ip, false)
+			row.ForwardMask = converters.InetAton(mask, false)
+			err := syscalls.CreateIPForwardEntry(&row)
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "could not create IP forward entry: %v", err)
 			}

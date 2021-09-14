@@ -227,9 +227,9 @@ func _runAction(cliCtx *cli.Context) (err error) {
 
 		switch opts := resp.GetOptions().(type) {
 		case *types.ProcessWaitResponse_StdOut:
-			err = outputs.Json(writer, opts.StdOut)
+			err = outputs.JSON(writer, opts.StdOut)
 		case *types.ProcessWaitResponse_StdErr:
-			err = outputs.Json(errWriter, opts.StdErr)
+			err = outputs.JSON(errWriter, opts.StdErr)
 		}
 	}
 
