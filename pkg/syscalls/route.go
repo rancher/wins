@@ -5,19 +5,11 @@ import (
 	"unsafe"
 )
 
-const (
-	// https://docs.microsoft.com/en-us/windows/win32/api/ipmib/ns-ipmib-mib_ipforwardrow
-	MIB_IPROUTE_TYPE_OTHER    = 1
-	MIB_IPROUTE_TYPE_INVALID  = 2
-	MIB_IPROUTE_TYPE_DIRECT   = 3
-	MIB_IPROUTE_TYPE_INDIRECT = 4
-)
-
 var (
 	modiphlpapi = syscall.NewLazyDLL("iphlpapi.dll")
 
-	procGetIpForwardTable    = modiphlpapi.NewProc("GetIpForwardTable")
-	procCreateIpForwardEntry = modiphlpapi.NewProc("CreateIpForwardEntry")
+	procGetIPForwardTable    = modiphlpapi.NewProc("GetIPForwardTable")
+	procCreateIPForwardEntry = modiphlpapi.NewProc("CreateIPForwardEntry")
 )
 
 // https://docs.microsoft.com/en-us/windows/win32/api/ipmib/ns-ipmib-mib_ipforwardtable
@@ -25,9 +17,9 @@ var (
 //  DWORD            dwNumEntries;
 //  MIB_IPFORWARDROW table[ANY_SIZE];
 // }
-type IpForwardTable struct {
+type IPForwardTable struct {
 	NumEntries uint32
-	Table      [1]IpForwardRow
+	Table      [1]IPForwardRow
 }
 
 // https://docs.microsoft.com/en-us/windows/win32/api/ipmib/ns-ipmib-mib_ipforwardrow
@@ -53,7 +45,7 @@ type IpForwardTable struct {
 //  DWORD    dwForwardMetric4;
 //  DWORD    dwForwardMetric5;
 // }
-type IpForwardRow struct {
+type IPForwardRow struct {
 	ForwardDest      uint32
 	ForwardMask      uint32
 	ForwardPolicy    uint32
@@ -70,22 +62,22 @@ type IpForwardRow struct {
 	ForwardMetric5   uint32
 }
 
-func GetIpForwardTable(ft *IpForwardTable, size *uint32, order bool) (errcode error) {
+func GetIPForwardTable(ft *IPForwardTable, size *uint32, order bool) (errcode error) {
 	var _p0 uint32
 	if order {
 		_p0 = 1
 	} else {
 		_p0 = 0
 	}
-	r0, _, _ := syscall.Syscall(procGetIpForwardTable.Addr(), 3, uintptr(unsafe.Pointer(ft)), uintptr(unsafe.Pointer(size)), uintptr(_p0))
+	r0, _, _ := syscall.Syscall(procGetIPForwardTable.Addr(), 3, uintptr(unsafe.Pointer(ft)), uintptr(unsafe.Pointer(size)), uintptr(_p0))
 	if r0 != 0 {
 		errcode = syscall.Errno(r0)
 	}
 	return
 }
 
-func CreateIpForwardEntry(fr *IpForwardRow) (errcode error) {
-	r0, _, _ := syscall.Syscall(procCreateIpForwardEntry.Addr(), 1, uintptr(unsafe.Pointer(fr)), 0, 0)
+func CreateIPForwardEntry(fr *IPForwardRow) (errcode error) {
+	r0, _, _ := syscall.Syscall(procCreateIPForwardEntry.Addr(), 1, uintptr(unsafe.Pointer(fr)), 0, 0)
 	if r0 != 0 {
 		errcode = syscall.Errno(r0)
 	}

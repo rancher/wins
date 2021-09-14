@@ -84,7 +84,7 @@ func _getNetworkAction(cliCtx *cli.Context) (err error) {
 		return
 	}
 
-	return outputs.Json(cliCtx.App.Writer, resp.Data)
+	return outputs.JSON(cliCtx.App.Writer, resp.Data)
 }
 
 func getNetworkCommand() cli.Command {

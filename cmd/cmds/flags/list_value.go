@@ -6,23 +6,18 @@ import (
 	"github.com/urfave/cli"
 )
 
-// command
-const (
-	valueSeparator = " "
-)
+type ListValue string
 
-type listValue string
-
-func (f *listValue) Set(value string) error {
-	*f = listValue(value)
+func (f *ListValue) Set(value string) error {
+	*f = ListValue(value)
 	return nil
 }
 
-func (f *listValue) String() string {
+func (f *ListValue) String() string {
 	return string(*f)
 }
 
-func (f *listValue) Get() ([]string, error) {
+func (f *ListValue) Get() ([]string, error) {
 	if f == nil || f.IsEmpty() {
 		return nil, nil
 	}
@@ -51,14 +46,14 @@ func (f *listValue) Get() ([]string, error) {
 	}
 	// Check if input is malformed for the last entry
 	if inEscapedDoubleQuotes || inEscapedSingleQuotes {
-		return nil, fmt.Errorf("malformed listValue contains an unpaired escaped quote")
+		return nil, fmt.Errorf("malformed ListValue contains an unpaired escaped quote")
 	}
 	// Add the final field
 	ret = append(ret, currVal)
 	return ret, nil
 }
 
-func (f *listValue) IsEmpty() bool {
+func (f *ListValue) IsEmpty() bool {
 	if f == nil {
 		return true
 	}
@@ -66,9 +61,9 @@ func (f *listValue) IsEmpty() bool {
 }
 
 func NewListValue() cli.Generic {
-	return new(listValue)
+	return new(ListValue)
 }
 
-func GetListValue(cliCtx *cli.Context, name string) *listValue {
-	return cliCtx.Generic(name).(*listValue)
+func GetListValue(cliCtx *cli.Context, name string) *ListValue {
+	return cliCtx.Generic(name).(*ListValue)
 }

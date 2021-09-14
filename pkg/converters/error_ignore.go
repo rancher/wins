@@ -4,19 +4,11 @@ import (
 	"strconv"
 
 	"github.com/buger/jsonparser"
+
 	"golang.org/x/sys/windows/registry"
 )
 
-func GetIntFormJson(jsonData []byte, key ...string) int {
-	val, _ := jsonparser.GetInt(jsonData, key...)
-	return int(val)
-}
-
-func GetIntStringFormJson(jsonData []byte, key ...string) string {
-	return strconv.Itoa(GetIntFormJson(jsonData, key...))
-}
-
-func GetStringFormJson(jsonData []byte, key ...string) string {
+func GetStringFormJSON(jsonData []byte, key ...string) string {
 	val, _ := jsonparser.GetUnsafeString(jsonData, key...)
 	return val
 }

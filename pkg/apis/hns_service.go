@@ -129,7 +129,7 @@ func v2nativeToHnsNetwork(nativeData *hcn.HostComputeNetwork) *types.HnsNetwork 
 	var managementIP string
 	for _, policy := range nativeData.Policies {
 		if policy.Type == hcn.ProviderAddress {
-			managementIP = converters.GetStringFormJson(policy.Settings, "ProviderAddress")
+			managementIP = converters.GetStringFormJSON(policy.Settings, "ProviderAddress")
 		}
 	}
 

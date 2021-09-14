@@ -18,9 +18,9 @@ func TestToJson(t *testing.T) {
 
 	want := `{"A":"a","bAlias":"b"}`
 
-	got, err := ToJson(json)
+	got, err := ToJSON(json)
 	if err != nil {
-		t.Errorf("error occured, " + err.Error())
+		t.Errorf("error occurred, " + err.Error())
 	}
 
 	if got != want {
@@ -43,7 +43,7 @@ func TestToYaml(t *testing.T) {
 
 	got, err := ToYaml(yaml)
 	if err != nil {
-		t.Errorf("error occured, " + err.Error())
+		t.Errorf("error occurred, " + err.Error())
 	}
 
 	if strings.TrimSpace(got) != want {

@@ -46,7 +46,7 @@ func _infoAction(cliCtx *cli.Context) (err error) {
 		return err
 	}
 
-	return outputs.Json(cliCtx.App.Writer, map[string]interface{}{
+	return outputs.JSON(cliCtx.App.Writer, map[string]interface{}{
 		"Client": &types.ApplicationInfo{Checksum: clientChecksum, Version: defaults.AppVersion, Commit: defaults.AppCommit},
 		"Server": infoResp.Info,
 	})

@@ -6,7 +6,7 @@ import (
 )
 
 func TestNormal(t *testing.T) {
-	val := listValue("RANCHER=hello WINS=world")
+	val := ListValue("RANCHER=hello WINS=world")
 	valList, err := val.Get()
 	if err != nil {
 		t.Fatal(err)
@@ -22,7 +22,7 @@ func TestNormal(t *testing.T) {
 }
 
 func TestEscapedDoubleQuotes(t *testing.T) {
-	val := listValue("NICK=bye LUTHER=\"hello\" RANCHER=\"hello world\" WINS=world")
+	val := ListValue("NICK=bye LUTHER=\"hello\" RANCHER=\"hello world\" WINS=world")
 	valList, err := val.Get()
 	if err != nil {
 		t.Fatal(err)
@@ -38,7 +38,7 @@ func TestEscapedDoubleQuotes(t *testing.T) {
 }
 
 func TestEscapedSingleQuotes(t *testing.T) {
-	val := listValue("NICK=bye LUTHER='hello' RANCHER='hello world' WINS=world")
+	val := ListValue("NICK=bye LUTHER='hello' RANCHER='hello world' WINS=world")
 	valList, err := val.Get()
 	if err != nil {
 		t.Fatal(err)
@@ -54,7 +54,7 @@ func TestEscapedSingleQuotes(t *testing.T) {
 }
 
 func TestEscapedSingleAndDoubleQuotes(t *testing.T) {
-	val := listValue("NICK=bye LUTHER=\"hello\" RANCHER='hello world' WINS=world")
+	val := ListValue("NICK=bye LUTHER=\"hello\" RANCHER='hello world' WINS=world")
 	valList, err := val.Get()
 	if err != nil {
 		t.Fatal(err)
@@ -70,7 +70,7 @@ func TestEscapedSingleAndDoubleQuotes(t *testing.T) {
 }
 
 func TestEscapedQuotesInQuotes(t *testing.T) {
-	val := listValue("NICK=bye LUTHER=\"'hello'\" RANCHER='\"hello world\"' WINS=world")
+	val := ListValue("NICK=bye LUTHER=\"'hello'\" RANCHER='\"hello world\"' WINS=world")
 	valList, err := val.Get()
 	if err != nil {
 		t.Fatal(err)

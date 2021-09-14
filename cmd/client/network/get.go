@@ -77,7 +77,7 @@ func _getAction(cliCtx *cli.Context) (err error) {
 		return
 	}
 
-	return outputs.Json(cliCtx.App.Writer, resp.Data)
+	return outputs.JSON(cliCtx.App.Writer, resp.Data)
 }
 
 func getCommand() cli.Command {

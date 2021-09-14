@@ -183,16 +183,17 @@ func runService(ctx context.Context, server *apis.Server) error {
 		logrus.SetOutput(ioutil.Discard)
 
 		// ETW tracing
-		if hook, err := logs.NewEtwProviderHook(defaults.WindowsServiceName); err != nil {
+		etw, err := logs.NewEtwProviderHook(defaults.WindowsServiceName)
+		if err != nil {
 			return errors.Wrapf(err, "could not create ETW provider logrus hook")
-		} else {
-			logrus.AddHook(hook)
 		}
-		if hook, err := logs.NewEventLogHook(defaults.WindowsServiceName); err != nil {
+		logrus.AddHook(etw)
+
+		el, err := logs.NewEventLogHook(defaults.WindowsServiceName)
+		if err != nil {
 			return errors.Wrapf(err, "could not create eventlog logrus hook")
-		} else {
-			logrus.AddHook(hook)
 		}
+		logrus.AddHook(el)
 
 		// Creates a Win32 event defined on a Global scope at stackdump-{pid} that can be signaled by
 		// built-in adminstrators of the Windows machine or by the local system.
@@ -243,7 +244,7 @@ func (h *serviceHandler) Execute(_ []string, r <-chan svc.ChangeRequest, s chan<
 	s <- svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown | svc.AcceptParamChange}
 
 	// The following loop configures the Windows service to respond to ChangeRequests from the Windows Service Manager
-	// It uses Go Labels to break out of the switch statement and the loop on recieving a Stop ChangeRequest
+	// It uses Go Labels to break out of the switch statement and the loop on receiving a Stop ChangeRequest
 	// See https://medium.com/golangspec/labels-in-go-4ffd81932339
 Loop:
 	for c := range r {
