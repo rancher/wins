@@ -12,7 +12,7 @@ function Build {
     )
 
     $linkFlags = ('-s -w -X github.com/rancher/wins/pkg/defaults.AppVersion={0} -X github.com/rancher/wins/pkg/defaults.AppCommit={1} -extldflags "-static"' -f $Version, $Commit)
-    go build -i -ldflags $linkFlags -o $Output cmd\main.go
+    go build -ldflags $linkFlags -o $Output cmd/main.go
     if (-not $?) {
         Log-Fatal "go build failed!"
     }

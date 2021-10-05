@@ -7,6 +7,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/rancher/system-agent/pkg/config"
 	"github.com/rancher/wins/pkg/defaults"
 )
 
@@ -26,11 +27,12 @@ func DefaultConfig() *Config {
 }
 
 type Config struct {
-	Debug     bool            `yaml:"debug" json:"debug"`
-	Listen    string          `yaml:"listen" json:"listen"`
-	Proxy     string          `yaml:"proxy" json:"proxy"`
-	WhiteList WhiteListConfig `yaml:"white_list" json:"white_list"`
-	Upgrade   UpgradeConfig   `yaml:"upgrade" json:"upgrade"`
+	Debug       bool                `yaml:"debug" json:"debug"`
+	Listen      string              `yaml:"listen" json:"listen"`
+	Proxy       string              `yaml:"proxy" json:"proxy"`
+	WhiteList   WhiteListConfig     `yaml:"white_list" json:"white_list"`
+	Upgrade     UpgradeConfig       `yaml:"upgrade" json:"upgrade"`
+	SystemAgent *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
 }
 
 func (c *Config) Validate() error {

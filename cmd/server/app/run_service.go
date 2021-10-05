@@ -14,6 +14,7 @@ import (
 	"github.com/rancher/wins/pkg/logs"
 	"github.com/rancher/wins/pkg/paths"
 	"github.com/rancher/wins/pkg/profilings"
+	"github.com/rancher/wins/pkg/systemagent"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/svc"
@@ -165,7 +166,7 @@ func unregisterService() error {
 	return nil
 }
 
-func runService(ctx context.Context, server *apis.Server) error {
+func runService(ctx context.Context, server *apis.Server, agent *systemagent.Agent) error {
 	// If the process is not currently executing as a Windows service, assume that this is an interactive session.
 	// debug.Run runs the binary that the service points to directly on the user's console and reacts to user actions
 	// e.g. clicking on Ctrl-C
@@ -207,6 +208,7 @@ func runService(ctx context.Context, server *apis.Server) error {
 		doneC: make(chan struct{}),
 		errC:  make(chan error),
 		srv:   server,
+		agent: agent,
 	}
 	go func() {
 		h.errC <- run(defaults.WindowsServiceName, h)
@@ -229,6 +231,7 @@ type serviceHandler struct {
 	doneC chan struct{}
 	errC  chan error
 	srv   *apis.Server
+	agent *systemagent.Agent
 }
 
 func (h *serviceHandler) Execute(_ []string, r <-chan svc.ChangeRequest, s chan<- svc.Status) (bool, uint32) {
@@ -239,6 +242,11 @@ func (h *serviceHandler) Execute(_ []string, r <-chan svc.ChangeRequest, s chan<
 	defer cancel()
 	go func() {
 		h.errC <- h.srv.Serve(ctx)
+	}()
+
+	// start system agent
+	go func() {
+		h.errC <- h.agent.Run(ctx)
 	}()
 
 	s <- svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown | svc.AcceptParamChange}
