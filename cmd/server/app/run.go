@@ -10,6 +10,7 @@ import (
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/profilings"
+	"github.com/rancher/wins/pkg/systemagent"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
@@ -104,7 +105,9 @@ func _runAction(cliCtx *cli.Context) error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to create server")
 	}
-	err = runService(ctx, server)
+	agent := systemagent.New(cfg.SystemAgent)
+
+	err = runService(ctx, server, agent)
 	if err != nil {
 		return errors.Wrapf(err, "failed to run server")
 	}

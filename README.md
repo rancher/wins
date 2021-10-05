@@ -108,6 +108,21 @@ OPTIONS:
 > curl.exe 127.0.0.1
 ```
 
+#### Enabling System Agent functionality
+
+The system agent functionality will only be enabled if the configuration section for the system agent is found in the config file. To enable it, provide the following configuration section with the required settings. If *remoteEnabled* is set to `true` then connectionInfoFile will need to be configured.
+
+```YAML
+systemagent:
+  appliedPlanDirectory: <agent dir>/applied
+  connectionInfoFile: <agent dir>/connection.yaml
+  localEnabled: <bool>
+  localPlanDirectory: <agent dir>/plans
+  preserveWorkDirectory: <bool>
+  remoteEnabled: <bool>
+  workDirectory: <agent dir>/work
+```
+
 ## Build
 ``` powershell
 > .\make build
