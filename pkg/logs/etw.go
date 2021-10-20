@@ -116,7 +116,7 @@ func NewEventLogHook(serviceName string) (logrus.Hook, error) {
 	return &eventLogHook{log: elog}, nil
 }
 
-func etwCallback(sourceID guid.GUID, state etw.ProviderState, level etw.Level, matchAnyKeyword uint64, matchAllKeyword uint64, filterData uintptr) {
+func etwCallback(_ guid.GUID, state etw.ProviderState, _ etw.Level, _ uint64, _ uint64, _ uintptr) {
 	if state == etw.ProviderStateCaptureState {
 		logrus.Infof("=== BEGIN goroutine stack dump ===\n%s\n=== END goroutine stack dump ===", profilings.DumpStacks())
 	}

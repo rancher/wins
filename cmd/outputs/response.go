@@ -31,7 +31,7 @@ func JSON(w io.Writer, obj interface{}) error {
 func fprint(w io.Writer, obj interface{}) (err error) {
 	_, err = fmt.Fprint(w, obj)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to output result")
+		err = errors.Wrap(err, "failed to output result")
 	}
 	return
 }

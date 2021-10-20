@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/buger/jsonparser"
-
 	"golang.org/x/sys/windows/registry"
 )
 

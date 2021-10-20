@@ -57,7 +57,7 @@ func GetBinarySHA1Hash(binaryName string) (string, error) {
 func EnsureBinary(binaryName string, expectedChecksum string) error {
 	actualChecksum, err := GetBinarySHA1Hash(binaryName)
 	if err != nil {
-		return errors.Wrapf(err, "could not get checksum")
+		return errors.Wrap(err, "could not get checksum")
 	}
 	if expectedChecksum != actualChecksum {
 		return errors.Errorf("could not match (expect checksum %q, but get %q)", expectedChecksum, actualChecksum)

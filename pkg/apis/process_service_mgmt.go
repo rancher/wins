@@ -53,7 +53,7 @@ func (p *process) kill(ctx context.Context) error {
 	// remove firewall route
 	_, err := powershell.RunCommandf(`Get-NetFirewallRule -PolicyStore ActiveStore -Name %s-* | ForEach-Object {Remove-NetFirewallRule -Name $_.Name -PolicyStore ActiveStore -ErrorAction Ignore | Out-Null}`, p.name)
 	if err != nil {
-		return errors.Wrapf(err, "could not remove firewall rules")
+		return errors.Wrap(err, "could not remove firewall rules")
 	}
 
 	// kill task
@@ -85,7 +85,7 @@ func (s *processService) getFromHost(pname string) (*process, error) {
 	// take windows processes snapshot
 	snapshot, err := syscall.CreateToolhelp32Snapshot(syscall.TH32CS_SNAPPROCESS, 0)
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not take a snapshot for Windows processes")
+		return nil, errors.Wrap(err, "could not take a snapshot for Windows processes")
 	}
 	defer syscall.CloseHandle(snapshot)
 
@@ -93,7 +93,7 @@ func (s *processService) getFromHost(pname string) (*process, error) {
 	var procEntry syscall.ProcessEntry32
 	procEntry.Size = uint32(unsafe.Sizeof(procEntry))
 	if err := syscall.Process32First(snapshot, &procEntry); err != nil {
-		return nil, errors.Wrapf(err, "could not start the iterator for Windows processes")
+		return nil, errors.Wrap(err, "could not start the iterator for Windows processes")
 	}
 
 	// process iterating
@@ -134,13 +134,13 @@ func (s *processService) create(ctx context.Context, path string, dir string, ar
 	if pInHost != nil {
 		// detect the process is running via wins
 		if pInPool, _ := s.getFromPool(pname); pInPool != nil {
-			return nil, errors.Wrapf(err, "could not run duplicate process")
+			return nil, errors.Wrap(err, "could not run duplicate process")
 		}
 
 		// recreate the process to gain the std handler
 		logrus.Warnf("[Process] Found stale process %s, try to recreate a new process", pInHost)
 		if err := pInHost.kill(ctx); err != nil {
-			return nil, errors.Wrapf(err, "could not kill stale process")
+			return nil, errors.Wrap(err, "could not kill stale process")
 		}
 	}
 
@@ -148,7 +148,7 @@ func (s *processService) create(ctx context.Context, path string, dir string, ar
 	if fwrules != "" {
 		_, err = powershell.RunCommandf(`"%s" -split ' ' | ForEach-Object {$ruleMd = $_ -split '-'; $ruleName = "%s-$_"; New-NetFirewallRule -Name $ruleName -DisplayName $ruleName -Action Allow -Protocol $ruleMd[0] -LocalPort $ruleMd[1] -Enabled True -PolicyStore ActiveStore -ErrorAction Ignore | Out-Null}`, fwrules, pname)
 		if err != nil {
-			return nil, errors.Wrapf(err, "could not create process firewall rules")
+			return nil, errors.Wrap(err, "could not create process firewall rules")
 		}
 	}
 
@@ -162,11 +162,11 @@ func (s *processService) create(ctx context.Context, path string, dir string, ar
 	}
 	stdout, err := c.StdoutPipe()
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not create process stdout stream")
+		return nil, errors.Wrap(err, "could not create process stdout stream")
 	}
 	stderr, err := c.StderrPipe()
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not create process stderr stream")
+		return nil, errors.Wrap(err, "could not create process stderr stream")
 	}
 
 	if err := c.Start(); err != nil {

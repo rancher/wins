@@ -70,7 +70,7 @@ func (s *routeService) Add(ctx context.Context, req *types.RouteAddRequest) (res
 		return &types.Void{}, nil
 	}
 
-	return nil, status.Errorf(codes.Internal, "there isn't a default gateway with a destination of 0.0.0.0")
+	return nil, status.Error(codes.Internal, "there isn't a default gateway with a destination of 0.0.0.0")
 }
 
 func ipnetToString(ipNet *net.IPNet) (addr string, mask string) {

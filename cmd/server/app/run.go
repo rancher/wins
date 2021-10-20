@@ -88,7 +88,7 @@ func _runAction(cliCtx *cli.Context) error {
 
 	err = setupUpgrading(ctx, cfg)
 	if err != nil {
-		return errors.Wrapf(err, "failed to setup upgrading")
+		return errors.Wrap(err, "failed to setup upgrading")
 	}
 
 	serverOptions := []grpc.ServerOption{
@@ -97,19 +97,19 @@ func _runAction(cliCtx *cli.Context) error {
 
 	serverOptions, err = setupGRPCServerOptions(serverOptions, cfg)
 	if err != nil {
-		return errors.Wrapf(err, "failed to setup grpc middlewares")
+		return errors.Wrap(err, "failed to setup grpc middlewares")
 	}
 
 	logrus.Debugf("Proxy port whitelist: %v", cfg.WhiteList.ProxyPorts)
 	server, err := apis.NewServer(cfg.Listen, serverOptions, cfg.Proxy, cfg.WhiteList.ProxyPorts)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create server")
+		return errors.Wrap(err, "failed to create server")
 	}
 	agent := systemagent.New(cfg.SystemAgent)
 
 	err = runService(ctx, server, agent)
 	if err != nil {
-		return errors.Wrapf(err, "failed to run server")
+		return errors.Wrap(err, "failed to run server")
 	}
 
 	return nil

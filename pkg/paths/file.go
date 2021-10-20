@@ -42,12 +42,12 @@ func MoveFile(srcPath, targetPath string) error {
 	d, err := os.Stat(dir)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			return errors.Wrapf(err, "could not detect the directory of target file")
+			return errors.Wrap(err, "could not detect the directory of target file")
 		}
 
 		err = os.Mkdir(dir, os.ModePerm)
 		if err != nil {
-			return errors.Wrapf(err, "could not create the directory of target file")
+			return errors.Wrap(err, "could not create the directory of target file")
 		}
 	} else if !d.IsDir() {
 		return errors.Errorf("%s is not a directory", dir)
@@ -59,13 +59,13 @@ func MoveFile(srcPath, targetPath string) error {
 		tempTargetPath := filepath.Join(os.TempDir(), filepath.Base(targetPath))
 		err = os.Rename(targetPath, tempTargetPath)
 		if err != nil {
-			return errors.Wrapf(err, "could not backup the existing target file")
+			return errors.Wrap(err, "could not backup the existing target file")
 		}
 	}
 
 	err = os.Rename(srcPath, targetPath)
 	if err != nil {
-		return errors.Wrapf(err, "could not move the source file to the target")
+		return errors.Wrap(err, "could not move the source file to the target")
 	}
 
 	return nil

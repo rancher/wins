@@ -107,7 +107,7 @@ func _proxyAction(cliCtx *cli.Context) (err error) {
 	// Get hostname to identify backend connection
 	hostname, err := os.Hostname()
 	if err != nil {
-		return errors.Wrapf(err, "unable to get hostname")
+		return errors.Wrap(err, "unable to get hostname")
 	}
 	proxyHeaders := http.Header{}
 	proxyHeaders.Set(proxy.ClientIDHeader, hostname)
