@@ -29,7 +29,7 @@ func (a *Agent) Run(ctx context.Context) error {
 	logrus.Infof("Rancher System Agent version %s is starting", version.FriendlyVersion())
 
 	if !a.cfg.LocalEnabled && !a.cfg.RemoteEnabled {
-		return errors.New("Local and remote were both not enabled. Exiting, as one must be enabled.")
+		return errors.New("local and remote were both not enabled. exiting, as one must be enabled")
 	}
 
 	logrus.Infof("Setting %s as the working directory", a.cfg.WorkDir)

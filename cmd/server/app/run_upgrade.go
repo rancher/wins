@@ -24,11 +24,7 @@ func setupUpgrading(ctx context.Context, cfg *config.Config) error {
 	}
 
 	// watching mode
-	if err := enableWatchingMode(ctx, cfg); err != nil {
-		return err
-	}
-
-	return nil
+	return enableWatchingMode(ctx, cfg)
 }
 
 // enableWatchingMode sets up a file system notification-based watcher on the config.Upgrade.WatchingPath directory.
