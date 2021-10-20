@@ -27,7 +27,7 @@ func registerService() error {
 	// confirm wins binary path
 	binaryPath, err := paths.GetBinaryPath(os.Args[0])
 	if err != nil {
-		return errors.Wrapf(err, "could not get binary")
+		return errors.Wrap(err, "could not get binary")
 	}
 
 	// open SCM
@@ -160,7 +160,7 @@ func unregisterService() error {
 
 	err = w.Delete()
 	if err != nil {
-		return errors.Wrapf(err, "could not delete")
+		return errors.Wrap(err, "could not delete")
 	}
 
 	return nil
@@ -186,13 +186,13 @@ func runService(ctx context.Context, server *apis.Server, agent *systemagent.Age
 		// ETW tracing
 		etw, err := logs.NewEtwProviderHook(defaults.WindowsServiceName)
 		if err != nil {
-			return errors.Wrapf(err, "could not create ETW provider logrus hook")
+			return errors.Wrap(err, "could not create ETW provider logrus hook")
 		}
 		logrus.AddHook(etw)
 
 		el, err := logs.NewEventLogHook(defaults.WindowsServiceName)
 		if err != nil {
-			return errors.Wrapf(err, "could not create eventlog logrus hook")
+			return errors.Wrap(err, "could not create eventlog logrus hook")
 		}
 		logrus.AddHook(el)
 

@@ -71,12 +71,12 @@ func GenerateSignedCert(commonName string, extKeyUsages []x509.ExtKeyUsage, key 
 func GenerateSelfSignedCACertAndKey(commonName string) (*x509.Certificate, *rsa.PrivateKey, error) {
 	key, err := GeneratePrivateKey()
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to generate private key")
+		return nil, nil, errors.Wrap(err, "failed to generate private key")
 	}
 
 	cert, err := GenerateSelfSignedCACert(commonName, key)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to generate cert")
+		return nil, nil, errors.Wrap(err, "failed to generate cert")
 	}
 
 	return cert, key, nil
@@ -85,12 +85,12 @@ func GenerateSelfSignedCACertAndKey(commonName string) (*x509.Certificate, *rsa.
 func GenerateCertAndKey(commonName string, extKeyUsages []x509.ExtKeyUsage, caCert *x509.Certificate, caKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
 	key, err := GeneratePrivateKey()
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to generate private key")
+		return nil, nil, errors.Wrap(err, "failed to generate private key")
 	}
 
 	cert, err := GenerateSignedCert(commonName, extKeyUsages, key, caCert, caKey)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to generate cert")
+		return nil, nil, errors.Wrap(err, "failed to generate cert")
 	}
 
 	return cert, key, nil

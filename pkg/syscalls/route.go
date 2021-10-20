@@ -12,39 +12,11 @@ var (
 	procCreateIPForwardEntry = modiphlpapi.NewProc("CreateIPForwardEntry")
 )
 
-// https://docs.microsoft.com/en-us/windows/win32/api/ipmib/ns-ipmib-mib_ipforwardtable
-// typedef struct _MIB_IPFORWARDTABLE {
-//  DWORD            dwNumEntries;
-//  MIB_IPFORWARDROW table[ANY_SIZE];
-// }
 type IPForwardTable struct {
 	NumEntries uint32
 	Table      [1]IPForwardRow
 }
 
-// https://docs.microsoft.com/en-us/windows/win32/api/ipmib/ns-ipmib-mib_ipforwardrow
-// typedef struct _MIB_IPFORWARDROW {
-//  DWORD    dwForwardDest;
-//  DWORD    dwForwardMask;
-//  DWORD    dwForwardPolicy;
-//  DWORD    dwForwardNextHop;
-//  IF_INDEX dwForwardIfIndex;
-//  union {
-//    DWORD              dwForwardType;
-//    MIB_IPFORWARD_TYPE ForwardType;
-//  };
-//  union {
-//    DWORD               dwForwardProto;
-//    MIB_IPFORWARD_PROTO ForwardProto;
-//  };
-//  DWORD    dwForwardAge;
-//  DWORD    dwForwardNextHopAS;
-//  DWORD    dwForwardMetric1;
-//  DWORD    dwForwardMetric2;
-//  DWORD    dwForwardMetric3;
-//  DWORD    dwForwardMetric4;
-//  DWORD    dwForwardMetric5;
-// }
 type IPForwardRow struct {
 	ForwardDest      uint32
 	ForwardMask      uint32

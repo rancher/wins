@@ -55,11 +55,11 @@ func _runRequestParser(cliCtx *cli.Context) (err error) {
 	// validate
 	path := cliCtx.String("path")
 	if path == "" {
-		return errors.Errorf("--path is required")
+		return errors.New("--path is required")
 	}
 	path, err = paths.GetBinaryPath(path)
 	if err != nil {
-		return errors.Wrapf(err, "--path is invalid")
+		return errors.Wrap(err, "--path is invalid")
 	}
 	checksum, err := paths.GetFileSHA1Hash(path)
 	if err != nil {
@@ -69,7 +69,7 @@ func _runRequestParser(cliCtx *cli.Context) (err error) {
 	if exposesList := flags.GetListValue(cliCtx, "exposes"); !exposesList.IsEmpty() {
 		exposesListValue, err := exposesList.Get()
 		if err != nil {
-			return errors.Wrapf(err, "failed to parse --exposes")
+			return errors.Wrap(err, "failed to parse --exposes")
 		}
 		exposes, err = parseExposes(exposesListValue)
 		if err != nil {
@@ -78,11 +78,11 @@ func _runRequestParser(cliCtx *cli.Context) (err error) {
 	}
 	args, err := flags.GetListValue(cliCtx, "args").Get()
 	if err != nil {
-		return errors.Wrapf(err, "failed to parse --args")
+		return errors.Wrap(err, "failed to parse --args")
 	}
 	envs, err := flags.GetListValue(cliCtx, "envs").Get()
 	if err != nil {
-		return errors.Wrapf(err, "failed to parse --envs")
+		return errors.Wrap(err, "failed to parse --envs")
 	}
 	dir := cliCtx.String("dir")
 	if dir == "" {
