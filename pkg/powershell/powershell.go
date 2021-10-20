@@ -54,9 +54,5 @@ func RunCommandWithJSONResult(command string, v interface{}) error {
 		return err
 	}
 
-	if err = json.Unmarshal(stdout, v); err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(stdout, v)
 }

@@ -4,7 +4,6 @@
     "enable": [
       "govet",
       "revive",
-      "goimports",
       "misspell",
       "ineffassign",
       "gofmt"
