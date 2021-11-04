@@ -473,7 +473,7 @@ systemagent:
         if ((Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
             Write-LogInfo "$ServiceName service found, stopping now"
             Stop-Service -Name $ServiceName
-            while ((Get-Service -Name wins).Status -ne 'Stopped') {
+            while ((Get-Service -Name $ServiceName).Status -ne 'Stopped') {
                 Write-LogInfo "Waiting for $ServiceName service to stop"
                 Start-Sleep -s 5
             }
