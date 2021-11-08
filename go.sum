@@ -411,6 +411,7 @@ github.com/hashicorp/memberlist v0.1.3/go.mod h1:ajVTdAv/9Im8oMAAj5G31PhhMCZJV2p
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
 github.com/heketi/heketi v10.2.0+incompatible/go.mod h1:bB9ly3RchcQqsQ9CpyaQwvva7RS5ytVoSoholZQON6o=
 github.com/heketi/tests v0.0.0-20151005000721-f3775cbcefd6/go.mod h1:xGMAM8JLi7UkZt1i4FQeQy0R2T8GLUwQhOP5M1gBhy4=
+github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/hudl/fargo v1.3.0/go.mod h1:y3CKSmjA+wD2gak7sUSXTAoopbhU08POFhmITJgmKTg=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
@@ -552,6 +553,7 @@ github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+W
 github.com/onsi/ginkgo v1.7.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/ginkgo v1.8.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/ginkgo v1.11.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
+github.com/onsi/ginkgo v1.12.0 h1:Iw5WCbBcaAAd0fpRb1c9r5YCylv4XDoCSigm1zLevwU=
 github.com/onsi/ginkgo v1.12.0/go.mod h1:oUhWkIvk5aDxtKvDDuw8gItl8pKl42LzjC9KZE0HfGg=
 github.com/onsi/gomega v0.0.0-20170829124025-dcabb60a477c/go.mod h1:C1qb7wdrVGGVU+Z6iS04AVkA3Q65CEZX59MT0QO5uiA=
 github.com/onsi/gomega v1.3.0/go.mod h1:C1qb7wdrVGGVU+Z6iS04AVkA3Q65CEZX59MT0QO5uiA=
@@ -560,6 +562,7 @@ github.com/onsi/gomega v1.5.0/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1Cpa
 github.com/onsi/gomega v1.7.0/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.8.1/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoTdcA=
+github.com/onsi/gomega v1.9.0 h1:R1uwffexN6Pr340GtYRIdZmAiN4J+iw6WG4wog1DUXg=
 github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoTdcA=
 github.com/op/go-logging v0.0.0-20160315200505-970db520ece7/go.mod h1:HzydrMdWErDVzsI23lYNej1Htcns9BCg93Dk0bBINWk=
 github.com/opencontainers/go-digest v0.0.0-20180430190053-c9281466c8b2/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=
@@ -648,10 +651,10 @@ github.com/rancher/lasso v0.0.0-20210408231703-9ddd9378d08d h1:vfjPEF6M7Jf1/zK1x
 github.com/rancher/lasso v0.0.0-20210408231703-9ddd9378d08d/go.mod h1:OhBBBO1pBwYp0hacWdnvSGOj+XE9yMLOLnaypIlic18=
 github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f h1:FIZcYXY/dl18TN1UdA18PRbTB7UfmylSVjpD/4gmF34=
 github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f/go.mod h1:dbzn9NF1JWbGEHL6Q/1KG4KFROILiY/j6wmfF1Np3fk=
-github.com/rancher/system-agent v0.1.0 h1:kMTJawKhfPAI/V98kT+NHCVKsDtRTz6sB59UlRuBLF0=
-github.com/rancher/system-agent v0.1.0/go.mod h1:Nw/z1IALki/eGXaJav1B/jOult0C3RdsXwl1oR8DsTg=
-github.com/rancher/wharfie v0.3.2 h1:HWXMow09V8jjZ20uxOOnt2SvavWHpIgPF7nL8pYqdSs=
-github.com/rancher/wharfie v0.3.2/go.mod h1:cb8mSczpmw7ItbPF3K1W7crWuJLVdyV49sZZuaY4BS8=
+github.com/rancher/system-agent v0.1.1-rc4.0.20211105192623-7922dcc4a3a3 h1:I8YdM/N8Y1xmvp7uNxXq+KNrf7lcOdil3ek6VU/GQ9s=
+github.com/rancher/system-agent v0.1.1-rc4.0.20211105192623-7922dcc4a3a3/go.mod h1:e7KQMIhAu5DMlLlWAfLZ4wBp6rGm3lKqO0i/WWO+zQw=
+github.com/rancher/wharfie v0.4.3 h1:Ezn78XQLvfFb02NYG7IlsnCNsQo1upLYoIxAidQJans=
+github.com/rancher/wharfie v0.4.3/go.mod h1:cb8mSczpmw7ItbPF3K1W7crWuJLVdyV49sZZuaY4BS8=
 github.com/rancher/wrangler v0.8.0 h1:jGWr7ES0KwZU/8zB6lte0z4QB7hFcspaXPTvGmrvHok=
 github.com/rancher/wrangler v0.8.0/go.mod h1:zSV5oh3+YZboilwcJmFHO3J6FZba82BTQft1b6ijx2I=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
@@ -1125,6 +1128,7 @@ gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntN
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
 gopkg.in/cheggaaa/pb.v1 v1.0.25/go.mod h1:V/YB90LKu/1FcN3WVnfiiE5oMCibMjukxqG/qStrOgw=
 gopkg.in/errgo.v2 v2.1.0/go.mod h1:hNsd1EY+bozCKY1Ytp96fpM3vjJbqLJn88ws8XvfDNI=
+gopkg.in/fsnotify.v1 v1.4.7 h1:xOHLXZwVvI9hhs+cLKq5+I5onOuwQLhQwiu63xxlHs4=
 gopkg.in/fsnotify.v1 v1.4.7/go.mod h1:Tz8NjZHkW78fSQdbUxIjBTcgA1z1m8ZHf0WmKUhAMys=
 gopkg.in/gcfg.v1 v1.2.0/go.mod h1:yesOnuUOFQAhST5vPY4nbZsb/huCgGGXlipJsBn0b3o=
 gopkg.in/gcfg.v1 v1.2.3/go.mod h1:yesOnuUOFQAhST5vPY4nbZsb/huCgGGXlipJsBn0b3o=
@@ -1135,6 +1139,7 @@ gopkg.in/mcuadros/go-syslog.v2 v2.2.1/go.mod h1:l5LPIyOOyIdQquNg+oU6Z3524YwrcqEm
 gopkg.in/natefinch/lumberjack.v2 v2.0.0/go.mod h1:l0ndWWf7gzL7RNwBG7wST/UCcT4T24xpD6X8LsfU/+k=
 gopkg.in/resty.v1 v1.12.0/go.mod h1:mDo4pnntr5jdWRML875a/NmxYqAlA73dVijT2AXvQQo=
 gopkg.in/square/go-jose.v2 v2.2.2/go.mod h1:M9dMgbHiYLoDGQrXy7OpJDJWiKiU//h+vD76mk0e1AI=
+gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 h1:uRGJdciOHaEIrze2W8Q3AKkepLTh2hOroT7a+7czfdQ=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWDmTeBkI65Dw0HsyUHuEVlX15mw=
 gopkg.in/warnings.v0 v0.1.1/go.mod h1:jksf8JmL6Qr/oQM2OXTHunEvvTAsrWBLb6OOjuVWRNI=
 gopkg.in/warnings.v0 v0.1.2/go.mod h1:jksf8JmL6Qr/oQM2OXTHunEvvTAsrWBLb6OOjuVWRNI=

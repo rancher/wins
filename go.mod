@@ -46,7 +46,7 @@ require (
 	github.com/prometheus/client_golang v1.9.0 // indirect
 	github.com/prometheus/procfs v0.5.0 // indirect
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
-	github.com/rancher/system-agent v0.1.0
+	github.com/rancher/system-agent v0.1.1-rc4.0.20211105192623-7922dcc4a3a3
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0 // indirect
