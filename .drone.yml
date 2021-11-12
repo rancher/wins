@@ -1,5 +1,6 @@
 ---
 kind: pipeline
+type: docker
 name: windows-1809
 
 platform:
@@ -10,7 +11,7 @@ platform:
 steps:
 - name: build
   pull: always
-  image: rancher/dapper:v0.5.6
+  image: rancher/dapper:v0.5.8
   commands:
     - dapper.exe -f Dockerfile.dapper -d ci
   volumes:
@@ -18,7 +19,7 @@ steps:
       path: \\\\.\\pipe\\docker_engine
 
 - name: stage-binaries
-  image: rancher/dapper:v0.5.6
+  image: rancher/dapper:v0.5.8
   commands:
     - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
@@ -79,73 +80,7 @@ trigger:
 
 ---
 kind: pipeline
-name: windows-2004
-
-platform:
-  os: windows
-  arch: amd64
-  version: 2004
-
-# remove this and use upstream images when https://github.com/drone/drone-git/pull/25 is merged
-clone:
-  disable: true
-
-steps:
-- name: clone
-  image: rancher/drone-images:git-2004
-
-- name: build
-  pull: always
-  image: rancher/dapper:v0.5.6
-  commands:
-    - dapper.exe -f Dockerfile.dapper -d ci
-  volumes:
-    - name: docker_pipe
-      path: \\\\.\\pipe\\docker_engine
-
-- name: stage-binaries
-  image: rancher/dapper:v0.5.6
-  commands:
-    - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
-
-- name: docker-publish
-  image: rancher/drone-images:docker-2004
-  settings:
-    build_args:
-      - SERVERCORE_VERSION=2004
-      - ARCH=amd64
-      - VERSION=${DRONE_TAG}
-    context: package/windows
-    custom_dns: 1.1.1.1
-    dockerfile: package/windows/Dockerfile
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    repo: rancher/wins
-    tag: ${DRONE_TAG}-windows-2004
-  volumes:
-    - name: docker_pipe
-      path: \\\\.\\pipe\\docker_engine
-  when:
-    event:
-      - tag
-    ref:
-      - refs/heads/main
-      - refs/tags/*
-
-volumes:
-  - name: docker_pipe
-    host:
-      path: \\\\.\\pipe\\docker_engine
-
-trigger:
-  event:
-    exclude:
-      - promote
-
----
-kind: pipeline
+type: docker
 name: windows-20H2
 
 platform:
@@ -163,7 +98,7 @@ steps:
 
 - name: build
   pull: always
-  image: rancher/dapper:v0.5.6
+  image: rancher/dapper:v0.5.8
   commands:
     - dapper.exe -f Dockerfile.dapper -d ci
   volumes:
@@ -171,7 +106,7 @@ steps:
       path: \\\\.\\pipe\\docker_engine
 
 - name: stage-binaries
-  image: rancher/dapper:v0.5.6
+  image: rancher/dapper:v0.5.8
   commands:
     - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
@@ -210,8 +145,77 @@ trigger:
   event:
     exclude:
       - promote
+
 ---
 kind: pipeline
+type: docker
+name: windows-ltsc2022
+
+platform:
+  os: windows
+  arch: amd64
+  version: 2022
+
+# remove this and use upstream images when https://github.com/drone/drone-git/pull/25 is merged
+clone:
+  disable: true
+
+steps:
+  - name: clone
+    image: rancher/drone-images:git-amd64-ltsc2022
+
+  - name: build
+    pull: always
+    image: rancher/dapper:v0.5.8
+    commands:
+      - dapper.exe -f Dockerfile.dapper -d ci
+    volumes:
+      - name: docker_pipe
+        path: \\\\.\\pipe\\docker_engine
+
+  - name: stage-binaries
+    image: rancher/dapper:v0.5.8
+    commands:
+      - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
+
+  - name: docker-publish
+    image: rancher/drone-images:docker-amd64-ltsc2022
+    settings:
+      build_args:
+        - SERVERCORE_VERSION=ltsc2022
+        - ARCH=amd64
+        - VERSION=${DRONE_TAG}
+      context: package/windows
+      custom_dns: 1.1.1.1
+      dockerfile: package/windows/Dockerfile
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      repo: rancher/wins
+      tag: ${DRONE_TAG}-windows-ltsc2022
+    volumes:
+      - name: docker_pipe
+        path: \\\\.\\pipe\\docker_engine
+    when:
+      event:
+        - tag
+      ref:
+        - refs/heads/main
+        - refs/tags/*
+
+volumes:
+  - name: docker_pipe
+    host:
+      path: \\\\.\\pipe\\docker_engine
+
+trigger:
+  event:
+    exclude:
+      - promote
+---
+kind: pipeline
+type: docker
 name: manifest
 
 platform:
@@ -238,11 +242,12 @@ trigger:
 
 depends_on:
 - windows-1809
-- windows-2004
 - windows-20H2
+- windows-ltsc2022
 
 ---
 kind: pipeline
+type: docker
 name: fossa
 
 platform:
