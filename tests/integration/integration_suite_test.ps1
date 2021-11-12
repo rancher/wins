@@ -1,7 +1,13 @@
 $ErrorActionPreference = "Stop"
 
 # docker build
-$SERVERCORE_VERSION = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' | Select-Object -ExpandProperty ReleaseId
+$buildTags = @{ "17763" = "1809"; "19042" = "20H2"; "20348" = "ltsc2022";}
+$buildNumber = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' -ErrorAction Ignore).CurrentBuildNumber
+$SERVERCORE_VERSION = $buildTags[$buildNumber]
+if (-not $SERVERCORE_VERSION) {
+    $SERVERCORE_VERSION = "1809"
+}
+
 Get-ChildItem -Path $PSScriptRoot\docker -Name Dockerfile.* | ForEach-Object {
     $dockerfile = $_
     $tag = $dockerfile -replace "Dockerfile.", ""
