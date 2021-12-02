@@ -8,6 +8,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/config"
+	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
 )
 
@@ -33,6 +34,7 @@ type Config struct {
 	WhiteList   WhiteListConfig     `yaml:"white_list" json:"white_list"`
 	Upgrade     UpgradeConfig       `yaml:"upgrade" json:"upgrade"`
 	SystemAgent *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
+	CSIProxy    *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy"`
 }
 
 func (c *Config) Validate() error {

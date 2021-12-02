@@ -21,7 +21,7 @@ type Agent struct {
 func (a *Agent) Run(ctx context.Context) error {
 
 	if a.cfg == nil {
-		logrus.Info("Rancher System Agent configuration now found, not starting system agent.")
+		logrus.Info("Rancher System Agent configuration not found, not starting system agent.")
 		return nil
 	}
 
