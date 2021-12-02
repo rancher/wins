@@ -31,3 +31,5 @@ Dockerfile.Dapper[0-9]*
 
 # MAC file
 .DS_Store
+
+dist/

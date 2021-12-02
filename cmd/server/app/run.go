@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rancher/wins/cmd/server/config"
 	"github.com/rancher/wins/pkg/apis"
+	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/profilings"
@@ -105,7 +106,21 @@ func _runAction(cliCtx *cli.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to create server")
 	}
+
+	// adding system agent
 	agent := systemagent.New(cfg.SystemAgent)
+
+	//checking if CSI Proxy has config, if so enables it.
+	if cfg.CSIProxy != nil {
+		logrus.Infof("CSI Proxy will be enabled as a Windows service.")
+		csi, err := csiproxy.New(cfg.CSIProxy)
+		if err != nil {
+			return err
+		}
+		if err := csi.Enable(); err != nil {
+			return err
+		}
+	}
 
 	err = runService(ctx, server, agent)
 	if err != nil {
