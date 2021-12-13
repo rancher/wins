@@ -536,6 +536,14 @@ systemagent:
         }
     }
 
+    function Copy-WinsForCharts() {
+        $winsForChartsPath = "c:/windows"
+        if (-Not (Test-Path $winsForChartsPath)) {
+            New-Item $winsForChartsPath -ItemType Directory
+        }
+        Copy-Item -Path "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe" -Destination "$winsForChartsPath/wins.exe" -Force
+    }
+
     function Invoke-WinsAgentInstall() {
         $serviceName = "rancher-wins"
         Get-Args
@@ -550,6 +558,7 @@ systemagent:
         Test-RancherConnection
         Stop-Agent -ServiceName $serviceName
         Invoke-WinsAgentDownload
+        Copy-WinsForCharts
         Set-WinsConfig
 
         if ($env:CATTLE_TOKEN) {
