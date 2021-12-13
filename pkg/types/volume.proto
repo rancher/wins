@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package wins;
+
+import "common.proto";
+
+option go_package = "types";
+
+service VolumeService {
+    rpc Mount (VolumeMountRequest) returns (Void) {
+    }
+}
+
+message VolumeMountRequest {
+    repeated string Selectors = 1;
+    repeated VolumePath Paths = 2;
+}
+
+message VolumePath {
+    string Source = 1;
+    string Destination = 2;
+}
