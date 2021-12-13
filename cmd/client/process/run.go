@@ -73,7 +73,7 @@ func _runRequestParser(cliCtx *cli.Context) (err error) {
 		}
 		exposes, err = parseExposes(exposesListValue)
 		if err != nil {
-			return errors.Wrapf(err, "failed to parse --exposes %s", exposes)
+			return errors.Wrapf(err, "failed to parse --exposes=\"%s\"", strings.Join(exposesListValue, " "))
 		}
 	}
 	args, err := flags.GetListValue(cliCtx, "args").Get()

@@ -10,6 +10,7 @@ import (
 	"github.com/rancher/wins/cmd/client/process"
 	"github.com/rancher/wins/cmd/client/proxy"
 	"github.com/rancher/wins/cmd/client/route"
+	"github.com/rancher/wins/cmd/client/volume"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/urfave/cli"
 )
@@ -27,6 +28,7 @@ func NewCommand() cli.Command {
 			route.NewCommand(),
 			app.NewCommand(),
 			proxy.NewCommand(),
+			volume.NewCommand(),
 		},
 	}
 }
