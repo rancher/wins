@@ -25,6 +25,9 @@
       - CATTLE_ID (default: autogenerate)
       - CATTLE_AGENT_BINARY_LOCAL (default: false)
       - CATTLE_AGENT_BINARY_LOCAL_LOCATION (default: )
+      - CSI_PROXY_URL (default: )
+      - CSI_PROXY_VERSION (default: )
+      - CSI_PROXY_KUBELET_PATH (default: )
 .EXAMPLE 
     
 #>
@@ -462,6 +465,17 @@ systemagent:
         }
     }
 
+    function Set-CsiProxyConfig() {
+        $proxyConfig = 
+        @"
+csi-proxy:
+  url: $($env:CSI_PROXY_URL)
+  version: $($env:CSI_PROXY_VERSION)
+  kubeletPath: $($env:CSI_PROXY_KUBELET_PATH)
+"@
+        Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $proxyConfig
+    }
+
     function Stop-Agent() { 
         [CmdletBinding()]
         param (
@@ -560,6 +574,10 @@ systemagent:
         Invoke-WinsAgentDownload
         Copy-WinsForCharts
         Set-WinsConfig
+
+        if($env:CSI_PROXY_URL -and $env:CSI_PROXY_VERSION -and $env:CSI_PROXY_KUBELET_PATH) {
+            Set-CsiProxyConfig
+        }
 
         if ($env:CATTLE_TOKEN) {
             New-CattleId
