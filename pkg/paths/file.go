@@ -55,17 +55,14 @@ func MoveFile(srcPath, targetPath string) error {
 
 	// if target path is already existing
 	if _, err := os.Stat(targetPath); err == nil {
-		// don't remove binary directly
-		tempTargetPath := filepath.Join(os.TempDir(), filepath.Base(targetPath))
-		err = os.Rename(targetPath, tempTargetPath)
-		if err != nil {
-			return errors.Wrap(err, "could not backup the existing target file")
+		// it already exists so delete it so we can move the new one in
+		if err = os.Remove(targetPath); err != nil {
+			return errors.Wrapf(err, "could not remove existing target file %s", targetPath)
 		}
 	}
 
-	err = os.Rename(srcPath, targetPath)
-	if err != nil {
-		return errors.Wrap(err, "could not move the source file to the target")
+	if err = os.Rename(srcPath, targetPath); err != nil {
+		return errors.Wrapf(err, "could not move the source file to the target %s", targetPath)
 	}
 
 	return nil
