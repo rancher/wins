@@ -24,13 +24,17 @@ DESCRIPTION:
    Rancher Wins Component (...)
 
 COMMANDS:
-     srv, server
-     cli, client
-     help, h      Shows a list of commands or help for one command
+   srv, server
+   cli, client
+   up, upgrade  Manage Rancher Wins Application
+   help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
+   --debug        Turn on verbose debug logging
+   --quiet        Turn on off all logging
    --help, -h     show help
    --version, -v  print the version
+
 ```
 
 #### Server (run on Windows host)
@@ -76,7 +80,7 @@ OPTIONS:
 
 ``` powershell
 # [host] start the wins server
-> wins.exe srv app run --log-level debug --listen rancher_wins
+> wins.exe --debug srv app run --listen rancher_wins
 
 # [host] verify the created npipe
 > Get-ChildItem //./pipe/ | Where-Object Name -eq "rancher_wins"
