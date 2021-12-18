@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/mattn/go-colorable"
@@ -13,6 +14,7 @@ import (
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -49,14 +51,32 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
-		// server
 		server.NewCommand(),
-
-		// cli
 		client.NewCommand(),
-
-		// upgrade
 		upgrade.NewCommand(),
+	}
+
+	app.Flags = []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "debug",
+			Usage: "Turn on verbose debug logging",
+		},
+		&cli.BoolFlag{
+			Name:  "quiet",
+			Usage: "Turn on off all logging",
+		},
+	}
+
+	app.Before = func(c *cli.Context) error {
+		if c.Bool("debug") {
+			logrus.SetLevel(logrus.DebugLevel)
+			grpc.EnableTracing = true
+		}
+		if c.Bool("quiet") {
+			logrus.SetOutput(ioutil.Discard)
+		}
+
+		return nil
 	}
 
 	if err := app.Run(os.Args); err != nil && err != io.EOF {
