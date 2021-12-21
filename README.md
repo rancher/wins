@@ -86,6 +86,29 @@ OPTIONS:
 > Get-ChildItem //./pipe/ | Where-Object Name -eq "rancher_wins"
 ```
 
+### Developer Documentation
+```powershell
+# [host] build local wins and run it as a service for testing/debugging
+git clone https://github.com/rancher/wins.git
+Set-Location wins
+Set-Location $(Get-Location).path
+scripts/build.ps1
+copy-item bin/wins.exe .
+$WINS_PATH = $(Get-Location).Path
+
+New-Service -Name rancher-wins -BinaryPathName "$WINS_PATH\wins.exe --debug srv app run" -DisplayName "Rancher Wins" -StartupType Manual
+Set-Service -Name "rancher-wins" -Status Running -PassThru # start the rancher-wins service and output servicecontroller[]
+$(Get-Service -name "rancher-wins").Status # verify that the new rancher-wins service is running
+
+# [host] how to replace the wins.exe binary the service uses during active development
+Set-Service -Name "rancher-wins" -Status Stopped
+$(Get-Service -name "rancher-wins").Status # verify the service stopped
+Set-Service -Name "rancher-wins" -Status Running -PassThru # restart the service with the freshly built wins binary
+
+# change the startup type of rancher-wins from automatic to manual
+Set-Service -Name "rancher-wins" -StartupType Manual
+```
+
 #### Query the host network adapter
 
 ``` powershell

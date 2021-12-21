@@ -200,7 +200,11 @@ func runService(ctx context.Context, server *apis.Server, agent *systemagent.Age
 		// built-in adminstrators of the Windows machine or by the local system.
 		// If this Win32 event (Global//stackdump-{pid}) is signaled, a goroutine launched by this call
 		// will dump the current stack trace into {windowsTemporaryDirectory}/{default.WindowsServiceName}.{pid}.stack.logs
-		profilings.SetupDumpStacks(defaults.WindowsServiceName, os.Getpid())
+		cwd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		profilings.SetupDumpStacks(defaults.WindowsServiceName, os.Getpid(), cwd)
 	}
 
 	h := &serviceHandler{

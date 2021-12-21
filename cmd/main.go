@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/rancher/wins/cmd/stackdump"
+
 	"github.com/mattn/go-colorable"
 	"github.com/rancher/wins/cmd/client"
 	"github.com/rancher/wins/cmd/server"
@@ -14,7 +16,6 @@ import (
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-	"google.golang.org/grpc"
 )
 
 func main() {
@@ -54,6 +55,7 @@ func main() {
 		server.NewCommand(),
 		client.NewCommand(),
 		upgrade.NewCommand(),
+		stackdump.NewCommand(),
 	}
 
 	app.Flags = []cli.Flag{
@@ -70,12 +72,10 @@ func main() {
 	app.Before = func(c *cli.Context) error {
 		if c.Bool("debug") {
 			logrus.SetLevel(logrus.DebugLevel)
-			grpc.EnableTracing = true
 		}
 		if c.Bool("quiet") {
 			logrus.SetOutput(ioutil.Discard)
 		}
-
 		return nil
 	}
 

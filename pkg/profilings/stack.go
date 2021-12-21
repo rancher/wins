@@ -13,7 +13,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// DumpStacks returns up to (1 << 15) bytes of the current processes's stack trace as a string
+// DumpStacks returns up to (1 << 15) bytes of the current processes stack trace as a string
 func DumpStacks() string {
 	var (
 		buf       []byte
@@ -50,7 +50,7 @@ func DumpStacksToFile(filename string) {
 // that is defined on a Global level; each time a signal is detected to this event, it will dump the a stack
 // trace across all goroutines (up to 1 << 15 bytes) to a file within the Windows machine's temp directory.
 // By default, this event can only be signaled by built-in administrators and the local system.
-func SetupDumpStacks(serviceName string, pid int) {
+func SetupDumpStacks(serviceName string, pid int, cwd string) {
 	if serviceName == "" {
 		return
 	}
@@ -74,11 +74,14 @@ func SetupDumpStacks(serviceName string, pid int) {
 		logrus.Errorf("Failed to create debug stackdump event %s: %v", event, err)
 		return
 	}
+
 	go func() {
 		logrus.Infof("Stackdump - waiting signal at %s", event)
 		for {
 			windows.WaitForSingleObject(h, windows.INFINITE)
-			DumpStacksToFile(filepath.Join(os.TempDir(), fmt.Sprintf("%s.%d.stacks.log", serviceName, pid)))
+			fileLoc := filepath.Join(cwd, fmt.Sprintf("%s.%d.stacks.log", serviceName, pid))
+			logrus.Debugf("SetupStackDumps: stackDump location will be [%s]", fileLoc)
+			DumpStacksToFile(fileLoc)
 		}
 	}()
 }
