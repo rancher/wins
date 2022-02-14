@@ -11,9 +11,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"golang.org/x/sys/windows"
-	"golang.org/x/sys/windows/svc"
-	"golang.org/x/sys/windows/svc/mgr"
+	"github.com/rancher/wins/pkg/concierge"
 )
 
 const (
@@ -50,6 +48,7 @@ type Proxy struct {
 	serviceName string
 	binaryName  string
 	binaryPath  string
+	concierge   *concierge.Concierge
 }
 
 // New creates a new Proxy struct
@@ -63,17 +62,29 @@ func New(cfg *Config) (*Proxy, error) {
 		return nil, err
 	}
 
+	config := concierge.Config{
+		Args:        []string{"-windows-service", "-log_file=\\etc\\rancher\\wins\\csi-proxy.log", "-logtostderr=false"},
+		Description: "Manages the Kubernetes CSI Proxy application.",
+		DisplayName: "CSI Proxy",
+		EnvVars:     nil,
+	}
+
+	service, err := concierge.New(serviceName, filepath.Join(cwd, exeName), &config)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Proxy{
 		cfg:         cfg,
 		serviceName: serviceName,
 		binaryName:  exeName,
 		binaryPath:  filepath.Join(cwd, exeName),
+		concierge:   service,
 	}, nil
 }
 
 func (p *Proxy) Enable() error {
-	var service *mgr.Service
-	ok, err := p.serviceExists()
+	ok, err := p.concierge.ServiceExists()
 	if err != nil {
 		return err
 	}
@@ -81,35 +92,9 @@ func (p *Proxy) Enable() error {
 		if err := p.download(); err != nil {
 			return err
 		}
-		if service, err = p.createService(); err != nil {
+		if err := p.concierge.Enable(); err != nil {
 			return err
 		}
-		return service.Start()
-	}
-
-	if service, err = p.getService(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *Proxy) Disable() error {
-	var service *mgr.Service
-	ok, err := p.serviceExists()
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return nil
-	}
-
-	if service, err = p.getService(); err != nil {
-		return err
-	}
-
-	if _, err := service.Control(svc.Stop); err != nil {
-		return err
 	}
 	return nil
 }
@@ -167,79 +152,4 @@ func (p *Proxy) download() error {
 	}
 
 	return nil
-}
-
-// createService configures the Windows service correctly, returning the service.
-func (p *Proxy) createService() (*mgr.Service, error) {
-	m, err := mgr.Connect()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not open SCM")
-	}
-	defer func(m *mgr.Mgr) {
-		_ = m.Disconnect()
-	}(m)
-
-	service, err := m.CreateService(p.serviceName, p.binaryPath, mgr.Config{
-		ServiceType:    windows.SERVICE_WIN32_OWN_PROCESS,
-		StartType:      mgr.StartAutomatic,
-		ErrorControl:   mgr.ErrorNormal,
-		BinaryPathName: p.binaryPath,
-		DisplayName:    "CSI Proxy",
-		Description:    "Manages the Kubernetes CSI Proxy application.",
-	}, "-windows-service", "-log_file=\\etc\\rancher\\wins\\csi-proxy.log", "-logtostderr=false")
-
-	if err != nil {
-		return nil, err
-	}
-
-	recoveryActions := []mgr.RecoveryAction{
-		{
-			Type:  mgr.ServiceRestart,
-			Delay: 10000,
-		},
-	}
-
-	return service, service.SetRecoveryActions(recoveryActions, 0)
-}
-
-// serviceExists retrieves the Windows service if exists.
-func (p *Proxy) serviceExists() (bool, error) {
-	m, err := mgr.Connect()
-	if err != nil {
-		return false, errors.Wrap(err, "could not open SCM")
-	}
-	defer func(m *mgr.Mgr) {
-		_ = m.Disconnect()
-	}(m)
-
-	services, err := m.ListServices()
-	if err != nil {
-		return false, errors.Wrap(err, "could list services.")
-	}
-
-	for _, service := range services {
-		if service == p.serviceName {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-// getService retrieves the Windows service.
-func (p *Proxy) getService() (*mgr.Service, error) {
-	m, err := mgr.Connect()
-	if err != nil {
-		return nil, errors.Wrap(err, "could not open SCM")
-	}
-	defer func(m *mgr.Mgr) {
-		_ = m.Disconnect()
-	}(m)
-
-	service, err := m.OpenService(p.serviceName)
-	if err != nil {
-		return nil, nil
-	}
-
-	return service, nil
 }
