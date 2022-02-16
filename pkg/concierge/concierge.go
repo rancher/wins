@@ -63,6 +63,7 @@ func (c *Concierge) Enable() error {
 	if service, err = c.fetchService(); err != nil {
 		return errors.Wrap(err, "error fetching the service")
 	}
+	defer service.Close()
 
 	return service.Start()
 }
@@ -81,6 +82,7 @@ func (c *Concierge) Disable() error {
 	if service, err = c.fetchService(); err != nil {
 		return errors.Wrap(err, "error fetching the service")
 	}
+	defer service.Close()
 
 	if _, err := service.Control(svc.Stop); err != nil {
 		return errors.Wrap(err, "error stopping the service")
@@ -94,9 +96,7 @@ func (c *Concierge) CreateService() error {
 	if err != nil {
 		return errors.Wrap(err, "could not open SCM")
 	}
-	defer func(m *mgr.Mgr) {
-		_ = m.Disconnect()
-	}(m)
+	defer m.Disconnect()
 
 	service, err := m.CreateService(c.name, c.path, mgr.Config{
 		ServiceType:    windows.SERVICE_WIN32_OWN_PROCESS,
@@ -106,6 +106,8 @@ func (c *Concierge) CreateService() error {
 		Description:    c.cfg.Description,
 		DisplayName:    c.cfg.DisplayName,
 	}, c.cfg.Args...)
+
+	defer service.Close()
 
 	if err != nil {
 		return errors.Wrap(err, "error creating the service")
@@ -138,6 +140,7 @@ func (c *Concierge) Delete() error {
 	if service, err = c.fetchService(); err != nil {
 		return errors.Wrap(err, "error fetching the service")
 	}
+	defer service.Close()
 
 	return service.Delete()
 }
@@ -168,18 +171,11 @@ func (c *Concierge) ServiceExists() (bool, error) {
 
 // State gets the state of the service. Examples are stopped, running, etc.
 func (c *Concierge) State() (svc.State, error) {
-	m, err := mgr.Connect()
-	if err != nil {
-		return svc.State(windows.SERVICE_NO_CHANGE), errors.Wrap(err, "could not open SCM")
-	}
-	defer func(m *mgr.Mgr) {
-		_ = m.Disconnect()
-	}(m)
-
-	service, err := m.OpenService(c.name)
+	service, err := c.fetchService()
 	if err != nil {
 		return svc.State(windows.SERVICE_NO_CHANGE), errors.Wrap(err, "error opening the service")
 	}
+	defer service.Close()
 
 	status, err := service.Query()
 	if err != nil {
@@ -194,14 +190,13 @@ func (c *Concierge) fetchService() (*mgr.Service, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "could not open SCM")
 	}
-	defer func(m *mgr.Mgr) {
-		_ = m.Disconnect()
-	}(m)
+	defer m.Disconnect()
 
 	service, err := m.OpenService(c.name)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not open service")
 	}
+
 	return service, nil
 }
 
