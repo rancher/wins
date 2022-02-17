@@ -7,6 +7,7 @@ annotations:
   catalog.cattle.io/namespace: cattle-wins-system
   catalog.cattle.io/release-name: rancher-wins-upgrader
   catalog.cattle.io/os: windows
+  catalog.cattle.io/permits-os: linux,windows
 description: Manages upgrading the wins server version and configuration across all of your Windows nodes
 maintainers:
 - name: aiyengar2
