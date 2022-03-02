@@ -378,7 +378,7 @@ function Invoke-WinsInstaller {
             while ($retries -lt 6) {
                 $responseCode = $(curl.exe --connect-timeout 60 --max-time 60 --write-out "%{http_code}\n" $env:CURL_CAFLAG -sfL "$env:CATTLE_SERVER/healthz")
                 switch ( $responseCode ) {
-                    { "ok200", 200 } {
+                    { $_ -in "ok200", 200 } {
                         Write-LogInfo "Successfully tested Rancher connection." 
                         $env:RANCHER_SUCCESS = $true
                         $retries = 99
@@ -411,7 +411,7 @@ function Invoke-WinsInstaller {
                         $retries = 99
                         break
                     }                    
-                    { 60, 77 } {
+                    { $_ -in 60, 77 } {
                         Write-LogInfo "Determined CA is necessary to connect to Rancher."
                         $env:CA_REQUIRED = $true
                         $retries = 99
@@ -434,7 +434,7 @@ function Invoke-WinsInstaller {
             while ($retries -lt 6) {
                 $responseCode = $(curl.exe --connect-timeout 60 --max-time 60 --write-out "%{http_code}\n" $env:CURL_CAFLAG -sfL "$env:CATTLE_SERVER/v3/connect/agent" -o $env:CATTLE_AGENT_VAR_DIR/rancher2_connection_info.json -H "Authorization: Bearer $($env:CATTLE_TOKEN)" -H "X-Cattle-Id: $($env:CATTLE_ID)" -H "X-Cattle-Role-Worker: $($env:CATTLE_ROLE_WORKER)" -H "X-Cattle-Labels: $($env:CATTLE_LABELS)" -H "X-Cattle-Taints: $($env:CATTLE_TAINTS)" -H "X-Cattle-Address: $($env:CATTLE_ADDRESS)" -H "X-Cattle-Internal-Address: $($env:CATTLE_INTERNAL_ADDRESS)" -H "Content-Type: application/json")
                 switch ( $responseCode ) {
-                    { "ok200", 200 } {
+                    { $_ -in "ok200", 200 } {
                         Write-LogInfo "Successfully downloaded Rancher connection information."
                         $retries = 99
                         break
