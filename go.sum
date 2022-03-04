@@ -656,8 +656,8 @@ github.com/rancher/lasso v0.0.0-20210408231703-9ddd9378d08d h1:vfjPEF6M7Jf1/zK1x
 github.com/rancher/lasso v0.0.0-20210408231703-9ddd9378d08d/go.mod h1:OhBBBO1pBwYp0hacWdnvSGOj+XE9yMLOLnaypIlic18=
 github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f h1:FIZcYXY/dl18TN1UdA18PRbTB7UfmylSVjpD/4gmF34=
 github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f/go.mod h1:dbzn9NF1JWbGEHL6Q/1KG4KFROILiY/j6wmfF1Np3fk=
-github.com/rancher/system-agent v0.1.1-rc4.0.20211105192623-7922dcc4a3a3 h1:I8YdM/N8Y1xmvp7uNxXq+KNrf7lcOdil3ek6VU/GQ9s=
-github.com/rancher/system-agent v0.1.1-rc4.0.20211105192623-7922dcc4a3a3/go.mod h1:e7KQMIhAu5DMlLlWAfLZ4wBp6rGm3lKqO0i/WWO+zQw=
+github.com/rancher/system-agent v0.2.0 h1:kW4h75bqUBsLFmE8N/eiXaiGNW/P7uPWIWVZuzMjtPw=
+github.com/rancher/system-agent v0.2.0/go.mod h1:m0YpDXKOalr3PEM9xZWdrASA2CznUIzFfPnwKYp6Mtk=
 github.com/rancher/wharfie v0.4.3 h1:Ezn78XQLvfFb02NYG7IlsnCNsQo1upLYoIxAidQJans=
 github.com/rancher/wharfie v0.4.3/go.mod h1:cb8mSczpmw7ItbPF3K1W7crWuJLVdyV49sZZuaY4BS8=
 github.com/rancher/wrangler v0.8.0 h1:jGWr7ES0KwZU/8zB6lte0z4QB7hFcspaXPTvGmrvHok=
@@ -737,6 +737,7 @@ github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtX
 github.com/urfave/cli v1.22.2/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/urfave/cli v1.22.5 h1:lNq9sAHXK2qfdI8W+GRItjCEkI+2oR4d+MEHy1CKXoU=
 github.com/urfave/cli v1.22.5/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
+github.com/urfave/cli/v2 v2.3.0/go.mod h1:LJmUH05zAU44vOAcrfzZQKsZbVcdbOG8rtL3/XcUArI=
 github.com/urfave/negroni v1.0.0/go.mod h1:Meg73S6kFm/4PpbYdq35yYWoCZ9mS/YSx+lKnmiohz4=
 github.com/vektah/gqlparser v1.1.2/go.mod h1:1ycwN7Ij5njmMkPPAOaRFY4rET2Enx7IkVv3vaXspKw=
 github.com/vishvananda/netlink v1.1.0/go.mod h1:cTgwzPIzzgDAYoQrMm0EdrjRUBkTqKYppBueQtXaqoE=
@@ -1156,6 +1157,7 @@ gopkg.in/yaml.v2 v2.0.0-20170812160011-eb3733d160e7/go.mod h1:JAlM8MvJe8wmxCU4Bl
 gopkg.in/yaml.v2 v2.0.0/go.mod h1:JAlM8MvJe8wmxCU4Bli9HhUf9+ttbYbLASfIpnQbh74=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+gopkg.in/yaml.v2 v2.2.3/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.4/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.5/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.7/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
