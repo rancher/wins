@@ -189,6 +189,8 @@ function Invoke-WinsInstaller {
     }
 
     function Set-Environment {
+        $env:CURL_CAFLAG = "--ssl-no-revoke"
+
         if (-Not $env:CATTLE_ROLE_CONTROLPLANE) {
             $env:CATTLE_ROLE_CONTROLPLANE = "false"
         }
@@ -235,13 +237,15 @@ function Invoke-WinsInstaller {
             }
 
             if (-Not $env:CATTLE_AGENT_BINARY_URL) {
-                if ($(Invoke-RestMethod -Uri https://api.github.com/rate_limit -TimeoutSec 60).rate.remaining -eq 0) {
+                $rateLimit = $(curl.exe --connect-timeout 60 --max-time 300 $env:CURL_CAFLAG -sfL "https://api.github.com/rate_limit") | ConvertFrom-Json
+               
+                if ($rateLimit.rate.remaining -eq 0) {
                     Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
                     $env:VERSION = $FALLBACK
                 }
                 else {
                     try {
-                        $env:VERSION = $(Invoke-RestMethod https://api.github.com/repos/rancher/wins/releases/latest -TimeoutSec 60).tag_name
+                        $env:VERSION = $(curl.exe --connect-timeout 60 $env:CURL_CAFLAG -sfL "https://api.github.com/repos/rancher/wins/releases/latest" | ConvertFrom-Json).tag_name
                     }
                     catch {
                         Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
@@ -367,8 +371,7 @@ function Invoke-WinsInstaller {
             Write-LogError "Please check if the correct certificate is configured at $( $env:CATTLE_SERVER )/$( $caCertsPath ) ."
             exit 1
         }
-        Import-Certificate -FilePath $env:RANCHER_CERT -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
-        $env:CURL_CAFLAG = "--ssl-no-revoke"
+        Import-Certificate -FilePath $env:RANCHER_CERT -CertStoreLocation Cert:\LocalMachine\Root | Out-Null        
     }
 
     function Test-RancherConnection {
@@ -588,7 +591,13 @@ csi-proxy:
         $PROXY_ENV_INFO = Get-ChildItem env: | Where-Object { $_.Name -Match "^(NO|HTTP|HTTPS)_PROXY" } | ForEach-Object { "$($_.Name)=$($_.Value)" }
         if ($PROXY_ENV_INFO) {
             $newEnv += $PROXY_ENV_INFO
-            Set-ItemProperty HKLM:SYSTEM\CurrentControlSet\Services\$serviceName -Name Environment -PropertyType MultiString -Value $newEnv
+            if(Test-Path -Path HKLM:SYSTEM\CurrentControlSet\Services\$serviceName) {
+                Set-ItemProperty HKLM:SYSTEM\CurrentControlSet\Services\$serviceName -Name Environment -Value $([string]$newEnv)
+            }
+            else {
+                New-Item HKLM:SYSTEM\CurrentControlSet\Services\$serviceName
+                New-ItemProperty HKLM:SYSTEM\CurrentControlSet\Services\$serviceName -Name Environment -PropertyType MultiString -Value $([string]$newEnv)
+            }
         }
                 
         try {
