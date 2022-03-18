@@ -250,29 +250,6 @@ kind: pipeline
 type: docker
 name: fossa
 
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: golang:1.16
-  commands:
-    - GOOS=windows go build ./cmd
-  when:
-    instance:
-      - drone-publish.rancher.io
-    ref:
-      include:
-        - "refs/heads/main"
-    event:
-      - push
-      - tag
----
-kind: pipeline
-type: docker
-name: fossa
-
 steps:
   - name: fossa-analyze
     image: rancher/drone-fossa:latest
