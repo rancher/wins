@@ -255,17 +255,18 @@ platform:
   arch: amd64
 
 steps:
-  - name: fossa-analyze
-    image: rancher/drone-fossa:latest
-    settings:
-      api_key:
-        from_secret: FOSSA_API_KEY
-  - name: fossa-test
-    image: rancher/drone-fossa:latest
-    settings:
-      api_key:
-        from_secret: FOSSA_API_KEY
-      command: test
+- name: fossa-analyze
+  image: rancher/drone-fossa:latest
+  settings:
+    api_key:
+      from_secret: FOSSA_API_KEY
+
+- name: fossa-test
+  image: rancher/drone-fossa:latest
+  settings:
+    api_key:
+      from_secret: FOSSA_API_KEY
+    command: test
   when:
     instance:
       - drone-publish.rancher.io
