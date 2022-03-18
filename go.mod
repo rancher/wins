@@ -2,6 +2,8 @@ module github.com/rancher/wins
 
 go 1.15
 
+replace github.com/urfave/cli => github.com/urfave/cli v1.20.0
+
 require (
 	github.com/Microsoft/go-winio v0.4.16
 	github.com/Microsoft/hcsshim v0.8.14
@@ -23,7 +25,6 @@ require (
 	github.com/prometheus/client_golang v1.9.0 // indirect
 	github.com/prometheus/procfs v0.5.0 // indirect
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli v1.22.5

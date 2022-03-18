@@ -56,8 +56,8 @@ RUN pushd c:\; \
 RUN pushd c:\; \
     \
     Write-Host ('Updating ginkgo ...'); \
-    go get -u github.com/onsi/ginkgo/ginkgo; \
-    go get -u github.com/onsi/gomega/...; \
+    go get github.com/onsi/ginkgo/ginkgo@v1.15.0; \
+    go get github.com/onsi/gomega/...@v1.10.5; \
     \
     Write-Host 'Complete.'; \
     popd;
