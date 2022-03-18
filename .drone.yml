@@ -255,37 +255,39 @@ platform:
   arch: amd64
 
 steps:
-- name: build
-  image: golang:1.16
-  commands:
-    - GOOS=windows go build ./cmd
-  when:
-    instance:
-      - drone-publish.rancher.io
-    ref:
-      include:
-        - "refs/heads/main"
-    event:
-      - push
-      - tag
-
-- name: analyze-and-test
-  image: registry.suse.com/suse/sle15:15.3.17.8.1
+- name: fossa-analyze
+  image: rancher/drone-fossa:latest
   failure: ignore
-  environment:
-    FOSSA_API_KEY:
+  settings:
+    api_key:
       from_secret: FOSSA_API_KEY
-  commands:
-    - zypper -n install curl unzip
-    - "curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/spectrometer/master/install.sh | sh"
-    - fossa analyze
-    - fossa test
   when:
     instance:
       - drone-publish.rancher.io
-    ref:
-      include:
-        - "refs/heads/main"
-    event:
-      - push
-      - tag
+  ref:
+    include:
+      - "refs/heads/main"
+      - "refs/tags/v*"
+      - "refs/pull/*"
+  event:
+    - push
+    - tag
+
+- name: fossa-test
+  image: rancher/drone-fossa:latest
+  failure: ignore
+  settings:
+    api_key:
+      from_secret: FOSSA_API_KEY
+    command: test
+  when:
+    instance:
+      - drone-publish.rancher.io
+  ref:
+    include:
+      - "refs/heads/main"
+      - "refs/tags/v*"
+      - "refs/pull/*"
+  event:
+    - push
+    - tag
