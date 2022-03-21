@@ -561,6 +561,24 @@ csi-proxy:
         Copy-Item -Path "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe" -Destination "$winsForChartsPath/wins.exe" -Force
     }
 
+    function Confirm-WindowsFeatures {
+        [CmdletBinding()]
+        param (
+            [Parameter(Mandatory = $true)]
+            [String[]]
+            $RequiredFeatures
+        )
+        foreach ($feature in $RequiredFeatures) {
+            $f = Get-WindowsFeature -Name $feature
+            if (-not $f.Installed) {
+                Write-FatalLog "Windows feature: '$feature' is not installed. Please run: Install-WindowsFeature -Name $feature"
+            }
+            else {
+                Write-InfoLog "Windows feature: '$feature' is installed. Installation will proceed."
+            }
+        }
+    }
+
     function Invoke-WinsAgentInstall() {
         $serviceName = "rancher-wins"
         Get-Args
@@ -620,5 +638,6 @@ csi-proxy:
         }
     }
 
+    Confirm-WindowsFeatures -RequiredFeatures @("Containers")
     Invoke-WinsAgentInstall
 }
