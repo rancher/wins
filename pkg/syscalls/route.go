@@ -8,8 +8,8 @@ import (
 var (
 	modiphlpapi = syscall.NewLazyDLL("iphlpapi.dll")
 
-	procGetIPForwardTable    = modiphlpapi.NewProc("GetIPForwardTable")
-	procCreateIPForwardEntry = modiphlpapi.NewProc("CreateIPForwardEntry")
+	procGetIPForwardTable    = modiphlpapi.NewProc("GetIpForwardTable")
+	procCreateIPForwardEntry = modiphlpapi.NewProc("CreateIpForwardEntry")
 )
 
 type IPForwardTable struct {
