@@ -49,7 +49,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.1 // indirect
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
-	github.com/rancher/system-agent v0.2.3
+	github.com/rancher/system-agent v0.2.5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli v1.22.5
