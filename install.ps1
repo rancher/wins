@@ -275,6 +275,9 @@ function Invoke-WinsInstaller {
             New-Item -Path $env:CATTLE_AGENT_CONFIG_DIR -ItemType Directory -Force | Out-Null
         }
 
+        # copy powershell for wins
+        Copy-Item $($(Get-Command powershell).Source) "$env:CATTLE_AGENT_CONFIG_DIR/powershell.exe"
+
         if (-Not $env:CATTLE_AGENT_VAR_DIR) {          
             $env:CATTLE_AGENT_VAR_DIR = "C:/var/lib/rancher/agent"
             Write-LogInfo "Using default agent var directory $( $env:CATTLE_AGENT_VAR_DIR )"
@@ -307,7 +310,7 @@ function Invoke-WinsInstaller {
         
         if ($env:CATTLE_AGENT_BINARY_LOCAL -eq "true") {
             Write-LogInfo "Using local Wins installer from $($env:CATTLE_AGENT_BINARY_LOCAL_LOCATION)"
-            Copy-Item -Path $env:CATTLE_AGENT_BINARY_LOCAL -Destination "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe"
+            Copy-Item -Path $env:CATTLE_AGENT_BINARY_LOCAL_LOCATION -Destination "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe"
         }
         else {
             Write-LogInfo "Downloading Wins from $($env:CATTLE_AGENT_BINARY_URL)"
@@ -454,6 +457,20 @@ function Invoke-WinsInstaller {
     }
 
     function Set-WinsConfig() {
+
+        $winsConfig =
+        @"
+whiteList:
+  processPaths:
+    - $($env:CATTLE_AGENT_CONFIG_DIR)/powershell.exe
+    - $($env:CATTLE_AGENT_CONFIG_DIR)/wins-upgrade.exe
+    - C:/etc/wmi-exporter/wmi-exporter.exe
+    - C:/etc/windows-exporter/windows-exporter.exe
+  proxyPorts:
+   - 9796
+"@
+        Set-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $winsConfig
+
         $agentConfig = 
         @"
 systemagent:
@@ -462,7 +479,7 @@ systemagent:
   remoteEnabled: $($env:CATTLE_REMOTE_ENABLED)
   preserveWorkDirectory: $($env:CATTLE_PRESERVE_WORKDIR)
 "@
-        Set-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $agentConfig
+        Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $agentConfig
         if ($env:CATTLE_REMOTE_ENABLED -eq "true") {
             Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value "  connectionInfoFile: $env:CATTLE_AGENT_VAR_DIR/rancher2_connection_info.json"
         }
@@ -571,10 +588,10 @@ csi-proxy:
         foreach ($feature in $RequiredFeatures) {
             $f = Get-WindowsFeature -Name $feature
             if (-not $f.Installed) {
-                Write-FatalLog "Windows feature: '$feature' is not installed. Please run: Install-WindowsFeature -Name $feature"
+                Write-LogFatal "Windows feature: '$feature' is not installed. Please run: Install-WindowsFeature -Name $feature"
             }
             else {
-                Write-InfoLog "Windows feature: '$feature' is installed. Installation will proceed."
+                Write-LogInfo "Windows feature: '$feature' is installed. Installation will proceed."
             }
         }
     }
