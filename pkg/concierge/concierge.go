@@ -32,10 +32,10 @@ func New(name, path string, cfg *Config) (*Concierge, error) {
 	}
 
 	if path == "" {
-		return nil, errors.New("path isn't set and can't be empty.")
+		return nil, errors.New("path isn't set and can't be empty")
 	}
 	if cfg == nil {
-		return nil, errors.New("cfg is nil, please provide at least an empty config.")
+		return nil, errors.New("cfg is nil, please provide at least an empty config")
 	}
 
 	cfg.registryKey = fmt.Sprintf(`SYSTEM\CurrentControlSet\Services\%s`, name)
@@ -157,7 +157,7 @@ func (c *Concierge) ServiceExists() (bool, error) {
 
 	services, err := m.ListServices()
 	if err != nil {
-		return false, errors.Wrap(err, "could not list services.")
+		return false, errors.Wrap(err, "could not list services")
 	}
 
 	for _, service := range services {
