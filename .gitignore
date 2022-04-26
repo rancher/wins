@@ -27,9 +27,11 @@ bin/*
 
 # Rancher
 Dockerfile.Dapper[0-9]*
+Dockerfile.dapper[0-9]*
 .cache/
 
 # MAC file
 .DS_Store
 
 dist/
+*.tgz

@@ -17,35 +17,35 @@ import (
 func StackDump() (err error) {
 	err = callStackDump()
 	if err != nil {
-		logrus.Errorf("StackDump: failed to call wins stack dump")
+		logrus.Errorf("[StackDump] failed to call wins stack dump: %v", err)
 		return err
 	}
 	return nil
 }
 
 func findWinsProcess() (uint32, error) {
-	h, e := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
-	if e != nil {
-		panic(e)
+	h, err := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
+	if err != nil {
+		panic(err)
 	}
 	var p windows.ProcessEntry32
 	p.Size = uint32(reflect.TypeOf(p).Size())
 
 	for {
-		e := windows.Process32Next(h, &p)
-		if e != nil {
-			logrus.Errorf("findWinsProcess: error finding next process [%v]", e)
+		err := windows.Process32Next(h, &p)
+		if err != nil {
+			logrus.Errorf("[findWinsProcess] error finding next process: %v", err)
 			break
 		}
 		ps := getProcessName(windows.UTF16ToString(p.ExeFile[:]))
-		logrus.Debugf("findWinsProcess: found trimmed process [%v]", ps)
+		logrus.Debugf("[findWinsProcess] found trimmed process: %v", ps)
 		if ps == defaults.WindowsProcessName {
 			pid := p.ProcessID
-			logrus.Debugf("Found process [%s] with pid [%d]", ps, pid)
+			logrus.Debugf("[findWinsProcess] found process [%s] with pid [%d]", ps, pid)
 			return pid, nil
 		}
-		logrus.Warnf("no process matching [%s] was found", defaults.WindowsProcessName)
-		}
+		logrus.Warnf("[findWinsProcess] no process matching [%s] was found", defaults.WindowsProcessName)
+	}
 	return 0, nil
 }
 
@@ -53,7 +53,7 @@ func callStackDump() (err error) {
 
 	winsProcessID, err := findWinsProcess()
 	if err != nil {
-		return fmt.Errorf("callStackDump: error returned when getting wins process id:\n[%v]", err)
+		return fmt.Errorf("[callStackDump]: error returned when getting wins process id: %v", err)
 	}
 
 	event := fmt.Sprintf("Global\\stackdump-%d", winsProcessID)
@@ -61,7 +61,7 @@ func callStackDump() (err error) {
 
 	// verify that wins is running before trying to send stackdump signal
 	if syscall.Signal(syscall.Signal(0)) == 0 {
-		logrus.Debugf("Confirmed that process %d is running.", winsProcessID)
+		logrus.Debugf("[callStackDump] confirmed that wins process %d is running", winsProcessID)
 	}
 
 	sd, err := windows.SecurityDescriptorFromString(defaults.PermissionBuiltinAdministratorsAndLocalSystem)
@@ -84,7 +84,7 @@ func callStackDump() (err error) {
 	defer windows.CloseHandle(h)
 
 	if err := windows.SetEvent(h); err != nil {
-		return fmt.Errorf("callStackDump: error setting win32 event [%v]", err)
+		return fmt.Errorf("[callStackDump] error setting win32 event: %v", err)
 	}
 
 	return windows.ResetEvent(h)
