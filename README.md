@@ -176,7 +176,7 @@ Example:
 ```YAML
 csi-proxy:
   url: https://acs-mirror.azureedge.net/csi-proxy/%[1]s/binaries/csi-proxy-%[1]s.tar.gz
-  version: v1.0.0
+  version: v1.1.1
   kubeletPath: c:/etc/kubelet.exe
 ```
 
