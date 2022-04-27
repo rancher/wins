@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
+	"github.com/rancher/wins/pkg/tls"
 	"io"
 	"net/http"
 	"os"
@@ -109,6 +110,11 @@ func (p *Proxy) download() error {
 	defer func(file *os.File) {
 		_ = file.Close()
 	}(file)
+
+	_, err = tls.SetupRancherTLSConfig()
+	if err != nil {
+		return err
+	}
 
 	client := http.Client{
 		CheckRedirect: func(r *http.Request, via []*http.Request) error {
