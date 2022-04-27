@@ -3,9 +3,10 @@ package tls
 import (
 	"crypto/x509"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 type TLSConfig struct {

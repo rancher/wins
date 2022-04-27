@@ -1,15 +1,16 @@
 package config
 
 import (
+	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/config"
 	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/tls"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 func DefaultConfig() *Config {
