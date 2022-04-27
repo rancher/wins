@@ -180,6 +180,25 @@ csi-proxy:
   kubeletPath: c:/etc/kubelet.exe
 ```
 
+#### Enabling Certificate Support for Wins
+
+Wins now supports consuming a certificate when it is required for pulling the CSI proxy tarball from a Rancher Server. 
+Common situations where this is required are airgapped Rancher environments and self-signed Rancher installations. 
+
+```yml
+tls-config:
+  insecure: <true/false>
+  certFilePath: <path to local certificate>
+```
+
+Example:
+
+```yml
+tls-config:
+  insecure: false
+  certFilePath: c:/etc/rancher/agent/ranchercert
+```
+
 ## Build
 
 ``` powershell
