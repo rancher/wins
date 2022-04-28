@@ -120,6 +120,19 @@ Set-Service -Name "rancher-wins" -StartupType Manual
 {"InterfaceIndex":"7","GatewayAddress":"10.170.0.1","SubnetCIDR":"10.170.0.0/20","HostName":"frank-wins-dev","AddressCIDR":"10.170.15.229/32"}
 ```
 
+#### Enabling Process and Port Access
+
+To configure wins properly to break out of a container you need to configure a list of processes and ports which are 
+granted permission for wins to use. This is done with the `white_list` configuration options.
+
+```
+white_list:
+  processPaths:
+   - c:\path\to\my.exe
+  proxyPorts
+   - 8888
+```
+
 #### Start a process on the host
 
 ``` powershell
