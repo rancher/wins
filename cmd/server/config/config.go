@@ -5,11 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/rancher/wins/cmd/cmds"
-
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/config"
+	"github.com/rancher/wins/cmd/cmds"
 	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/tls"
