@@ -11,7 +11,9 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	winsConfig "github.com/rancher/wins/cmd/server/config"
 	"github.com/rancher/wins/pkg/concierge"
+	"github.com/rancher/wins/pkg/tls"
 )
 
 const (
@@ -89,6 +91,13 @@ func (p *Proxy) Enable() error {
 		return err
 	}
 	if !ok {
+		wc := winsConfig.Config{}
+		if wc.TLSConfig.CertFilePath != "" {
+			_, err := tls.SetupGenericTLSConfigFromFile(*wc.TLSConfig)
+			if err != nil {
+				return err
+			}
+		}
 		if err := p.download(); err != nil {
 			return err
 		}

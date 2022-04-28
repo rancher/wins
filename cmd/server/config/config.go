@@ -10,6 +10,7 @@ import (
 	"github.com/rancher/system-agent/pkg/config"
 	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
+	"github.com/rancher/wins/pkg/tls"
 )
 
 func DefaultConfig() *Config {
@@ -24,6 +25,9 @@ func DefaultConfig() *Config {
 			Mode:         "watching",
 			WatchingPath: defaults.UpgradeWatchingPath,
 		},
+		TLSConfig: &tls.TLSConfig{
+			CertFilePath: defaults.CertPath,
+		},
 	}
 }
 
@@ -35,6 +39,7 @@ type Config struct {
 	Upgrade     UpgradeConfig       `yaml:"upgrade" json:"upgrade"`
 	SystemAgent *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
 	CSIProxy    *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy"`
+	TLSConfig   *tls.TLSConfig      `yaml:"tls-config" json:"tls-config"`
 }
 
 func (c *Config) Validate() error {
