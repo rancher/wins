@@ -4,6 +4,11 @@ import (
 	"github.com/urfave/cli"
 )
 
+func BoolAddr(b bool) *bool {
+	boolVar := b
+	return &boolVar
+}
+
 func JoinFlags(flagSlices ...[]cli.Flag) []cli.Flag {
 	var ret []cli.Flag
 	for _, flags := range flagSlices {

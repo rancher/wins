@@ -76,7 +76,7 @@ func SetupDumpStacks(serviceName string, pid int, cwd string) {
 	}
 
 	go func() {
-		logrus.Infof("Stackdump - waiting signal at %s", event)
+		logrus.Infof("[SetupDumpStacks] stackdump feature successfully initialized - waiting for signal at %s", event)
 		for {
 			windows.WaitForSingleObject(h, windows.INFINITE)
 			fileLoc := filepath.Join(cwd, fmt.Sprintf("%s.%d.stacks.log", serviceName, pid))

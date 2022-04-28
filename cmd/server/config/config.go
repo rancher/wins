@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/rancher/wins/cmd/cmds"
+
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/config"
@@ -25,7 +27,7 @@ func DefaultConfig() *Config {
 			Mode:         "watching",
 			WatchingPath: defaults.UpgradeWatchingPath,
 		},
-		TLSConfig: &tls.TLSConfig{
+		TLSConfig: &tls.Config{
 			CertFilePath: defaults.CertPath,
 		},
 	}
@@ -39,7 +41,38 @@ type Config struct {
 	Upgrade     UpgradeConfig       `yaml:"upgrade" json:"upgrade"`
 	SystemAgent *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
 	CSIProxy    *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy"`
-	TLSConfig   *tls.TLSConfig      `yaml:"tls-config" json:"tls-config"`
+	TLSConfig   *tls.Config         `yaml:"tls-config" json:"tls-config"`
+}
+
+func (c *Config) ValidateTLSConfig() error {
+	if b, err := ioutil.ReadFile(c.TLSConfig.CertFilePath); b == nil || err != nil {
+		return errors.Wrapf(err, "failed to read certificate from %s", c.TLSConfig.CertFilePath)
+	}
+
+	if c.TLSConfig.CertFilePath != defaults.CertPath {
+		// load non-default certificate file
+		_ = csiproxy.Config{
+			Config: tls.Config{
+				CertFilePath: c.TLSConfig.CertFilePath,
+			},
+		}
+	}
+
+	if *c.TLSConfig.Insecure {
+		// set insecure flag for all subsequent CSI Proxy functions
+		_ = csiproxy.Config{
+			Config: tls.Config{
+				Insecure: cmds.BoolAddr(true),
+			},
+		}
+	} else {
+		_ = csiproxy.Config{
+			Config: tls.Config{
+				Insecure: cmds.BoolAddr(false),
+			},
+		}
+	}
+	return nil
 }
 
 func (c *Config) Validate() error {
@@ -56,6 +89,8 @@ func (c *Config) Validate() error {
 	if err := c.Upgrade.Validate(); err != nil {
 		return errors.Wrap(err, "failed to validate upgrade field")
 	}
+
+	// validate
 
 	return nil
 }
