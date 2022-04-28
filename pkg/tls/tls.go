@@ -9,13 +9,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type TLSConfig struct {
+type Config struct {
 	Insecure     *bool  `yaml:"insecure" json:"insecure"`
 	CertFilePath string `yaml:"CertFilePath" json:"CertFilePath"`
 }
 
 // SetupGenericTLSConfigFromFile returns a x509 system certificate pool containing the specified certificate file
-func SetupGenericTLSConfigFromFile(config TLSConfig) (*x509.CertPool, error) {
+func SetupGenericTLSConfigFromFile() (*x509.CertPool, error) {
+	var config *Config
 	if config.CertFilePath == "" {
 		logrus.Info("[SetupGenericTLSConfigFromFile] specified certificate file path is empty, not modifying system certificate store")
 		return nil, nil

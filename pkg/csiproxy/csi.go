@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	winsConfig "github.com/rancher/wins/cmd/server/config"
 	"github.com/rancher/wins/pkg/concierge"
 	"github.com/rancher/wins/pkg/tls"
 )
@@ -26,6 +25,7 @@ type Config struct {
 	URL         string `yaml:"url" json:"url"`
 	Version     string `yaml:"version" json:"version"`
 	KubeletPath string `yaml:"kubeletPath" json:"kubeletPath"`
+	tls.Config
 }
 
 // Validate ensures that the configuration for CSI Proxy is correct if provided.
@@ -91,9 +91,9 @@ func (p *Proxy) Enable() error {
 		return err
 	}
 	if !ok {
-		wc := winsConfig.Config{}
-		if wc.TLSConfig.CertFilePath != "" {
-			_, err := tls.SetupGenericTLSConfigFromFile(*wc.TLSConfig)
+		if p.cfg.CertFilePath != "" && !*p.cfg.Insecure {
+			// CSI Proxy does not need the certpool that is returned
+			_, err := tls.SetupGenericTLSConfigFromFile()
 			if err != nil {
 				return err
 			}
