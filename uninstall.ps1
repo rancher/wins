@@ -194,9 +194,6 @@ function Invoke-WinsUninstaller {
     }
 
     Invoke-WinsAgentUninstall
-    if (Test-Path $env:CATTLE_AGENT_BIN_PREFIX/bin/rke2-uninstall.ps1) {
-        . $env:CATTLE_AGENT_BIN_PREFIX/bin/rke2-uninstall.ps1
-    }
 }
 
 Invoke-WinsUninstaller
