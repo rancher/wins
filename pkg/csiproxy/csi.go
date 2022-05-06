@@ -127,14 +127,16 @@ func (p *Proxy) download() error {
 		},
 	}
 
-	// default to insecure
-	transport := http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
-	client.Transport = &transport
+	// default to insecure which matches system-agent functionality
+	transport := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 
 	if !*p.cfg.Insecure && p.cfg.CertFilePath != "" {
-		transport = http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: false}}
-		client.Transport = &transport
+		transport.TLSClientConfig.InsecureSkipVerify = false
 	}
+
+	client.Transport = transport
+
+	defer client.CloseIdleConnections()
 
 	resp, err := client.Get(fmt.Sprintf(p.cfg.URL, p.cfg.Version))
 	if err != nil {
@@ -143,7 +145,6 @@ func (p *Proxy) download() error {
 
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
-		transport.CloseIdleConnections()
 	}(resp.Body)
 
 	gz, err := gzip.NewReader(resp.Body)
