@@ -8,7 +8,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/config"
-	"github.com/rancher/wins/cmd/cmds"
 	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/tls"
@@ -27,7 +26,7 @@ func DefaultConfig() *Config {
 			WatchingPath: defaults.UpgradeWatchingPath,
 		},
 		TLSConfig: &tls.Config{
-			CertFilePath: defaults.CertPath,
+			CertFilePath: "",
 		},
 	}
 }
@@ -57,40 +56,28 @@ func (c *Config) ValidateTLSConfig() error {
 		}
 	}
 
-	if *c.TLSConfig.Insecure {
-		// set insecure flag for all subsequent CSI Proxy functions
-		_ = csiproxy.Config{
-			Config: tls.Config{
-				Insecure: cmds.BoolAddr(true),
-			},
-		}
-	} else {
-		_ = csiproxy.Config{
-			Config: tls.Config{
-				Insecure: cmds.BoolAddr(false),
-			},
-		}
-	}
 	return nil
 }
 
 func (c *Config) Validate() error {
 	if strings.TrimSpace(c.Listen) == "" {
-		return errors.New("listen could not be blank")
+		return errors.New("[Validate] listen cannot be blank")
 	}
 
 	// validate white list field
 	if err := c.WhiteList.Validate(); err != nil {
-		return errors.Wrap(err, "failed to validate white list field")
+		return errors.Wrap(err, "[Validate] failed to validate white list field")
 	}
 
 	// validate upgrade field
 	if err := c.Upgrade.Validate(); err != nil {
-		return errors.Wrap(err, "failed to validate upgrade field")
+		return errors.Wrap(err, "[Validate] failed to validate upgrade field")
 	}
 
-	// validate
-
+	// validate csiProxy config
+	if err := c.ValidateTLSConfig(); err != nil {
+		return errors.Wrap(err, "[Validate] failed to validate tls-config field")
+	}
 	return nil
 }
 

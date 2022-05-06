@@ -11,7 +11,7 @@ import (
 
 type Config struct {
 	Insecure     *bool  `yaml:"insecure" json:"insecure"`
-	CertFilePath string `yaml:"CertFilePath" json:"CertFilePath"`
+	CertFilePath string `yaml:"certFilePath" json:"certFilePath"`
 }
 
 // SetupGenericTLSConfigFromFile returns a x509 system certificate pool containing the specified certificate file

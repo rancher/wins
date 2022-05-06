@@ -468,7 +468,7 @@ white_list:
   proxyPorts:
     - 9796
 "@
-        Set-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $winsConfig
+        Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $winsConfig
 
         $agentConfig = 
         @"
@@ -477,6 +477,8 @@ systemagent:
   appliedPlanDirectory: $($env:CATTLE_AGENT_VAR_DIR)/applied
   remoteEnabled: $($env:CATTLE_REMOTE_ENABLED)
   preserveWorkDirectory: $($env:CATTLE_PRESERVE_WORKDIR)
+tls-config:
+  certFilePath: C:/etc/rancher/wins/ranchercert
 "@
         Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $agentConfig
         if ($env:CATTLE_REMOTE_ENABLED -eq "true") {
