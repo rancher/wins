@@ -3,6 +3,7 @@ package csiproxy
 import (
 	"archive/tar"
 	"compress/gzip"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rancher/wins/pkg/concierge"
-	"github.com/rancher/wins/pkg/tls"
+	winstls "github.com/rancher/wins/pkg/tls"
 )
 
 const (
@@ -25,7 +26,7 @@ type Config struct {
 	URL         string `yaml:"url" json:"url"`
 	Version     string `yaml:"version" json:"version"`
 	KubeletPath string `yaml:"kubeletPath" json:"kubeletPath"`
-	tls.Config
+	winstls.Config
 }
 
 // Validate ensures that the configuration for CSI Proxy is correct if provided.
@@ -93,7 +94,7 @@ func (p *Proxy) Enable() error {
 	if !ok {
 		if p.cfg.CertFilePath != "" && !*p.cfg.Insecure {
 			// CSI Proxy does not need the certpool that is returned
-			_, err := tls.SetupGenericTLSConfigFromFile()
+			_, err := winstls.SetupGenericTLSConfigFromFile()
 			if err != nil {
 				return err
 			}
@@ -125,6 +126,18 @@ func (p *Proxy) download() error {
 			return nil
 		},
 	}
+
+	// default to insecure which matches system-agent functionality
+	transport := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+
+	if !*p.cfg.Insecure && p.cfg.CertFilePath != "" {
+		transport.TLSClientConfig.InsecureSkipVerify = false
+	}
+
+	client.Transport = transport
+
+	defer client.CloseIdleConnections()
+
 	resp, err := client.Get(fmt.Sprintf(p.cfg.URL, p.cfg.Version))
 	if err != nil {
 		return err
