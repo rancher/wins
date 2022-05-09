@@ -472,8 +472,6 @@ white_list:
 
         $agentConfig = 
         @"
-tls-config:
-  certFilePath: C:/etc/rancher/wins/ranchercert
 systemagent:
   workDirectory: $($env:CATTLE_AGENT_VAR_DIR)/work
   appliedPlanDirectory: $($env:CATTLE_AGENT_VAR_DIR)/applied
@@ -483,6 +481,14 @@ systemagent:
         Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $agentConfig
         if ($env:CATTLE_REMOTE_ENABLED -eq "true") {
             Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value "  connectionInfoFile: $env:CATTLE_AGENT_VAR_DIR/rancher2_connection_info.json"
+        }
+        if ((Test-Path -Path $env:RANCHER_CERT) -and ($env:CA_REQUIRED -eq "true")) {
+            $tlsConfig =
+            @"
+            tls-config:
+                certFilePath: $($($env:RANCHER_CERT).Replace("\\","/"))
+"@
+            Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $tlsConfig
         }
     }
 
