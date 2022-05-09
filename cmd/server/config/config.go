@@ -75,8 +75,10 @@ func (c *Config) Validate() error {
 	}
 
 	// validate csiProxy config
-	if err := c.ValidateTLSConfig(); err != nil {
-		return errors.Wrap(err, "[Validate] failed to validate tls-config field")
+	if c.TLSConfig.CertFilePath != "" {
+		if err := c.ValidateTLSConfig(); err != nil {
+			return errors.Wrap(err, "[Validate] failed to validate tls-config field")
+		}
 	}
 	return nil
 }
