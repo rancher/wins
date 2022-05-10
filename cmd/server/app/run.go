@@ -113,7 +113,7 @@ func _runAction(cliCtx *cli.Context) error {
 	//checking if CSI Proxy has config, if so enables it.
 	if cfg.CSIProxy != nil {
 		logrus.Infof("CSI Proxy will be enabled as a Windows service.")
-		csi, err := csiproxy.New(cfg.CSIProxy)
+		csi, err := csiproxy.New(cfg.CSIProxy, cfg.TLSConfig)
 		if err != nil {
 			return err
 		}

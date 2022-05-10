@@ -10,7 +10,7 @@ import (
 	"github.com/rancher/system-agent/pkg/config"
 	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
-	"github.com/rancher/wins/pkg/tls"
+	wintls "github.com/rancher/wins/pkg/tls"
 )
 
 func DefaultConfig() *Config {
@@ -25,9 +25,6 @@ func DefaultConfig() *Config {
 			Mode:         "watching",
 			WatchingPath: defaults.UpgradeWatchingPath,
 		},
-		TLSConfig: &tls.Config{
-			CertFilePath: "",
-		},
 	}
 }
 
@@ -39,24 +36,7 @@ type Config struct {
 	Upgrade     UpgradeConfig       `yaml:"upgrade" json:"upgrade"`
 	SystemAgent *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
 	CSIProxy    *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy"`
-	TLSConfig   *tls.Config         `yaml:"tls-config" json:"tls-config"`
-}
-
-func (c *Config) ValidateTLSConfig() error {
-	if b, err := ioutil.ReadFile(c.TLSConfig.CertFilePath); b == nil || err != nil {
-		return errors.Wrapf(err, "failed to read certificate from %s", c.TLSConfig.CertFilePath)
-	}
-
-	if c.TLSConfig.CertFilePath != defaults.CertPath {
-		// load non-default certificate file
-		_ = csiproxy.Config{
-			Config: tls.Config{
-				CertFilePath: c.TLSConfig.CertFilePath,
-			},
-		}
-	}
-
-	return nil
+	TLSConfig   *wintls.Config      `yaml:"tls-config" json:"tls-config"`
 }
 
 func (c *Config) Validate() error {
@@ -74,12 +54,6 @@ func (c *Config) Validate() error {
 		return errors.Wrap(err, "[Validate] failed to validate upgrade field")
 	}
 
-	// validate csiProxy config
-	if c.TLSConfig.CertFilePath != "" {
-		if err := c.ValidateTLSConfig(); err != nil {
-			return errors.Wrap(err, "[Validate] failed to validate tls-config field")
-		}
-	}
 	return nil
 }
 

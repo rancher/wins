@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/pkg/errors"
 	"github.com/rancher/wins/pkg/concierge"
 	winstls "github.com/rancher/wins/pkg/tls"
@@ -26,7 +28,6 @@ type Config struct {
 	URL         string `yaml:"url" json:"url"`
 	Version     string `yaml:"version" json:"version"`
 	KubeletPath string `yaml:"kubeletPath" json:"kubeletPath"`
-	winstls.Config
 }
 
 // Validate ensures that the configuration for CSI Proxy is correct if provided.
@@ -48,6 +49,7 @@ func (c *Config) validate() error {
 // Proxy is for creating and retrieving the Windows Service
 type Proxy struct {
 	cfg         *Config
+	tlsCfg      *winstls.Config
 	serviceName string
 	binaryName  string
 	binaryPath  string
@@ -55,7 +57,7 @@ type Proxy struct {
 }
 
 // New creates a new Proxy struct
-func New(cfg *Config) (*Proxy, error) {
+func New(cfg *Config, tlsCfg *winstls.Config) (*Proxy, error) {
 	if err := cfg.validate(); err != nil {
 		return nil, err
 	}
@@ -79,6 +81,7 @@ func New(cfg *Config) (*Proxy, error) {
 
 	return &Proxy{
 		cfg:         cfg,
+		tlsCfg:      tlsCfg,
 		serviceName: serviceName,
 		binaryName:  exeName,
 		binaryPath:  filepath.Join(cwd, exeName),
@@ -92,16 +95,19 @@ func (p *Proxy) Enable() error {
 		return err
 	}
 	if !ok {
-		if p.cfg.CertFilePath != "" && !*p.cfg.Insecure {
+		if p.tlsCfg != nil && p.tlsCfg.CertFilePath != "" {
 			// CSI Proxy does not need the certpool that is returned
-			_, err := winstls.SetupGenericTLSConfigFromFile()
+			_, err := p.tlsCfg.SetupGenericTLSConfigFromFile()
 			if err != nil {
+
 				return err
 			}
 		}
+		logrus.Infof("CSI Proxy is being downloaded.")
 		if err := p.download(); err != nil {
 			return err
 		}
+		logrus.Infof("CSI Proxy is being started.")
 		if err := p.concierge.Enable(); err != nil {
 			return err
 		}
@@ -130,7 +136,7 @@ func (p *Proxy) download() error {
 	// default to insecure which matches system-agent functionality
 	transport := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 
-	if !*p.cfg.Insecure && p.cfg.CertFilePath != "" {
+	if p.tlsCfg != nil && !*p.tlsCfg.Insecure && p.tlsCfg.CertFilePath != "" {
 		transport.TLSClientConfig.InsecureSkipVerify = false
 	}
 
@@ -172,6 +178,5 @@ func (p *Proxy) download() error {
 			}
 		}
 	}
-
 	return nil
 }
