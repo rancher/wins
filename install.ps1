@@ -632,6 +632,11 @@ csi-proxy:
         $newEnv = @()
         $PROXY_ENV_INFO = Get-ChildItem env: | Where-Object { $_.Name -Match "^(NO|HTTP|HTTPS)_PROXY" } | ForEach-Object { "$($_.Name)=$($_.Value)" }
         if ($PROXY_ENV_INFO) {
+            netsh winhttp set proxy $env:HTTPS_PROXY
+            Set-ItemProperty -path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" ProxyEnable -value 1
+            Set-ItemProperty -path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" ProxyServer -value "https=$env:HTTPS_PROXY;http=$env:HTTP_PROXY"
+            Set-ItemProperty -path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" ProxyOverride -value $env:NO_PROXY.Replace(',',';')
+
             $newEnv += $PROXY_ENV_INFO
             if(Test-Path -Path HKLM:SYSTEM\CurrentControlSet\Services\$serviceName) {
                 Set-ItemProperty HKLM:SYSTEM\CurrentControlSet\Services\$serviceName -Name Environment -Value $([string]$newEnv)
