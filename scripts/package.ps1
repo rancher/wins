@@ -29,7 +29,7 @@ if ($env:DRONE_TAG) {
     $TAG = $env:DRONE_TAG
 }
 
-$buildTags = @{ "17763" = "1809"; "19042" = "20H2"; "20348" = "ltsc2022";}
+$buildTags = @{ "17763" = "1809"; "20348" = "ltsc2022";}
 $buildNumber = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' -ErrorAction Ignore).CurrentBuildNumber
 $WINDOWS_VERSION = $buildTags[$buildNumber]
 if (-not $WINDOWS_VERSION) {
