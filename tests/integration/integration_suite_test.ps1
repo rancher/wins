@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 # docker build
-$buildTags = @{ "17763" = "1809"; "19042" = "20H2"; "20348" = "ltsc2022";}
+$buildTags = @{ "17763" = "1809"; "20348" = "ltsc2022";}
 $buildNumber = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' -ErrorAction Ignore).CurrentBuildNumber
 $SERVERCORE_VERSION = $buildTags[$buildNumber]
 if (-not $SERVERCORE_VERSION) {
