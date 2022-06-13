@@ -8,6 +8,8 @@ $SRC_PATH = (Resolve-Path "$DIR_PATH\..").Path
 
 # Reference binary in ./bin/wins.exe
 Copy-Item -Force -Path $SRC_PATH\bin\wins.exe -Destination $SRC_PATH\package\windows | Out-Null
+Copy-Item -Force -Path $SRC_PATH\install.ps1 -Destination $SRC_PATH\package\windows | Out-Null
+Copy-Item -Force -Path $SRC_PATH\suc\run.ps1 -Destination $SRC_PATH\package\windows | Out-Null
 
 Set-Location -Path $SRC_PATH\package\windows
 
@@ -52,3 +54,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Built $IMAGE`n"
+Set-Location -Path $SRC_PATH

@@ -9,6 +9,9 @@ SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $P
 RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe"
 
 COPY ./wins.exe /Windows/
+COPY ./wins.exe wins.exe
+COPY ./install.ps1 install.ps1
+COPY ./run.ps1 run.ps1
 #USER ContainerAdministrator
 
-CMD ["wins.exe", "--version"]
+ENTRYPOINT [ "powershell", "-Command", "./run.ps1"]
