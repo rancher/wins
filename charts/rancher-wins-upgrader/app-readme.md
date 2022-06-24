@@ -1,5 +1,7 @@
 # Rancher Wins Upgrader
 
+# **This is chart is deprecated and will not be maintained starting at v0.3.0.**
+
 A Rancher chart that handles keeping the wins server version and config across some (or all) of the Windows nodes on a Kubernetes cluster in sync. It does this by running a simple script to replace the contents of the `\etc\rancher\wins` directory with the newly specified config and wins image via one or more DaemonSets. Once executed, the script will simply sleep forever.
 
 ## How does this work?

@@ -109,9 +109,8 @@ function Invoke-WinsWinsUpgrade {
     }
 
     $winsOut = wins.exe cli prc run --path=$winsUpgradePathLocal --args="up"
-    Write-Host $winsOut
 
-    #Remove-Item -Path $winsUpgradePath
+    Remove-Item -Path $winsUpgradePath
 
     if ($winsOut -match ".* rpc error: code = Unavailable desc = transport is closing") {
         Write-Host "Successfully upgraded"
@@ -119,10 +118,12 @@ function Invoke-WinsWinsUpgrade {
     }
     elseif ($LastExitCode -ne 0) {
         Write-Host "Returned exit $LastExitCode"
+        Write-Host $winsOut
         exit $LastExitCode
     }
     else {
         Write-Host "Returned exit 0, but did not receive expected output from .\wins up"
+        Write-Host $winsOut
         exit 1
     }  
 }
