@@ -4,7 +4,7 @@ go 1.18
 
 replace (
 	github.com/rancher/system-agent => github.com/rosskirkpat/system-agent v0.2.9-rc1
-	github.com/urfave/cli => github.com/urfave/cli v1.20.0
+	//github.com/urfave/cli => github.com/urfave/cli v1.20.0
 	k8s.io/api => k8s.io/api v0.24.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.0
 	k8s.io/apimachinery => k8s.io/apimachinery v0.24.2
@@ -63,6 +63,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/containerd/cgroups v1.0.1 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.11.4 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/cli v20.10.17+incompatible // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
@@ -102,6 +103,7 @@ require (
 	github.com/rancher/lasso v0.0.0-20220628160937-749b3397db38 // indirect
 	github.com/rancher/wharfie v0.5.3 // indirect
 	github.com/rancher/wrangler v1.0.0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vbatts/tar-split v0.11.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
@@ -117,7 +119,7 @@ require (
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.24.2 // indirect
 	k8s.io/apimachinery v0.24.2 // indirect
 	k8s.io/apiserver v0.24.0 // indirect
