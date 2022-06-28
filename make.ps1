@@ -27,6 +27,12 @@ if ($args[0] -eq "clean") {
     Remove-Item Dockerfile.dapper* -Exclude "Dockerfile.dapper"
 }
 
+if ($args[0] -eq "build") {
+    Write-Host "Building"
+    .dapper.exe -f Dockerfile.dapper build
+    exit
+}
+
 if (Test-Path scripts\$($args[0]).ps1) {
     .dapper.exe -f Dockerfile.dapper $($args[0])
     exit
