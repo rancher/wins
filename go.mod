@@ -45,13 +45,14 @@ require (
 	github.com/mattn/go-colorable v0.1.11
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
-	github.com/rancher/system-agent v0.2.8
+	github.com/rancher/system-agent v0.0.0-00010101000000-000000000000
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b
 	google.golang.org/grpc v1.45.0
 	inet.af/tcpproxy v0.0.0-20200125044825-b6bb9b5b8252
+
 )
 
 require (
