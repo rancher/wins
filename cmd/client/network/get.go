@@ -8,16 +8,16 @@ import (
 	"github.com/rancher/wins/cmd/outputs"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/types"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var _getFlags = internal.NewGRPCClientConn(
 	[]cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "name",
 			Usage: "[optional] Specifies the network name",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "address",
 			Usage: "[optional] Specifies the network address",
 		},
@@ -80,8 +80,8 @@ func _getAction(cliCtx *cli.Context) (err error) {
 	return outputs.JSON(cliCtx.App.Writer, resp.Data)
 }
 
-func getCommand() cli.Command {
-	return cli.Command{
+func getCommand() *cli.Command {
+	return &cli.Command{
 		Name:   "get",
 		Usage:  "Get network metadata",
 		Flags:  _getFlags,

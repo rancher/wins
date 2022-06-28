@@ -13,30 +13,30 @@ import (
 	"github.com/rancher/wins/pkg/profilings"
 	"github.com/rancher/wins/pkg/systemagent"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 )
 
 var _runFlags = []cli.Flag{
-	cli.BoolFlag{
+	&cli.BoolFlag{
 		Name:  "register",
 		Usage: "[optional] Register to the Windows Service",
 	},
-	cli.BoolFlag{
+	&cli.BoolFlag{
 		Name:  "unregister",
 		Usage: "[optional] Unregister from the Windows Service",
 	},
-	cli.StringFlag{
+	&cli.StringFlag{
 		Name:  "config",
 		Usage: "[optional] Specifies the path of the configuration",
 		Value: defaults.ConfigPath,
 	},
-	cli.StringFlag{
+	&cli.StringFlag{
 		Name:  "profile",
 		Usage: "[optional] Specifies the name of profile to capture (none|cpu|heap|goroutine|threadcreate|block|mutex)",
 		Value: "none",
 	},
-	cli.StringFlag{
+	&cli.StringFlag{
 		Name:  "profile-output",
 		Usage: "[optional] Specifies the name of the file to write the profile to",
 		Value: "profile.pprof",
@@ -130,8 +130,8 @@ func _runAction(cliCtx *cli.Context) error {
 	return nil
 }
 
-func runCommand() cli.Command {
-	return cli.Command{
+func runCommand() *cli.Command {
+	return &cli.Command{
 		Name:   "run",
 		Usage:  "Run application",
 		Flags:  _runFlags,
