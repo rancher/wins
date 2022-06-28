@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/rancher/wins/pkg/defaults"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
-func NewCommand() cli.Command {
-	return cli.Command{
+func NewCommand() *cli.Command {
+	return &cli.Command{
 		Name:    "up",
 		Aliases: []string{"upgrade"},
 		Usage:   fmt.Sprintf("Manage %s Application", defaults.WindowsServiceDisplayName),

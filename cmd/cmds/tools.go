@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func BoolAddr(b bool) *bool {
@@ -9,10 +9,10 @@ func BoolAddr(b bool) *bool {
 	return &boolVar
 }
 
-func JoinFlags(flagSlices ...[]cli.Flag) []cli.Flag {
+func JoinFlags(flagSlices []cli.Flag) []cli.Flag {
 	var ret []cli.Flag
 	for _, flags := range flagSlices {
-		ret = append(ret, flags...)
+		ret = append(ret, flags)
 	}
 	return ret
 }

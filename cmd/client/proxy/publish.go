@@ -15,16 +15,16 @@ import (
 	"github.com/rancher/wins/pkg/npipes"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/proxy"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var _proxyFlags = []cli.Flag{
-	cli.GenericFlag{
+	&cli.GenericFlag{
 		Name:  "publish",
 		Usage: "[required] [list-argument] Publish a port or a range of ports, e.g.: TCP:443 TCP:80-81 (note: only TCP is supported)",
 		Value: flags.NewListValue(),
 	},
-	cli.StringFlag{
+	&cli.StringFlag{
 		Name:  "proxy",
 		Usage: "[optional] Specifies the name of the proxy listening named pipe",
 		Value: defaults.ProxyPipeName,

@@ -11,15 +11,15 @@ import (
 	"github.com/rancher/wins/cmd/client/proxy"
 	"github.com/rancher/wins/cmd/client/route"
 	"github.com/rancher/wins/pkg/defaults"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
-func NewCommand() cli.Command {
-	return cli.Command{
+func NewCommand() *cli.Command {
+	return &cli.Command{
 		Name:        "cli",
 		Aliases:     []string{"client"},
 		Description: fmt.Sprintf("The client side commands of %s", defaults.WindowsServiceDisplayName),
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			hns.NewCommand(),
 			host.NewCommand(),
 			network.NewCommand(),

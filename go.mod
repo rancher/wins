@@ -4,7 +4,6 @@ go 1.18
 
 replace (
 	github.com/rancher/system-agent => github.com/rosskirkpat/system-agent v0.2.9-rc1
-	//github.com/urfave/cli => github.com/urfave/cli v1.20.0
 	k8s.io/api => k8s.io/api v0.24.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.0
 	k8s.io/apimachinery => k8s.io/apimachinery v0.24.2
@@ -48,7 +47,7 @@ require (
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
 	github.com/rancher/system-agent v0.2.8
 	github.com/sirupsen/logrus v1.8.1
-	github.com/urfave/cli v1.22.9
+	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b
 	google.golang.org/grpc v1.45.0
@@ -105,6 +104,7 @@ require (
 	github.com/rancher/wrangler v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/urfave/cli v1.22.9 // indirect
 	github.com/vbatts/tar-split v0.11.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

@@ -7,26 +7,27 @@ import (
 	"github.com/rancher/wins/cmd/cmds"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/npipes"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-func NewGRPCClientConn(prependFlags ...[]cli.Flag) []cli.Flag {
+func NewGRPCClientConn(prependFlags []cli.Flag) []cli.Flag {
 	prependFlags = append(prependFlags,
 		[]cli.Flag{
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  "server",
 				Usage: "[optional] Specifies the name of the server listening named pipe",
 				Value: defaults.NamedPipeName,
 			},
-		},
+		}...,
 	)
-	return cmds.JoinFlags(prependFlags...)
+	return cmds.JoinFlags(prependFlags)
 }
 
 func ParseGRPCClientConn(cliCtx *cli.Context) (*grpc.ClientConn, error) {
 	dialOptions := []grpc.DialOption{
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
 	// setup dialer
