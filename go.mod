@@ -3,10 +3,20 @@ module github.com/rancher/wins
 go 1.18
 
 replace (
-	github.com/rancher/system-agent => github.com/rosskirkpat/system-agent v0.2.9-rc1
-	k8s.io/api => k8s.io/api v0.24.2
-	github.com/docker/docker => github.com/docker/docker v20.10.16+incompatible
+	cloud.google.com/go => cloud.google.com/go v0.100.2
+	cloud.google.com/go/compute => cloud.google.com/go/compute v1.6.1
+	github.com/Azure/go-ansiterm => github.com/Azure/go-ansiterm v0.0.0-20210608223527-2377c96fe795
 	github.com/docker/cli => github.com/docker/cli v20.10.16+incompatible
+	github.com/docker/docker => github.com/docker/docker v20.10.16+incompatible
+	github.com/google/go-cmp => github.com/google/go-cmp v0.5.7
+	github.com/klauspost/compress => github.com/klauspost/compress v1.15.4
+	github.com/moby/term => github.com/moby/term v0.0.0-20210610120745-9d4ed1856297
+	github.com/rancher/system-agent => github.com/rosskirkpat/system-agent v0.2.9-rc2
+	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
+	golang.org/x/sync => golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
+	//golang.org/x/sys => golang.org/x/sys v0.0.0-20200831180312-196b9ba8737a
+	golang.org/x/tools => golang.org/x/tools v0.1.10
+	k8s.io/api => k8s.io/api v0.24.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.0
 	k8s.io/apimachinery => k8s.io/apimachinery v0.24.2
 	k8s.io/apiserver => k8s.io/apiserver v0.24.2
@@ -32,6 +42,7 @@ replace (
 	k8s.io/mount-utils => k8s.io/mount-utils v0.24.0
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.23.8
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.24.0
+
 )
 
 require (
@@ -81,7 +92,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
-	github.com/google/go-containerregistry v0.10.0 // indirect
+	github.com/google/go-containerregistry v0.5.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
@@ -91,7 +102,7 @@ require (
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
-	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/maxbrunsfeld/counterfeiter/v6 v6.2.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -103,7 +114,7 @@ require (
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rancher/lasso v0.0.0-20220628160937-749b3397db38 // indirect
-	github.com/rancher/wharfie v0.5.3 // indirect
+	github.com/rancher/wharfie v0.4.3 // indirect
 	github.com/rancher/wrangler v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -112,13 +123,16 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
 	golang.org/x/oauth2 v0.0.0-20220628200809-02e64fa58f26 // indirect
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
+	golang.org/x/tools v0.1.10-0.20220218145154-897bd77cd717 // indirect
+	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220107163113-42d7afdf6368 // indirect
+	google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -127,7 +141,9 @@ require (
 	k8s.io/apimachinery v0.24.2 // indirect
 	k8s.io/apiserver v0.24.0 // indirect
 	k8s.io/client-go v0.24.2 // indirect
+	k8s.io/code-generator v0.24.0 // indirect
 	k8s.io/component-base v0.24.2 // indirect
+	k8s.io/gengo v0.0.0-20211129171323-c02415ce4185 // indirect
 	k8s.io/klog/v2 v2.70.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20220328201542-3ee0da9b0b42 // indirect
 	k8s.io/kubelet v0.24.2 // indirect
