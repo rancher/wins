@@ -5,6 +5,8 @@ go 1.18
 replace (
 	github.com/rancher/system-agent => github.com/rosskirkpat/system-agent v0.2.9-rc1
 	k8s.io/api => k8s.io/api v0.24.2
+	github.com/docker/docker => github.com/docker/docker v20.10.16+incompatible
+	github.com/docker/cli => github.com/docker/cli v20.10.16+incompatible
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.0
 	k8s.io/apimachinery => k8s.io/apimachinery v0.24.2
 	k8s.io/apiserver => k8s.io/apiserver v0.24.2
