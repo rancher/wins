@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var _infoFlags = internal.NewGRPCClientConn()
+var _infoFlags = internal.NewGRPCClientConn([]cli.Flag{})
 
 func _infoAction(cliCtx *cli.Context) (err error) {
 	defer panics.Log()
