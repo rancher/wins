@@ -33,7 +33,7 @@ func main() {
 		if err != nil {
 			return
 		}
-		if pcliCtx := cliCtx.Context(); pcliCtx == nil {
+		if pcliCtx := cliCtx.Lineage(); pcliCtx[1] == nil {
 			cli.ShowAppHelpAndExit(cliCtx, 1)
 		} else {
 			cli.ShowCommandHelpAndExit(cliCtx, cliCtx.Command.Name, 1)
