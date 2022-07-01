@@ -3,19 +3,13 @@ module github.com/rancher/wins
 go 1.18
 
 replace (
-	cloud.google.com/go => cloud.google.com/go v0.100.2
-	cloud.google.com/go/compute => cloud.google.com/go/compute v1.6.1
-	github.com/Azure/go-ansiterm => github.com/Azure/go-ansiterm v0.0.0-20210608223527-2377c96fe795
 	github.com/docker/cli => github.com/docker/cli v20.10.16+incompatible
 	github.com/docker/docker => github.com/docker/docker v20.10.16+incompatible
 	github.com/google/go-cmp => github.com/google/go-cmp v0.5.7
 	github.com/klauspost/compress => github.com/klauspost/compress v1.15.4
-	github.com/moby/term => github.com/moby/term v0.0.0-20210610120745-9d4ed1856297
 	github.com/rancher/system-agent => github.com/rosskirkpat/system-agent v0.2.9-rc2
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
 	golang.org/x/sync => golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
-	//golang.org/x/sys => golang.org/x/sys v0.0.0-20200831180312-196b9ba8737a
-	golang.org/x/tools => golang.org/x/tools v0.1.10
 	k8s.io/api => k8s.io/api v0.24.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.0
 	k8s.io/apimachinery => k8s.io/apimachinery v0.24.2
