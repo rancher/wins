@@ -55,34 +55,36 @@ RUN pushd c:\; \
     \
     Write-Host 'Ginkgo install complete.'; \
     popd;
-#
-#ENTRYPOINT ["powershell", "-NoLogo", "-NonInteractive", "-File", "./scripts/entry.ps1"]
-#CMD ["ci"]
 
 COPY . /go/wins/
 WORKDIR C:/
 
-RUN Write-Host "current directory is $(pwd)"; \
+ARG ACTION
+ENV ACTION ${ACTION}
+RUN Write-Host "Starting CI Action ($env:ACTION) for wins"; \
     Set-Location C:/go/wins/ ; \
-    ./scripts/entry.ps1 "ci"
+    ./scripts/entry.ps1 "$env:ACTION"
 
-#COPY ./install.ps1 C:/package/install.ps1
-#COPY ./suc/run.ps1 C:/package/run.ps1
-
+ARG BUILD_DATE
+ENV BUILD_DATE ${BUILD_DATE}
 ENV SERVERCORE_VERSION = ${SERVERCORE_VERSION}
 FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION} as wins
-ENV ARCH=amd64
+LABEL maintainer="ross.kirkpatrick@suse.com"
+LABEL org.opencontainers.image.authors="ross.kirkpatrick@suse.com"
+LABEL org.opencontainers.image.created="$env:BUILD_DATE"
+LABEL org.opencontainers.image.url="https://github.com/wins"
+LABEL org.opencontainers.image.documentation="https://github.com/wins"
+LABEL org.opencontainers.image.source="https://github.com/wins"
+LABEL org.opencontainers.image.vendor="Rancher Labs"
 
-SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 COPY --from=base C:/package/. C:/.
 WORKDIR C:/
 
-# Create a symbolic link pwsh.exe that points to powershell.exe for consistency
-RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe"
+SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-COPY ./wins.exe C:/Windows/wins.exe
-#COPY ./install.ps1 install.ps1
-#COPY ./suc/run.ps1 run.ps1
+# Create a symbolic link pwsh.exe that points to powershell.exe for consistency
+RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe" ; \
+    Copy-Item -Path ./wins.exe -Destination ./Windows/
 #USER ContainerAdministrator
 
 ENTRYPOINT [ "powershell", "-Command", "./run.ps1"]

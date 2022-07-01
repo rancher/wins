@@ -18,11 +18,8 @@ Write-Host -ForegroundColor Green "all required build artifacts are present"
 
 Write-Host -ForegroundColor Yellow "staging artifacts for multi-stage build"
 $null = New-Item -Type Directory -Path C:\package -ErrorAction Ignore
-$null = New-Item -Type Directory -Path C:\package\suc -ErrorAction Ignore
-$null = New-Item -Type Directory -Path C:\package\bin -ErrorAction Ignore
 Copy-Item -Force -Path $SRC_PATH\install.ps1 -Destination C:\package\install.ps1
 Copy-Item -Force -Path $SRC_PATH\suc\run.ps1 -Destination C:\package\run.ps1
 Copy-Item -Force -Path $SRC_PATH\bin\wins.exe -Destination C:\package\wins.exe
 Write-Host -ForegroundColor Green "artifacts have been successfully staged"
-#Set-Location -Path $SRC_PATH\package
 Write-Host -ForegroundColor Green "package.ps1 has completed successfully."
