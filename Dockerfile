@@ -74,15 +74,13 @@ FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION} as wins
 ENV ARCH=amd64
 
 SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-COPY --from=base C:/package/. C:/wins/.
-WORKDIR C:/wins/
+COPY --from=base C:/package/. C:/.
+WORKDIR C:/
 
 # Create a symbolic link pwsh.exe that points to powershell.exe for consistency
 RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe"
 
-RUN Write-Host "$(dir)"
-
-COPY ./bin/wins.exe C:/Windows/wins.exe
+COPY ./wins.exe C:/Windows/wins.exe
 #COPY ./install.ps1 install.ps1
 #COPY ./suc/run.ps1 run.ps1
 #USER ContainerAdministrator
