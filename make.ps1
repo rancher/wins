@@ -15,6 +15,35 @@ if ($args[0] -eq "integration") {
     exit
 }
 
+if ($args[0] -eq "build") {
+    Write-Host "Building wins"
+    Import-Module -WarningAction Ignore -Name "$PSScriptRoot\scripts\utils.psm1"
+    Invoke-Expression -Command "$PSScriptRoot\scripts\version.ps1"
+
+    $IMAGE = ('{0}/wins:{1}-windows-{2}-{3}' -f $env:REPO, $env:TAG, $env:SERVERCORE_VERSION, $env:ARCH)
+    Write-Host -ForegroundColor Yellow "Starting docker build of $IMAGE`n"
+
+    docker build `
+    --build-arg SERVERCORE_VERSION=$env:SERVERCORE_VERSION `
+    --build-arg ARCH=$env:ARCH `
+    --build-arg VERSION=$env:TAG `
+    -t $IMAGE `
+    -f Dockerfile .
+
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+    Write-Host -ForegroundColor Green "Successfully built $IMAGE`n"
+    exit
+}
+
+if ($args[0] -eq "package") {
+    Write-Host "Building and Packaging wins"
+    .dapper.exe -f Dockerfile.dapper build
+    .dapper.exe -f Dockerfile.dapper package
+    exit
+}
+
 if ($args[0] -eq "all") {
     Write-Host "Running CI and Integration Tests"
     .dapper.exe -f Dockerfile.dapper ci

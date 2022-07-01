@@ -14,6 +14,7 @@ function Build {
     $linkFlags = ('-s -w -X github.com/rancher/wins/pkg/defaults.AppVersion={0} -X github.com/rancher/wins/pkg/defaults.AppCommit={1} -extldflags "-static"' -f $Version, $Commit)
     go build -ldflags $linkFlags -o $Output cmd/main.go
     if (-not $?) {
+        Write-Host "go build is failing"
         Log-Fatal "go build failed!"
     }
 }
@@ -28,7 +29,7 @@ $null = New-Item -Type Directory -Path bin -ErrorAction Ignore
 $env:GOARCH = $env:ARCH
 $env:GOOS = 'windows'
 $env:CGO_ENABLED = 0
-Build -Version $env:VERSION -Commit $env:COMMIT -Output "bin\wins.exe"
-Build -Version "container" -Commit "container" -Output "bin\wins-container.exe"
+Write-Host "Building wins.exe for $env:GOOS/$env:GOARCH"
+Build -Version $env:VERSION -Commit $env:COMMIT -Output "$SRC_PATH\bin\wins.exe"
 
 Pop-Location

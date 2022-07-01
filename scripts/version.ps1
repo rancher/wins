@@ -21,19 +21,34 @@ if ((-not $DIRTY) -and ($GIT_TAG)) {
 }
 $env:VERSION = $VERSION
 
-$ARCH = $env:ARCH
-if (-not $ARCH) {
-    $ARCH = "amd64"
+if (-not $env:TAG) {
+    $env:TAG = ('{0}{1}' -f $env:VERSION, $env:SUFFIX)
 }
-$env:ARCH = $ARCH
+
+if (-not $env:REPO) {
+    $env:REPO = "rancher"
+}
+
+if ($TAG | Select-String -Pattern 'dirty') {
+    $env:TAG = "dev"
+}
+
+if ($env:DRONE_TAG) {
+    $TAG = $env:DRONE_TAG
+    $env:TAG = $TAG
+}
+
+if (-not $env:ARCH) {
+    $env:ARCH = "amd64"
+}
 
 $buildTags = @{ "17763" = "1809"; "20348" = "ltsc2022";}
 $buildNumber = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' -ErrorAction Ignore).CurrentBuildNumber
-$SERVERCORE_VERSION = $buildTags[$buildNumber]
-if (-not $SERVERCORE_VERSION) {
+$env:SERVERCORE_VERSION = $buildTags[$buildNumber]
+if (-not $env:SERVERCORE_VERSION) {
     $env:SERVERCORE_VERSION = "1809"
 }
 
-Write-Host "ARCH: $ARCH"
-Write-Host "VERSION: $VERSION"
-Write-Host "SERVERCORE_VERSION: $SERVERCORE_VERSION"
+Write-Host "ARCH: $env:ARCH"
+Write-Host "VERSION: $env:VERSION"
+Write-Host "SERVERCORE_VERSION: $env:SERVERCORE_VERSION"

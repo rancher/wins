@@ -22,7 +22,7 @@ if ! [[ "$0" =~ "scripts/protoc-gen" ]]; then
 	error "must be run from repository root"
 fi
 
-if ! [[ $(protoc --version) =~ "3.14.0" ]]; then
+if ! [[ $(protoc --version) =~ 3.14.0 ]]; then
 	error "could not find protoc 3.14.0, is it installed + in PATH?"
 fi
 
