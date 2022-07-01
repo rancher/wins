@@ -64,7 +64,7 @@ param (
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$FALLBACK = "v0.1.1"
+$FALLBACK = "v0.3.0"
 
 function Invoke-WinsInstaller {
     [CmdletBinding()]

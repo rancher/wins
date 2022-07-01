@@ -31,6 +31,10 @@ function WinsCIAction() {
     -f Dockerfile .
 
     if ($LASTEXITCODE -ne 0) {
+        $env:TAG=""
+        $env:SERVERCORE_VERSION=""
+        $env:TAG=""
+        $env:TAG=""
         exit $LASTEXITCODE
     }
     Write-Host -ForegroundColor Green "Successfully built $IMAGE`n"

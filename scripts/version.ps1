@@ -21,20 +21,19 @@ if ((-not $DIRTY) -and ($GIT_TAG)) {
 }
 $env:VERSION = $VERSION
 
-if (-not $env:TAG) {
-    $env:TAG = ('{0}{1}' -f $env:VERSION, $env:SUFFIX)
+$TAG = ('{0}{1}' -f $env:VERSION, $env:SUFFIX)
+if ($TAG | Select-String -Pattern 'dirty') {
+    $TAG = "dev"
 }
 
 if (-not $env:REPO) {
     $env:REPO = "rancher"
 }
 
-if ($TAG | Select-String -Pattern 'dirty') {
-    $env:TAG = "dev"
-}
-
-if ($env:DRONE_TAG) {
+if (($env:DRONE_TAG) -and (-Not ($TAG).Contains("dev") -or -Not ($TAG).Contains("dirty"))){
     $TAG = $env:DRONE_TAG
+    $env:TAG = $TAG
+} else {
     $env:TAG = $TAG
 }
 
@@ -51,4 +50,5 @@ if (-not $env:SERVERCORE_VERSION) {
 
 Write-Host "ARCH: $env:ARCH"
 Write-Host "VERSION: $env:VERSION"
+Write-Host "TAG: $env:TAG"
 Write-Host "SERVERCORE_VERSION: $env:SERVERCORE_VERSION"

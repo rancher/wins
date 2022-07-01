@@ -66,16 +66,18 @@ RUN Write-Host "Starting CI Action ($env:ACTION) for wins"; \
     ./scripts/entry.ps1 "$env:ACTION"
 
 ARG BUILD_DATE
+ARG VERSION
 ENV BUILD_DATE ${BUILD_DATE}
+ENV VERSION ${VERSION}
 ENV SERVERCORE_VERSION = ${SERVERCORE_VERSION}
 FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION} as wins
-LABEL maintainer="ross.kirkpatrick@suse.com"
-LABEL org.opencontainers.image.authors="ross.kirkpatrick@suse.com"
-LABEL org.opencontainers.image.created="$env:BUILD_DATE"
+LABEL org.opencontainers.image.authors="ross.kirkpatrick@suse.com jamie.phillips@suse.com"
+LABEL org.opencontainers.image.created="${env:BUILD_DATE}"
 LABEL org.opencontainers.image.url="https://github.com/wins"
 LABEL org.opencontainers.image.documentation="https://github.com/wins"
 LABEL org.opencontainers.image.source="https://github.com/wins"
 LABEL org.opencontainers.image.vendor="Rancher Labs"
+LABEL org.opencontainers.image.version="${env:VERSION}"
 
 COPY --from=base C:/package/. C:/.
 WORKDIR C:/
