@@ -29,7 +29,8 @@ $null = New-Item -Type Directory -Path bin -ErrorAction Ignore
 $env:GOARCH = $env:ARCH
 $env:GOOS = 'windows'
 $env:CGO_ENABLED = 0
-Write-Host "Building wins.exe for $env:GOOS/$env:GOARCH"
+Write-Host "Building wins version ($env:VERSION) for $env:GOOS/$env:GOARCH"
 Build -Version $env:VERSION -Commit $env:COMMIT -Output "$SRC_PATH\bin\wins.exe"
+Write-Host "built wins.exe for $env:GOOS/$env:GOARCH and output in $SRC_PATH\bin"
 
 Pop-Location

@@ -15,7 +15,7 @@ if (-not $GIT_TAG) {
 }
 $env:COMMIT = $COMMIT
 
-$VERSION = "${COMMIT}${DIRTY}"
+$VERSION = "${env:COMMIT}${DIRTY}"
 if ((-not $DIRTY) -and ($GIT_TAG)) {
     $VERSION = "${GIT_TAG}"
 }

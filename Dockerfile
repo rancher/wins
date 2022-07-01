@@ -63,10 +63,8 @@ COPY . /go/wins/
 WORKDIR C:/
 
 RUN Write-Host "current directory is $(pwd)"; \
-    ./go/wins/scripts/entry.ps1 "ci"; \
-    Write-Host "C: $(dir C:/)"; \
-    Write-Host "package: $(dir C:/package)"
-
+    Set-Location C:/go/wins/ ; \
+    ./scripts/entry.ps1 "ci"
 
 #COPY ./install.ps1 C:/package/install.ps1
 #COPY ./suc/run.ps1 C:/package/run.ps1
@@ -76,15 +74,15 @@ FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION} as wins
 ENV ARCH=amd64
 
 SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-COPY --from=base C:/package/* C:/.
-WORKDIR C:/
+COPY --from=base C:/package/. C:/wins/.
+WORKDIR C:/wins/
 
 # Create a symbolic link pwsh.exe that points to powershell.exe for consistency
 RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe"
 
 RUN Write-Host "$(dir)"
 
-COPY C:/wins.exe /Windows/
+COPY ./bin/wins.exe C:/Windows/wins.exe
 #COPY ./install.ps1 install.ps1
 #COPY ./suc/run.ps1 run.ps1
 #USER ContainerAdministrator

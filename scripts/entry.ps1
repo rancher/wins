@@ -5,7 +5,7 @@ trap {
     Write-Host -NoNewline -ForegroundColor Red "[ERROR]: "
     Write-Host -ForegroundColor Red "$_"
 
-    popd
+    Pop-Location
     exit 1
 }
 
