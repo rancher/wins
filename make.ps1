@@ -1,19 +1,13 @@
-#if (!(Test-Path .dapper.exe)) {
-#    $dapperURL = "https://releases.rancher.com/dapper/latest/dapper-Windows-x86_64.exe"
-#    Write-Host "no .dapper.exe, downloading $dapperURL"
-#    curl.exe -sfL -o .dapper.exe $dapperURL
-#}
+#Requires -Version 5.0
 
-if ($args.Count -eq 0) {
-    $args = @("ci")
-}
+$ErrorActionPreference = 'Stop'
 
+Import-Module -WarningAction Ignore -Name "$PSScriptRoot\scripts\utils.psm1"
 
 function WinsCIAction() {
     param (
         [parameter(Mandatory = $true, ValueFromPipeline = $true)] [string]$Action
     )
-    Import-Module -WarningAction Ignore -Name "$PSScriptRoot\scripts\utils.psm1"
     Invoke-Expression -Command "$PSScriptRoot\scripts\version.ps1"
 
     $IMAGE = ('{0}/wins:{1}-windows-{2}' -f $env:REPO, $env:TAG, $env:SERVERCORE_VERSION)
@@ -39,6 +33,14 @@ function WinsCIAction() {
     Write-Host -ForegroundColor Green "Successfully built $IMAGE`n"
 }
 
+trap {
+    Write-Host -NoNewline -ForegroundColor Red "[ERROR]: "
+    Write-Host -ForegroundColor Red "$_"
+
+    Pop-Location
+    exit 1
+}
+
 if ($args[0] -eq "integration") {
     Write-Host "Running Integration Tests"
     WinsCIAction -Action "integration"
@@ -58,10 +60,20 @@ if ($args[0] -eq "package") {
     exit
 }
 
-if ($args[0] -eq "all") {
+if ($args[0] -eq "all" -or $args.Count -eq 0 -or $args[0] -eq "ci") {
     Write-Host "Running CI and Integration Tests"
     WinsCIAction -Action "ci"
-    WinsCIAction -Action "integration"
+    exit
+}
+
+if ($args[0] -eq "no-docker") {
+    if ($args[1] -eq "") {
+        Write-Host "Running CI without Docker"
+        Invoke-Expression -Command "scripts\ci.ps1 ci"
+    } else {
+        Write-Host ('Running {0}.ps1 without Docker' -f $($args[1]))
+        Invoke-Expression -Command "scripts\ci.ps1 $($args[1])"
+    }
     exit
 }
 
