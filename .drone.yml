@@ -13,18 +13,19 @@ steps:
   image: plugins/docker
   pull: always
   settings:
-#    dry_run: true
-#    no_cache: true
+    dry_run: true
+    purge: true
     build_args:
       - SERVERCORE_VERSION=1809
       - ARCH=amd64
       - VERSION=${DRONE_TAG}
-      - ACTION=package
+      - ACTION=ci
       - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
       - REPO=https://github.com/rancher/wins
     custom_dns: 1.1.1.1
     dockerfile: Dockerfile
     repo: rancher/wins
+    tag: ${DRONE_TAG}-windows-1809
   volumes:
     - name: docker_pipe
       path: \\\\.\\pipe\\docker_engine
@@ -50,13 +51,12 @@ steps:
 - name: publish
   image: plugins/docker
   settings:
-    pull_image: true
     no_cache: true
     build_args:
       - SERVERCORE_VERSION=1809
       - ARCH=amd64
       - VERSION=${DRONE_TAG}
-      - ACTION=package
+      - ACTION=ci
       - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
       - REPO=https://github.com/rancher/wins
     custom_dns: 1.1.1.1
@@ -110,30 +110,54 @@ steps:
   - name: build
     image: rancher/drone-images:docker-amd64-ltsc2022
     settings:
+      dry_run: true
+      purge: true
       build_args:
         - SERVERCORE_VERSION=ltsc2022
         - ARCH=amd64
         - VERSION=${DRONE_TAG}
-        - ACTION=package
+        - ACTION=ci
         - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
         - REPO=https://github.com/rancher/wins
       custom_dns: 1.1.1.1
       dockerfile: Dockerfile
+      repo: rancher/wins
+#      tag: ${DRONE_TAG}-windows-ltsc2022
+    volumes:
+      - name: docker_pipe
+        path: \\\\.\\pipe\\docker_engine
+
+
+  - name: publish
+    image: plugins/docker
+    settings:
+      no_cache: true
+      build_args:
+        - SERVERCORE_VERSION=ltsc2022
+        - ARCH=amd64
+        - VERSION=${DRONE_TAG}
+        - ACTION=ci
+        - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
+        - REPO=https://github.com/rancher/wins
+      custom_dns: 1.1.1.1
+      dockerfile: Dockerfile
+      repo: rancher/wins
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
-      repo: rosskirkpat/wins
       tag: ${DRONE_TAG}-windows-ltsc2022
     volumes:
       - name: docker_pipe
         path: \\\\.\\pipe\\docker_engine
     when:
+      instance:
+        - drone-publish.rancher.io
+      ref:
+        - refs/head/main
+        - refs/tags/*
       event:
         - tag
-      ref:
-        - refs/heads/main
-        - refs/tags/*
 
 volumes:
   - name: docker_pipe

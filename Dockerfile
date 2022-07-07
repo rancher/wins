@@ -61,7 +61,7 @@ ARG ACTION
 ENV ACTION ${ACTION}
 RUN Write-Host "Starting CI Action ($env:ACTION) for wins"; \
     Set-Location C:/go/wins/ ; \
-    ./scripts/entry.ps1 "$env:ACTION"
+    ./scripts/ci.ps1 "$env:ACTION"
 
 FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION} as wins
 ARG VERSION
