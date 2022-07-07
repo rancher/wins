@@ -24,7 +24,6 @@ steps:
     custom_dns: 1.1.1.1
     dockerfile: Dockerfile
     repo: rancher/wins
-    tag: ${DRONE_TAG}-windows-1809
   volumes:
     - name: docker_pipe
       path: \\\\.\\pipe\\docker_engine
@@ -120,7 +119,6 @@ steps:
       custom_dns: 1.1.1.1
       dockerfile: Dockerfile
       repo: rancher/wins
-#      tag: ${DRONE_TAG}-windows-ltsc2022
     volumes:
       - name: docker_pipe
         path: \\\\.\\pipe\\docker_engine
