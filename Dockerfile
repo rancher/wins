@@ -8,7 +8,7 @@ RUN pushd c:\; \
     Write-Host ('Downloading docker from {0} ...' -f $URL); \
     curl.exe -sfL $URL -o c:\Windows\docker.exe; \
     \
-    Write-Host 'Complete.'; \
+    Write-Host 'docker install complete.'; \
     popd;
 
 RUN pushd c:\; \
@@ -26,7 +26,7 @@ RUN pushd c:\; \
     Write-Host 'Updating PATH ...'; \
     [Environment]::SetEnvironmentVariable('PATH', ('c:\golangci-lint-1.44.0-windows-amd64\;{0}' -f $env:PATH), [EnvironmentVariableTarget]::Machine); \
     \
-    Write-Host 'Complete.'; \
+    Write-Host 'golangci-lint install complete.'; \
     popd;
 
 # upgrade git
@@ -42,8 +42,7 @@ RUN pushd c:\; \
     \
     Write-Host 'Cleaning ...'; \
     Remove-Item -Force -Recurse -Path c:\git.zip; \
-    \
-    Write-Host 'Complete.'; \
+    Write-Host 'git install complete.'; \
     popd;
 
 # install ginkgo
@@ -52,7 +51,6 @@ RUN pushd c:\; \
     Write-Host ('Updating ginkgo ...'); \
     go install github.com/onsi/ginkgo/ginkgo@latest; \
     go get -u github.com/onsi/gomega/...; \
-    \
     Write-Host 'Ginkgo install complete.'; \
     popd;
 
@@ -65,24 +63,28 @@ RUN Write-Host "Starting CI Action ($env:ACTION) for wins"; \
     Set-Location C:/go/wins/ ; \
     ./scripts/entry.ps1 "$env:ACTION"
 
-ARG BUILD_DATE
-ARG VERSION
-ENV BUILD_DATE ${BUILD_DATE}
-ENV VERSION ${VERSION}
-ENV SERVERCORE_VERSION = ${SERVERCORE_VERSION}
 FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION} as wins
-LABEL org.opencontainers.image.authors="ross.kirkpatrick@suse.com jamie.phillips@suse.com"
-LABEL org.opencontainers.image.created="${env:BUILD_DATE}"
-LABEL org.opencontainers.image.url="https://github.com/wins"
-LABEL org.opencontainers.image.documentation="https://github.com/wins"
-LABEL org.opencontainers.image.source="https://github.com/wins"
+ARG VERSION
+ARG MAINTAINERS
+ARG REPO
+
+SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+ENV VERSION ${VERSION}
+ENV MAINTAINERS ${MAINTAINERS}
+ENV REPO ${REPO}
+
+LABEL org.opencontainers.image.authors=${MAINTAINERS}
+LABEL org.opencontainers.image.url=${REPO}
+LABEL org.opencontainers.image.documentation=${REPO}
+LABEL org.opencontainers.image.source=${REPO}
+LABEL org.label-schema.vcs-url=${REPO}
 LABEL org.opencontainers.image.vendor="Rancher Labs"
-LABEL org.opencontainers.image.version="${env:VERSION}"
+LABEL org.opencontainers.image.version=${VERSION}
 
 COPY --from=base C:/package/. C:/.
 WORKDIR C:/
 
-SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 # Create a symbolic link pwsh.exe that points to powershell.exe for consistency
 RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe" ; \
