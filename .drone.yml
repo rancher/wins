@@ -18,7 +18,6 @@ steps:
     build_args:
       - SERVERCORE_VERSION=1809
       - ARCH=amd64
-      - VERSION=${DRONE_TAG}
       - ACTION=ci
       - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
       - REPO=https://github.com/rancher/wins
@@ -115,7 +114,6 @@ steps:
       build_args:
         - SERVERCORE_VERSION=ltsc2022
         - ARCH=amd64
-        - VERSION=${DRONE_TAG}
         - ACTION=ci
         - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
         - REPO=https://github.com/rancher/wins
