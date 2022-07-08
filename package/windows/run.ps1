@@ -81,8 +81,8 @@ function Invoke-WinsHostProcessUpgrade {
 
     Pop-Location
 
-    Remove-Item -Force -Path $tmpdir\wins.exe -ErrorAction Ignore | Out-Null
-    Remove-Item -Force -Path $tmpdir\install.ps1 -ErrorAction Ignore | Out-Null
+    Remove-Item -Path $tmpdir\wins.exe
+    Remove-Item -Path $tmpdir\install.ps1
     exit 0
 }
 
@@ -97,7 +97,6 @@ function Invoke-WinsWinsUpgrade {
     Copy-Item -Force -Path "C:\wins.exe" -Destination $winsUpgradePathLocal | Out-Null
 
     Write-Host "Transferring file to host..."
-    New-Directory -Path $winsUpgradePath
     Start-TransferFile -Source "C:\wins.exe" -Destination $winsUpgradePath
 
     Write-Host "Checking if $($winsUpgradePath) exists"
@@ -111,8 +110,7 @@ function Invoke-WinsWinsUpgrade {
 
     $winsOut = wins.exe cli prc run --path=$winsUpgradePathLocal --args="up"
 
-    Remove-Item -Recurse -Force -Path $winsUpgradePath -ErrorAction Ignore | Out-Null
-
+    Remove-Item -Path $winsUpgradePath
 
     if ($winsOut -match ".* rpc error: code = Unavailable desc = transport is closing") {
         Write-Host "Successfully upgraded"

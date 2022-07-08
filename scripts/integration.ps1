@@ -12,5 +12,6 @@ if ($LASTEXITCODE -ne 0) {
     Log-Fatal "integration test failed"
     exit $LASTEXITCODE
 }
+Write-Host -ForegroundColor Green "integration.ps1 has completed successfully."
 
 Pop-Location

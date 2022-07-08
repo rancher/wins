@@ -215,7 +215,17 @@ tls-config:
 ## Build
 
 ``` powershell
-> .\make build
+# Build inside a Docker container
+
+> .\make.ps1 build
+
+# Build using Powershell scripts only
+
+> .\make.ps1 no-docker build
+
+# Build locally using drone (Docker-In-Docker)
+
+> drone.exe exec --trusted --pipeline=windows-1809 --include=build --event=pull_request --ref="$(git rev-parse --short HEAD)" --sha="$(git show -s --format=%H)" .drone.yml
 ```
 
 ## Testing
@@ -226,26 +236,26 @@ and integration test.
 For validation test, which could be embedded into a containerized CI flow, please run the below command in `PowerShell`:
 
 ``` powershell
-> .\make
+> .\make.ps1 validate
 ```
 
 For integration test, please run the below command in `PowerShell`:
 
 ``` powershell
-> .\make integration
+> .\make.ps1 integration
 ```
 
-> Note: Don't use `bin/wins.exe` after integration testing. Please `.\make build` again.
+> Note: Don't use `bin/wins.exe` after integration testing. Please `.\make.ps1 build` again.
 
 If want both of them, please run the below command in `PowerShell`:
 
 ``` powershell
-> .\make all
+> .\make.ps1 all
 ```
 
 ## License
 
-Copyright (c) 2014-2021 [Rancher Labs, Inc.](http://rancher.com)
+Copyright (c) 2014-2022 [Rancher Labs, Inc.](http://rancher.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
 License. You may obtain a copy of the License at

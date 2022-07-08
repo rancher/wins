@@ -8,18 +8,18 @@ if (-not $SERVERCORE_VERSION) {
     $SERVERCORE_VERSION = "1809"
 }
 
-Get-ChildItem -Path $PSScriptRoot\docker -Name Dockerfile.* | ForEach-Object {
-    $dockerfile = $_
-    $tag = $dockerfile -replace "Dockerfile.", ""
-    docker build `
-        --build-arg SERVERCORE_VERSION=$SERVERCORE_VERSION `
-        -t $tag `
-        -f $PSScriptRoot\docker\$dockerfile .
-    if ($LASTEXITCODE -ne 0) {
-        Log-Fatal "Failed to build testing docker image"
-        exit $LASTEXITCODE
-    }
-}
+#Get-ChildItem -Path $PSScriptRoot\docker -Name Dockerfile.* | ForEach-Object {
+#    $dockerfile = $_
+#    $tag = $dockerfile -replace "Dockerfile.", ""
+#    docker build `
+#        --build-arg SERVERCORE_VERSION=$SERVERCORE_VERSION `
+#        -t $tag `
+#        -f $PSScriptRoot\docker\$dockerfile .
+#    if ($LASTEXITCODE -ne 0) {
+#        Log-Fatal "Failed to build testing docker image"
+#        exit $LASTEXITCODE
+#    }
+#}
 
 # test
 New-Item -Type Directory -Force -ErrorAction Ignore -Path @(

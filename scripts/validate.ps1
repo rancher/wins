@@ -18,3 +18,5 @@ golangci-lint run
 
 Log-Info "Running: go fmt"
 go fmt ./...
+
+Write-Host -ForegroundColor Green "validate.ps1 has completed successfully."

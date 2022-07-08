@@ -10,18 +10,23 @@ platform:
 
 steps:
 - name: build
+  image: plugins/docker
   pull: always
-  image: rancher/dapper:v0.5.8
-  commands:
-    - dapper.exe -f Dockerfile.dapper -d ci
+  settings:
+    dry_run: true
+    purge: true
+    build_args:
+      - SERVERCORE_VERSION=1809
+      - ARCH=amd64
+      - ACTION=ci
+      - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
+      - REPO=https://github.com/rancher/wins
+    custom_dns: 1.1.1.1
+    dockerfile: Dockerfile
+    repo: rancher/wins
   volumes:
     - name: docker_pipe
       path: \\\\.\\pipe\\docker_engine
-
-- name: stage-binaries
-  image: rancher/dapper:v0.5.8
-  commands:
-    - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
 - name: github_binary_release
   image: plugins/github-release
@@ -32,7 +37,6 @@ steps:
     - sha256
     files:
       - bin/wins.exe
-      - dist/rancher-wins-upgrader-*.tgz
   when:
     instance:
       - drone-publish.rancher.io
@@ -42,31 +46,36 @@ steps:
     event:
       - tag
 
-- name: docker-publish
+- name: publish
   image: plugins/docker
   settings:
+    no_cache: true
     build_args:
-    - SERVERCORE_VERSION=1809
-    - ARCH=amd64
-    - VERSION=${DRONE_TAG}
-    context: package/windows
+      - SERVERCORE_VERSION=1809
+      - ARCH=amd64
+      - VERSION=${DRONE_TAG}
+      - ACTION=ci
+      - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
+      - REPO=https://github.com/rancher/wins
     custom_dns: 1.1.1.1
-    dockerfile: package/windows/Dockerfile
+    dockerfile: Dockerfile
+    repo: rancher/wins
     username:
       from_secret: docker_username
     password:
       from_secret: docker_password
-    repo: rancher/wins
     tag: ${DRONE_TAG}-windows-1809
   volumes:
-  - name: docker_pipe
-    path: \\\\.\\pipe\\docker_engine
+    - name: docker_pipe
+      path: \\\\.\\pipe\\docker_engine
   when:
-    event:
-    - tag
+    instance:
+      - drone-publish.rancher.io
     ref:
-    - refs/heads/main
-    - refs/tags/*
+      - refs/head/main
+      - refs/tags/*
+    event:
+      - tag
 
 volumes:
   - name: docker_pipe
@@ -97,44 +106,54 @@ steps:
     image: rancher/drone-images:git-amd64-ltsc2022
 
   - name: build
-    pull: always
-    image: rancher/dapper:v0.5.8
-    commands:
-      - dapper.exe -f Dockerfile.dapper -d ci
+    image: rancher/drone-images:docker-amd64-ltsc2022
+    settings:
+      dry_run: true
+      purge: true
+      build_args:
+        - SERVERCORE_VERSION=ltsc2022
+        - ARCH=amd64
+        - ACTION=ci
+        - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
+        - REPO=https://github.com/rancher/wins
+      custom_dns: 1.1.1.1
+      dockerfile: Dockerfile
+      repo: rancher/wins
     volumes:
       - name: docker_pipe
         path: \\\\.\\pipe\\docker_engine
 
-  - name: stage-binaries
-    image: rancher/dapper:v0.5.8
-    commands:
-      - "Get-ChildItem -Path ./bin; Get-ChildItem -Path ./dist; Copy-Item -Force -Path ./bin/wins.exe -Destination ./package/windows/; Get-ChildItem -Path ./package/windows"
 
-  - name: docker-publish
-    image: rancher/drone-images:docker-amd64-ltsc2022
+  - name: publish
+    image: plugins/docker
     settings:
+      no_cache: true
       build_args:
         - SERVERCORE_VERSION=ltsc2022
         - ARCH=amd64
         - VERSION=${DRONE_TAG}
-      context: package/windows
+        - ACTION=ci
+        - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
+        - REPO=https://github.com/rancher/wins
       custom_dns: 1.1.1.1
-      dockerfile: package/windows/Dockerfile
+      dockerfile: Dockerfile
+      repo: rancher/wins
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
-      repo: rancher/wins
       tag: ${DRONE_TAG}-windows-ltsc2022
     volumes:
       - name: docker_pipe
         path: \\\\.\\pipe\\docker_engine
     when:
+      instance:
+        - drone-publish.rancher.io
+      ref:
+        - refs/head/main
+        - refs/tags/*
       event:
         - tag
-      ref:
-        - refs/heads/main
-        - refs/tags/*
 
 volumes:
   - name: docker_pipe

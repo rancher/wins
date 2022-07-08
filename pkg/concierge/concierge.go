@@ -28,7 +28,7 @@ type Concierge struct {
 // New creates a new Concierge for managing a Windows Service.
 func New(name, path string, cfg *Config) (*Concierge, error) {
 	if name == "" {
-		return nil, errors.New("name isn't set and can't be empty.")
+		return nil, errors.New("name isn't set and can't be empty")
 	}
 
 	if path == "" {
