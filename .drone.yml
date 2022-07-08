@@ -28,24 +28,6 @@ steps:
     - name: docker_pipe
       path: \\\\.\\pipe\\docker_engine
 
-- name: github_binary_release
-  image: plugins/github-release
-  settings:
-    api_key:
-      from_secret: github_token
-    checksum:
-    - sha256
-    files:
-      - bin/wins.exe
-  when:
-    instance:
-      - drone-publish.rancher.io
-    ref:
-      - refs/head/main
-      - refs/tags/*
-    event:
-      - tag
-
 - name: publish
   image: plugins/docker
   settings:
@@ -68,6 +50,24 @@ steps:
   volumes:
     - name: docker_pipe
       path: \\\\.\\pipe\\docker_engine
+  when:
+    instance:
+      - drone-publish.rancher.io
+    ref:
+      - refs/head/main
+      - refs/tags/*
+    event:
+      - tag
+
+- name: github_binary_release
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: github_token
+    checksum:
+      - sha256
+    files:
+      - bin/wins.exe
   when:
     instance:
       - drone-publish.rancher.io
@@ -125,7 +125,7 @@ steps:
 
 
   - name: publish
-    image: plugins/docker
+    image: rancher/drone-images:docker-amd64-ltsc2022
     settings:
       no_cache: true
       build_args:
