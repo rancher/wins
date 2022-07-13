@@ -11,10 +11,10 @@ import (
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/paths"
 	"github.com/rancher/wins/pkg/types"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
-var _infoFlags = internal.NewGRPCClientConn()
+var _infoFlags = internal.NewGRPCClientConn([]cli.Flag{})
 
 func _infoAction(cliCtx *cli.Context) (err error) {
 	defer panics.Log()
@@ -52,8 +52,8 @@ func _infoAction(cliCtx *cli.Context) (err error) {
 	})
 }
 
-func infoCommand() cli.Command {
-	return cli.Command{
+func infoCommand() *cli.Command {
+	return &cli.Command{
 		Name:   "info",
 		Usage:  "Get application info",
 		Flags:  _infoFlags,

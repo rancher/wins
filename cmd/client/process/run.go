@@ -18,31 +18,31 @@ import (
 	"github.com/rancher/wins/pkg/paths"
 	"github.com/rancher/wins/pkg/types"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var _runFlags = internal.NewGRPCClientConn(
 	[]cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "path",
 			Usage: "[required] Runs the binary located in the host",
 		},
-		cli.GenericFlag{
+		&cli.GenericFlag{
 			Name:  "args",
 			Usage: "[optional] [list-argument] Specifies the arguments for binary when running, e.g.: x=y b=c",
 			Value: flags.NewListValue(),
 		},
-		cli.GenericFlag{
+		&cli.GenericFlag{
 			Name:  "exposes",
 			Usage: "[optional] [list-argument] Exposes a port or a range of ports, e.g.: TCP:443 UDP:4789-4790",
 			Value: flags.NewListValue(),
 		},
-		cli.GenericFlag{
+		&cli.GenericFlag{
 			Name:  "envs",
 			Usage: "[optional] [list-argument] Specifies the environment variables for binary when running, e.g.: x=y b=c",
 			Value: flags.NewListValue(),
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  "dir",
 			Usage: "[optional] Specifies the running directory, otherwise run in the path parent directory",
 		},
@@ -268,8 +268,8 @@ func combineSignals(doneC <-chan struct{}, cleanupFn func()) <-chan struct{} {
 	return stopChan
 }
 
-func runCommand() cli.Command {
-	return cli.Command{
+func runCommand() *cli.Command {
+	return &cli.Command{
 		Name:   "run",
 		Usage:  "Run a process",
 		Flags:  _runFlags,

@@ -7,10 +7,10 @@ import (
 	"github.com/rancher/wins/cmd/outputs"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/types"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
-var _getVersionFlags = internal.NewGRPCClientConn()
+var _getVersionFlags = internal.NewGRPCClientConn([]cli.Flag{})
 
 func _getVersionAction(cliCtx *cli.Context) (err error) {
 	defer panics.Log()
@@ -41,8 +41,8 @@ func _getVersionAction(cliCtx *cli.Context) (err error) {
 	return outputs.JSON(cliCtx.App.Writer, resp.Data)
 }
 
-func getVersionCommand() cli.Command {
-	return cli.Command{
+func getVersionCommand() *cli.Command {
+	return &cli.Command{
 		Name:   "get-version",
 		Usage:  "Get host version",
 		Flags:  _getVersionFlags,

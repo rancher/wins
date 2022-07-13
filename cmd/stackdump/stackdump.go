@@ -2,7 +2,7 @@ package stackdump
 
 import (
 	"github.com/rancher/wins/pkg/profilings"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func _stackDumpAction(_ *cli.Context) (err error) {

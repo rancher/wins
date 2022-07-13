@@ -10,12 +10,12 @@ import (
 	"github.com/rancher/wins/cmd/cmds/flags"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/types"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var _addFlags = internal.NewGRPCClientConn(
 	[]cli.Flag{
-		cli.GenericFlag{
+		&cli.GenericFlag{
 			Name:  "addresses",
 			Usage: "[required] [list-argument] Specifies the addresses or CIDRs as the destinations, e.g.: 8.8.8.8 6.6.6.6/32",
 			Value: flags.NewListValue(),
@@ -74,8 +74,8 @@ func _addAction(cliCtx *cli.Context) (err error) {
 	return
 }
 
-func addCommand() cli.Command {
-	return cli.Command{
+func addCommand() *cli.Command {
+	return &cli.Command{
 		Name:   "add",
 		Usage:  "Add a route",
 		Flags:  _addFlags,

@@ -67,7 +67,7 @@ steps:
     checksum:
       - sha256
     files:
-      - C:\go\wins\bin\wins.exe
+      - C:\package\wins.exe
   when:
     instance:
       - drone-publish.rancher.io

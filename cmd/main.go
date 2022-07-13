@@ -15,7 +15,7 @@ import (
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -29,19 +29,31 @@ func main() {
 	app.Writer = colorable.NewColorableStdout()
 	app.ErrWriter = colorable.NewColorableStderr()
 	app.CommandNotFound = func(cliCtx *cli.Context, s string) {
-		fmt.Fprintf(cliCtx.App.Writer, "Invalid Command: %s \n\n", s)
-		if pcliCtx := cliCtx.Parent(); pcliCtx == nil {
+		_, err := fmt.Fprintf(cliCtx.App.Writer, "Invalid Command: %s \n\n", s)
+		if err != nil {
+			return
+		}
+		if pcliCtx := cliCtx.Lineage(); pcliCtx[1] == nil {
 			cli.ShowAppHelpAndExit(cliCtx, 1)
 		} else {
-			cli.ShowCommandHelpAndExit(cliCtx, pcliCtx.Command.Name, 1)
+			cli.ShowCommandHelpAndExit(cliCtx, cliCtx.Command.Name, 1)
 		}
 	}
 	app.OnUsageError = func(cliCtx *cli.Context, err error, isSubcommand bool) error {
-		fmt.Fprintf(cliCtx.App.Writer, "Incorrect Usage: %s \n\n", err.Error())
+		_, err = fmt.Fprintf(cliCtx.App.Writer, "Incorrect Usage: %s \n\n", err.Error())
+		if err != nil {
+			return err
+		}
 		if isSubcommand {
-			cli.ShowSubcommandHelp(cliCtx)
+			err := cli.ShowSubcommandHelp(cliCtx)
+			if err != nil {
+				return err
+			}
 		} else {
-			cli.ShowAppHelp(cliCtx)
+			err := cli.ShowAppHelp(cliCtx)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -51,7 +63,7 @@ func main() {
 		return nil
 	}
 
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		server.NewCommand(),
 		client.NewCommand(),
 		upgrade.NewCommand(),

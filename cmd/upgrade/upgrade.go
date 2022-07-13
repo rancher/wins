@@ -7,15 +7,15 @@ import (
 
 	"github.com/rancher/wins/pkg/powershell"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 var _upgradeFlags = []cli.Flag{
-	cli.StringFlag{
+	&cli.StringFlag{
 		Name:  "wins-args",
 		Usage: "[optional] Arguments to pass onto wins srv app run --register",
 	},
-	cli.BoolFlag{
+	&cli.BoolFlag{
 		Name:  "debug",
 		Usage: "[optional] whether to print debugging logs from performing the upgrade",
 	},
