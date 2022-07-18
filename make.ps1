@@ -47,18 +47,18 @@ if ($args[0] -eq "integration") {
     exit
 }
 
-if ($args[0] -eq "build") {
+if ($args[0] -eq "build" -or $args[0] -eq "package") {
     Write-Host "Building wins"
     WinsCIAction -Action "build"
     exit
 }
 
-if ($args[0] -eq "package") {
-    Write-Host "Building and Packaging wins"
-    WinsCIAction -Action "build"
-    WinsCIAction -Action "package"
-    exit
-}
+# if ($args[0] -eq "package") {
+#     Write-Host "Building and Packaging wins"
+#     WinsCIAction -Action "build"
+#     WinsCIAction -Action "package"
+#     exit
+# }
 
 if ($args[0] -eq "all" -or $args.Count -eq 0 -or $args[0] -eq "ci") {
     Write-Host "Running CI and Integration Tests"

@@ -5,21 +5,14 @@ Invoke-Expression -Command "$PSScriptRoot\version.ps1"
 
 $DIR_PATH = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $SRC_PATH = (Resolve-Path "$DIR_PATH\..").Path
+$PACKAGE_DIR = "C:\package"
 
-$ASSETS = @("install.ps1", "bin\wins.exe", "suc\run.ps1")
-Write-Host -ForegroundColor Yellow "checking for build artifact [$ASSETS] in $SRC_PATH"
+$ASSETS = @("install.ps1", "wins.exe", "run.ps1")
+Write-Host -ForegroundColor Yellow "[package] verifying build artifacts [$ASSETS] are present in ($PACKAGE_DIR)"
 foreach ($item in $ASSETS) {
-    if (-not ("$SRC_PATH\$item")) {
-        Write-Error "required build artifact is missing: $item"
-        throw
+    if (-not("$PACKAGE_DIR\$item")) {
+        Log-Fatal "[package] required build artifact $PACKAGE_DIR\$item is missing, exiting now"
     }
 }
-Write-Host -ForegroundColor Green "all required build artifacts are present"
-
-Write-Host -ForegroundColor Yellow "staging artifacts for multi-stage build"
-$null = New-Item -Type Directory -Path C:\package -ErrorAction Ignore
-Copy-Item -Force -Path $SRC_PATH\install.ps1 -Destination C:\package\install.ps1
-Copy-Item -Force -Path $SRC_PATH\suc\run.ps1 -Destination C:\package\run.ps1
-Copy-Item -Force -Path $SRC_PATH\bin\wins.exe -Destination C:\package\wins.exe
-Write-Host -ForegroundColor Green "artifacts have been successfully staged"
-Write-Host -ForegroundColor Green "package.ps1 has completed successfully."
+Write-Host -ForegroundColor Green "[package] all required build artifacts are present"
+Write-Host -ForegroundColor Green "package.ps1 has completed successfully"
