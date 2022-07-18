@@ -90,7 +90,7 @@ volumes:
     host:
       path: \\\\.\\pipe\\docker_engine
   - name: binary_cache
-    path: {}
+    temp: {}
 
 trigger:
   event:
