@@ -83,13 +83,17 @@ LABEL org.opencontainers.image.vendor="Rancher Labs"
 LABEL org.opencontainers.image.version=${VERSION}
 
 COPY --from=base C:/package/. C:/.
+# staging for backwards compatibility
+RUN New-Item -Type Directory C:/package
+COPY C:/wins.exe C:/package/wins.exe
+COPY C:/wins.exe C:/Windows/wins.exe
 WORKDIR C:/
 
 
 # Create a symbolic link pwsh.exe that points to powershell.exe for consistency
 RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe" ; \
     Copy-Item -Path ./wins.exe -Destination ./Windows/
-#USER ContainerAdministrator
+USER ContainerAdministrator
 
 ENTRYPOINT [ "powershell", "-Command", "./run.ps1"]
 
