@@ -19,7 +19,7 @@ try {
         Write-Host "Invoking integration.ps1"
         Invoke-Script -File "$PSScriptRoot\integration.ps1"
 
-        Write-Host "Invoking package.ps1"
+        Write-Host "Invoking package.ps1 to validate build artifacts"
         Invoke-Script -File "$PSScriptRoot\package.ps1"
     }
 

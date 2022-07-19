@@ -4,42 +4,32 @@ SHELL ["powershell", "-NoLogo", "-Command", "$ErrorActionPreference = 'Stop'; $P
 
 RUN pushd c:\; \
     $URL = 'https://github.com/StefanScherer/docker-cli-builder/releases/download/20.10.5/docker.exe'; \
-    \
     Write-Host ('Downloading docker from {0} ...' -f $URL); \
     curl.exe -sfL $URL -o c:\Windows\docker.exe; \
-    \
     Write-Host 'docker install complete.'; \
     popd;
 
 RUN pushd c:\; \
     $URL = 'https://github.com/golangci/golangci-lint/releases/download/v1.44.0/golangci-lint-1.44.0-windows-amd64.zip'; \
-    \
     Write-Host ('Downloading golangci from {0} ...' -f $URL); \
     curl.exe -sfL $URL -o c:\golangci-lint.zip; \
-    \
     Write-Host 'Expanding ...'; \
     Expand-Archive -Path c:\golangci-lint.zip -DestinationPath c:\; \
-    \
     Write-Host 'Cleaning ...'; \
     Remove-Item -Force -Recurse -Path c:\golangci-lint.zip; \
-    \
     Write-Host 'Updating PATH ...'; \
     [Environment]::SetEnvironmentVariable('PATH', ('c:\golangci-lint-1.44.0-windows-amd64\;{0}' -f $env:PATH), [EnvironmentVariableTarget]::Machine); \
-    \
     Write-Host 'golangci-lint install complete.'; \
     popd;
 
 # upgrade git
 RUN pushd c:\; \
     $URL = 'https://github.com/git-for-windows/git/releases/download/v2.33.0.windows.2/MinGit-2.33.0.2-64-bit.zip'; \
-    \
     Write-Host ('Downloading git from {0} ...' -f $URL); \
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
     Invoke-WebRequest -UseBasicParsing -OutFile c:\git.zip -Uri $URL; \
-    \
     Write-Host 'Expanding ...'; \
     Expand-Archive -Force -Path c:\git.zip -DestinationPath c:\git\.; \
-    \
     Write-Host 'Cleaning ...'; \
     Remove-Item -Force -Recurse -Path c:\git.zip; \
     Write-Host 'git install complete.'; \
@@ -47,7 +37,6 @@ RUN pushd c:\; \
 
 # install ginkgo
 RUN pushd c:\; \
-    \
     Write-Host ('Updating ginkgo ...'); \
     go install github.com/onsi/ginkgo/ginkgo@latest; \
     go get -u github.com/onsi/gomega/...; \
@@ -82,15 +71,15 @@ LABEL org.label-schema.vcs-url=${REPO}
 LABEL org.opencontainers.image.vendor="Rancher Labs"
 LABEL org.opencontainers.image.version=${VERSION}
 
-COPY --from=base C:/package/. C:/.
-WORKDIR C:/
-
-
+COPY --from=base C:/package/ C:/
+# staging for backwards compatibility and drone github-binary-release plugin
+RUN New-Item -Type Directory C:/package ; \
+    Copy-Item wins.exe C:/package/wins.exe ; \
 # Create a symbolic link pwsh.exe that points to powershell.exe for consistency
-RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe" ; \
-    Copy-Item -Path ./wins.exe -Destination ./Windows/
-#USER ContainerAdministrator
+    New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe" ; \
+    Copy-Item wins.exe -Destination C:/Windows
 
+USER ContainerAdministrator
 ENTRYPOINT [ "powershell", "-Command", "./run.ps1"]
 
 
