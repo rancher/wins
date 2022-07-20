@@ -9,6 +9,19 @@ RUN pushd c:\; \
     Write-Host 'docker install complete.'; \
     popd;
 
+RUN pushd c:\ ; \
+    $URL = 'https://github.com/cli/cli/releases/download/v2.14.2/gh_2.14.2_windows_amd64.zip' ; \
+    Write-Host ('Downloading github cli from {0} ...' -f $URL); \
+    curl.exe -sfL $URL -o c:\gh.zip; \
+    Write-Host 'Expanding ...'; \
+    Expand-Archive -Path c:\gh.zip -DestinationPath c:\gh_2.14.2_windows_amd64; \
+    Write-Host 'Cleaning ...'; \
+    Remove-Item -Force -Recurse -Path c:\gh.zip; \
+    Write-Host 'Updating PATH ...'; \
+    [Environment]::SetEnvironmentVariable('PATH', ('c:\gh_2.14.2_windows_amd64\bin\;{0}' -f $env:PATH), [EnvironmentVariableTarget]::Machine); \
+    Write-Host 'github cli install complete.'; \
+    popd
+
 RUN pushd c:\; \
     $URL = 'https://github.com/golangci/golangci-lint/releases/download/v1.44.0/golangci-lint-1.44.0-windows-amd64.zip'; \
     Write-Host ('Downloading golangci from {0} ...' -f $URL); \
@@ -72,11 +85,9 @@ LABEL org.opencontainers.image.vendor="Rancher Labs"
 LABEL org.opencontainers.image.version=${VERSION}
 
 COPY --from=base C:/package/ C:/
-# staging for backwards compatibility and drone github-binary-release plugin
-RUN New-Item -Type Directory C:/package ; \
-    Copy-Item wins.exe C:/package/wins.exe ; \
+# staging for backwards compatibility
 # Create a symbolic link pwsh.exe that points to powershell.exe for consistency
-    New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe" ; \
+RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe" ; \
     Copy-Item wins.exe -Destination C:/Windows
 
 USER ContainerAdministrator

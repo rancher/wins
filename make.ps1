@@ -21,7 +21,7 @@ function WinsCIAction() {
     --build-arg VERSION=$env:VERSION `
     --build-arg MAINTAINERS=$env:MAINTAINERS `
     --build-arg REPO=https://github.com/rancher/wins `
-    -t $IMAGE `
+    --tag $IMAGE `
     -f Dockerfile .
 
     if ($LASTEXITCODE -ne 0) {
@@ -31,6 +31,8 @@ function WinsCIAction() {
         exit $LASTEXITCODE
     }
     Write-Host -ForegroundColor Green "Successfully built $IMAGE`n"
+    docker cp $IMAGE:./wins.exe ./wins.exe
+    Write-Host -ForegroundColor Green "Successfully staged wins binary from $IMAGE`n"
 }
 
 trap {
@@ -53,12 +55,12 @@ if ($args[0] -eq "build" -or $args[0] -eq "package") {
     exit
 }
 
-# if ($args[0] -eq "package") {
-#     Write-Host "Building and Packaging wins"
-#     WinsCIAction -Action "build"
-#     WinsCIAction -Action "package"
-#     exit
-# }
+if ($args[0] -eq "package") {
+    Write-Host "Building and Packaging wins"
+    WinsCIAction -Action "build"
+    WinsCIAction -Action "package"
+    exit
+}
 
 if ($args[0] -eq "all" -or $args.Count -eq 0 -or $args[0] -eq "ci") {
     Write-Host "Running CI and Integration Tests"

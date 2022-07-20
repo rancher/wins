@@ -50,8 +50,6 @@ steps:
   volumes:
     - name: docker_pipe
       path: \\\\.\\pipe\\docker_engine
-    - name: binary_cache
-      path: C:\\package
   when:
     instance:
       - drone-publish.rancher.io
@@ -70,12 +68,9 @@ steps:
       - sha256
       - sha512
     files:
-      - C:\\package\\wins.exe
+      - ./wins.exe
     file_exists:
       - fail
-  volumes:
-    - name: binary_cache
-      path: C:\\package
   when:
     instance:
       - drone-publish.rancher.io
@@ -89,8 +84,6 @@ volumes:
   - name: docker_pipe
     host:
       path: \\\\.\\pipe\\docker_engine
-  - name: binary_cache
-    temp: {}
 
 trigger:
   event:
