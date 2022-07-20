@@ -68,7 +68,7 @@ steps:
       - sha256
       - sha512
     files:
-      - ./wins.exe
+      - C:\\wins.exe
     file_exists:
       - fail
   when:

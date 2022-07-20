@@ -19,6 +19,7 @@ function WinsCIAction() {
     --build-arg SERVERCORE_VERSION=$env:SERVERCORE_VERSION `
     --build-arg ACTION=$Action `
     --build-arg VERSION=$env:VERSION `
+    --build-arg DRONE_TAG=$env:DRONE_TAG `
     --build-arg MAINTAINERS=$env:MAINTAINERS `
     --build-arg REPO=https://github.com/rancher/wins `
     --tag $IMAGE `
@@ -31,7 +32,8 @@ function WinsCIAction() {
         exit $LASTEXITCODE
     }
     Write-Host -ForegroundColor Green "Successfully built $IMAGE`n"
-    docker cp $IMAGE:./wins.exe ./wins.exe
+    Write-Host -ForegroundColor Green "Attempting to stage wins binary for $env:VERSION`n"
+    docker cp $IMAGE:C:\\wins.exe C:\\wins.exe
     Write-Host -ForegroundColor Green "Successfully staged wins binary from $IMAGE`n"
 }
 

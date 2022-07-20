@@ -60,6 +60,9 @@ COPY . /go/wins/
 WORKDIR C:/
 
 ARG ACTION
+ARG DRONE_TAG
+ENV DRONE_TAG ${DRONE_TAG}
+
 ENV ACTION ${ACTION}
 RUN Write-Host "Starting CI Action ($env:ACTION) for wins"; \
     Set-Location C:/go/wins/ ; \
@@ -83,6 +86,7 @@ LABEL org.opencontainers.image.source=${REPO}
 LABEL org.label-schema.vcs-url=${REPO}
 LABEL org.opencontainers.image.vendor="Rancher Labs"
 LABEL org.opencontainers.image.version=${VERSION}
+WORKDIR C:/
 
 COPY --from=base C:/package/ C:/
 # staging for backwards compatibility
