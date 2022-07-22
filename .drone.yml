@@ -13,11 +13,7 @@ steps:
   pull: always
   image: rancher/dapper:v0.5.8
   commands:
-    - dapper.exe -f Dockerfile.dapper -d ci
-  volumes:
-    - name: docker_pipe
-      path: \\\\.\\pipe\\docker_engine
-
+    - ./scripts/ci.ps1
 - name: stage-binaries
   image: rancher/dapper:v0.5.8
   commands:
@@ -100,7 +96,7 @@ steps:
     pull: always
     image: rancher/dapper:v0.5.8
     commands:
-      - dapper.exe -f Dockerfile.dapper -d ci
+      - ./scripts/ci.ps1
     volumes:
       - name: docker_pipe
         path: \\\\.\\pipe\\docker_engine
