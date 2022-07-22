@@ -10,23 +10,19 @@ platform:
 
 steps:
 - name: build
-  image: plugins/docker
-  pull: always
-  settings:
-    dry_run: true
-    purge: true
-    build_args:
-      - SERVERCORE_VERSION=1809
-      - ARCH=amd64
-      - ACTION=ci
-      - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
-      - REPO=https://github.com/rancher/wins
-    custom_dns: 1.1.1.1
-    dockerfile: Dockerfile
-    repo: rancher/wins
-  volumes:
-    - name: docker_pipe
-      path: \\\\.\\pipe\\docker_engine
+  image: golang:1.18-windowsservercore
+  environment:
+     MAGEFILE_CACHE: C:/Drone/.magefile
+  commands:
+  - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.0
+  - go install github.com/onsi/ginkgo/ginkgo@latest
+  - go get -u github.com/onsi/gomega/...
+  - cd ..
+  - git clone https://github.com/magefile/mage.git
+  - cd mage
+  - go run bootstrap.go install
+  - cd C:/Drone/src
+  - mage ci
 
 - name: publish
   image: plugins/docker
@@ -35,8 +31,6 @@ steps:
     build_args:
       - SERVERCORE_VERSION=1809
       - ARCH=amd64
-      - VERSION=${DRONE_TAG}
-      - ACTION=ci
       - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
       - REPO=https://github.com/rancher/wins
     custom_dns: 1.1.1.1
@@ -68,9 +62,12 @@ steps:
       - sha256
       - sha512
     files:
-      - C:\\wins.exe
+      - C:/wins.exe
     file_exists:
       - fail
+  volumes:
+    - name: root
+      path: C:/
   when:
     instance:
       - drone-publish.rancher.io
@@ -109,22 +106,19 @@ steps:
     image: rancher/drone-images:git-amd64-ltsc2022
 
   - name: build
-    image: rancher/drone-images:docker-amd64-ltsc2022
-    settings:
-      dry_run: true
-      purge: true
-      build_args:
-        - SERVERCORE_VERSION=ltsc2022
-        - ARCH=amd64
-        - ACTION=ci
-        - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
-        - REPO=https://github.com/rancher/wins
-      custom_dns: 1.1.1.1
-      dockerfile: Dockerfile
-      repo: rancher/wins
-    volumes:
-      - name: docker_pipe
-        path: \\\\.\\pipe\\docker_engine
+    image: golang:1.18-windowsservercore
+    environment:
+      MAGEFILE_CACHE: C:/Drone/.magefile
+    commands:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.0
+      - go install github.com/onsi/ginkgo/ginkgo@latest
+      - go get -u github.com/onsi/gomega/...
+      - cd ..
+      - git clone https://github.com/magefile/mage.git
+      - cd mage
+      - go run bootstrap.go install
+      - cd C:/Drone/src
+      - mage ci
 
 
   - name: publish
@@ -134,8 +128,6 @@ steps:
       build_args:
         - SERVERCORE_VERSION=ltsc2022
         - ARCH=amd64
-        - VERSION=${DRONE_TAG}
-        - ACTION=ci
         - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
         - REPO=https://github.com/rancher/wins
       custom_dns: 1.1.1.1

@@ -35,3 +35,5 @@ Dockerfile.dapper[0-9]*
 
 dist/
 *.tgz
+
+artifacts/
