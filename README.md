@@ -214,18 +214,10 @@ tls-config:
 
 ## Build
 
+This project uses magefile to build. The default target is build.
+
 ``` powershell
-# Build inside a Docker container
-
-> .\make.ps1 build
-
-# Build using Powershell scripts only
-
-> .\make.ps1 no-docker build
-
-# Build locally using drone (Docker-In-Docker)
-
-> drone.exe exec --trusted --pipeline=windows-1809 --include=build --event=pull_request --ref="$(git rev-parse --short HEAD)" --sha="$(git show -s --format=%H)" .drone.yml
+> go run mage.go <target>
 ```
 
 ## Testing
@@ -236,13 +228,13 @@ and integration test.
 For validation test, which could be embedded into a containerized CI flow, please run the below command in `PowerShell`:
 
 ``` powershell
-> .\make.ps1 validate
+> go run mage.go validate
 ```
 
 For integration test, please run the below command in `PowerShell`:
 
 ``` powershell
-> .\make.ps1 integration
+> go run mage.go integration
 ```
 
 > Note: Don't use `bin/wins.exe` after integration testing. Please `.\make.ps1 build` again.
