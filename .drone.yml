@@ -62,12 +62,9 @@ steps:
       - sha256
       - sha512
     files:
-      - C:/wins.exe
+      - ./artifacts/wins.exe
     file_exists:
       - fail
-  volumes:
-    - name: root
-      path: C:/
   when:
     instance:
       - drone-publish.rancher.io
