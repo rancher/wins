@@ -7,7 +7,7 @@ cmake-build-debug/
 cmake-build-release/
 
 # Binaries for programs and plugins
-bin/*
+bin/
 !.gitkeep
 *.exe
 *.exe~

@@ -54,13 +54,23 @@ func Version() error {
 		return nil
 	}
 
-	version = commit + "-dirty"
+	version = commit
+	if !isClean {
+		version = commit + "-dirty"
+		log.Printf("[Version] dirty version encountered: %s \n", version)
+	}
+	// check if this is a release version and fail if the version contains `dirty`
+	if strings.Contains(version, "dirty") && os.Getenv("DRONE_TAG") != "" || tag != "" {
+		return fmt.Errorf("[Version] releases require a non-dirty tag: %s", version)
+	}
+	log.Printf("[Version] version: %s \n", version)
+
 	return nil
 }
 
 func Setup() {
 	mg.Deps(Version)
-	g = magetools.NewGo("amd64", "windows", version, commit, "0")
+	g = magetools.NewGo("amd64", "windows", version, commit, "0", "1")
 }
 
 func Dependencies() error {
@@ -69,14 +79,14 @@ func Dependencies() error {
 }
 
 func Validate() error {
-	envs := map[string]string{"GOOS": "windows", "ARCH": "amd64", "CGO_ENABLED": "0"}
+	envs := map[string]string{"GOOS": "windows", "ARCH": "amd64", "CGO_ENABLED": "0", "MAGEFILE_VERBOSE": "1"}
 
-	log.Printf("[build] Running: golangci-lint \n")
+	log.Printf("[Validate] Running: golangci-lint \n")
 	if err := sh.RunWithV(envs, "golangci-lint", "run"); err != nil {
 		return err
 	}
 
-	log.Printf("[build] Running: go fmt \n")
+	log.Printf("[Validate] Running: go fmt \n")
 	if err := sh.RunWithV(envs, "go", "fmt", "./..."); err != nil {
 		return err
 	}
@@ -87,17 +97,16 @@ func Validate() error {
 
 func Build() error {
 	mg.Deps(Clean, Dependencies, Validate)
-
 	winsOutput := filepath.Join("bin", "wins.exe")
 
-	log.Printf("[build] Building wins version %s \n", version)
-	log.Printf("[build] Output: %s \n", winsOutput)
+	log.Printf("[Build] Building wins version: %s \n", version)
+	log.Printf("[Build] Output: %s \n", winsOutput)
 	if err := g.Build(flags, "cmd/main.go", winsOutput); err != nil {
 		return err
 	}
-	log.Printf("[build] successfully built wins version version %s \n", version)
+	log.Printf("[Build] successfully built wins version %s \n", version)
 
-	log.Printf("[build] now staging build artifacts \n")
+	log.Printf("[Build] now staging build artifacts \n")
 	if err := os.MkdirAll(artifactOutput, os.ModePerm); err != nil {
 		return err
 	}
@@ -114,14 +123,14 @@ func Build() error {
 		return err
 	}
 
-	log.Printf("[build] all required build artifacts have been staged \n")
+	log.Printf("[Build] all required build artifacts have been staged \n")
 	files, err := os.ReadDir(artifactOutput)
 	if err != nil {
 		return err
 	}
 
 	if len(files) != 3 {
-		return errors.New("[package] a required build artifact is missing, exiting now \n")
+		return errors.New("[Build] a required build artifact is missing, exiting now \n")
 	}
 
 	var artifacts strings.Builder
@@ -129,18 +138,18 @@ func Build() error {
 		artifacts.WriteString(file.Name() + " ,")
 	}
 
-	log.Printf("[build] artifacts copied: %s \n", artifacts.String())
+	log.Printf("[Build] artifacts copied: %s \n", artifacts.String())
 
 	return nil
 }
 
 func Test() error {
 	mg.Deps(Build)
-	log.Printf("[build] Testing wins version %s \n", version)
+	log.Printf("[Test] Testing wins version %s \n", version)
 	if err := g.Test(flags, "./..."); err != nil {
 		return err
 	}
-	log.Printf("[build] successfully tested wins version version %s \n", version)
+	log.Printf("[Test] successfully tested wins version version %s \n", version)
 	return nil
 }
 
