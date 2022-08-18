@@ -24,8 +24,7 @@ steps:
     - cd mage
     - go run bootstrap.go install
     - cd C:/Drone/src
-    - git status --porcelain --untracked-files=no
-    - mage -v ci
+    - mage ci
 
 - name: publish
   image: plugins/docker
@@ -120,7 +119,7 @@ steps:
       - cd mage
       - go run bootstrap.go install
       - cd C:/Drone/src
-      - mage -v ci
+      - mage ci
 
   - name: publish
     image: rancher/drone-images:docker-amd64-ltsc2022
