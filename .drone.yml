@@ -13,16 +13,18 @@ steps:
   image: golang:1.18-windowsservercore
   environment:
      MAGEFILE_CACHE: C:/Drone/.magefile
+     MAGEFILE_VERBOSE: 1
+     MAGEFILE_DEBUG: false
   commands:
-  - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.0
-  - go install github.com/onsi/ginkgo/ginkgo@latest
-  - go get -u github.com/onsi/gomega/...
-  - cd ..
-  - git clone https://github.com/magefile/mage.git
-  - cd mage
-  - go run bootstrap.go install
-  - cd C:/Drone/src
-  - mage ci
+    - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.0
+    - go install github.com/onsi/ginkgo/ginkgo@latest
+    - go get github.com/onsi/gomega/...
+    - cd ..
+    - git clone https://github.com/magefile/mage.git
+    - cd mage
+    - go run bootstrap.go install
+    - cd C:/Drone/src
+    - mage ci
 
 - name: publish
   image: plugins/docker
@@ -31,7 +33,7 @@ steps:
     build_args:
       - SERVERCORE_VERSION=1809
       - ARCH=amd64
-      - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
+      - MAINTAINERS=rosskirkpat@outlook.com cphill11@gmail.com luther.monson@gmail.com
       - REPO=https://github.com/rancher/wins
     custom_dns: 1.1.1.1
     dockerfile: Dockerfile
@@ -106,17 +108,18 @@ steps:
     image: golang:1.18-windowsservercore
     environment:
       MAGEFILE_CACHE: C:/Drone/.magefile
+      MAGEFILE_VERBOSE: 1
+      MAGEFILE_DEBUG: false
     commands:
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.0
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.0
       - go install github.com/onsi/ginkgo/ginkgo@latest
-      - go get -u github.com/onsi/gomega/...
+      - go get github.com/onsi/gomega/...
       - cd ..
       - git clone https://github.com/magefile/mage.git
       - cd mage
       - go run bootstrap.go install
       - cd C:/Drone/src
       - mage ci
-
 
   - name: publish
     image: rancher/drone-images:docker-amd64-ltsc2022
@@ -125,7 +128,7 @@ steps:
       build_args:
         - SERVERCORE_VERSION=ltsc2022
         - ARCH=amd64
-        - MAINTAINERS=ross.kirkpatrick@suse.com jamie.phillips@suse.com
+        - MAINTAINERS=rosskirkpat@outlook.com cphill11@gmail.com luther.monson@gmail.com
         - REPO=https://github.com/rancher/wins
       custom_dns: 1.1.1.1
       dockerfile: Dockerfile
