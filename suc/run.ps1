@@ -100,7 +100,7 @@ function Invoke-LogWrite {
         [parameter(Mandatory = $true)] [string]$Source
     )
     Write-Host "$($Message)"
-    Write-EventLog -LogName "$LogName" -Source "$Source" -Message "$Message"
+    Write-EventLog -LogName "$LogName" -Source "$Source" -Message "$Message" -EID 1
 }
 
 function Invoke-WinsWinsUpgrade {
