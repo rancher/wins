@@ -732,8 +732,6 @@ github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoT
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
 github.com/onsi/gomega v1.15.0/go.mod h1:cIuvLEne0aoVhAgh/O6ac0Op8WWw9H6eYCriF+tEHG0=
 github.com/onsi/gomega v1.16.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
-github.com/onsi/gomega v1.20.0 h1:8W0cWlwFkflGPLltQvLRB7ZVD5HuP6ng320w2IS245Q=
-github.com/onsi/gomega v1.20.0/go.mod h1:DtrZpjmvpn2mPm4YWQa0/ALMDj9v4YxLgojwPeREyVo=
 github.com/onsi/gomega v1.20.2 h1:8uQq0zMgLEfa0vRrrBgaJF2gyW9Da9BmfGV+OyUzfkY=
 github.com/onsi/gomega v1.20.2/go.mod h1:iYAIXgPSaDHak0LCMA+AWBpIKBr8WZicMxnE8luStNc=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
@@ -825,8 +823,8 @@ github.com/rancher/lasso v0.0.0-20220628160937-749b3397db38 h1:RcYCbUUb7ln5UtvBK
 github.com/rancher/lasso v0.0.0-20220628160937-749b3397db38/go.mod h1:sMLCrn5NBypoWCc7wf9pNdzXOZ+HBlO0RHIppPmLOCA=
 github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f h1:FIZcYXY/dl18TN1UdA18PRbTB7UfmylSVjpD/4gmF34=
 github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f/go.mod h1:dbzn9NF1JWbGEHL6Q/1KG4KFROILiY/j6wmfF1Np3fk=
-github.com/rancher/system-agent v0.2.10-0.20220730021407-2e85ac7f94d2 h1:Xo36sAepNjdeLzZUPhhCwpU+h5XPxKB4s4j4EbjjVMc=
-github.com/rancher/system-agent v0.2.10-0.20220730021407-2e85ac7f94d2/go.mod h1:4fiLQr6prG3YmmXpGoewpAalWaMgRog5xdfdl6xcaq4=
+github.com/rancher/system-agent v0.2.11 h1:JSmC0//yMxHotNd60TIvwBNVMT/bwgBJ6tv3TkUTy8s=
+github.com/rancher/system-agent v0.2.11/go.mod h1:4fiLQr6prG3YmmXpGoewpAalWaMgRog5xdfdl6xcaq4=
 github.com/rancher/wharfie v0.4.3 h1:Ezn78XQLvfFb02NYG7IlsnCNsQo1upLYoIxAidQJans=
 github.com/rancher/wharfie v0.4.3/go.mod h1:cb8mSczpmw7ItbPF3K1W7crWuJLVdyV49sZZuaY4BS8=
 github.com/rancher/wrangler v1.0.0 h1:K+GHMhkpgcGIfYgOX9RKdEEiM8o3WjFpI2U0ljxy+bg=
