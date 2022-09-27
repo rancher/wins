@@ -51,7 +51,7 @@ require (
 	github.com/mattn/go-colorable v0.1.11
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
-	github.com/rancher/system-agent v0.2.10-0.20220730021407-2e85ac7f94d2
+	github.com/rancher/system-agent v0.2.11
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
