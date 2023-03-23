@@ -92,7 +92,10 @@ OPTIONS:
 git clone https://github.com/rancher/wins.git
 Set-Location wins
 Set-Location $(Get-Location).path
-scripts/build.ps1
+
+# build the project using the magefile
+go run mage.go build
+
 copy-item bin/wins.exe .
 $WINS_PATH = $(Get-Location).Path
 
@@ -237,17 +240,17 @@ For integration test, please run the below command in `PowerShell`:
 > go run mage.go integration
 ```
 
-> Note: Don't use `bin/wins.exe` after integration testing. Please `.\make.ps1 build` again.
+> Note: Don't use `bin/wins.exe` after integration testing. Please `go run mage.go build` again.
 
 If want both of them, please run the below command in `PowerShell`:
 
 ``` powershell
-> .\make.ps1 all
+> go run mage.go TestAll
 ```
 
 ## License
 
-Copyright (c) 2014-2022 [Rancher Labs, Inc.](http://rancher.com)
+Copyright (c) 2014-2023 [Rancher Labs, Inc.](http://rancher.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
 License. You may obtain a copy of the License at

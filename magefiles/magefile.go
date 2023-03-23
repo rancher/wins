@@ -20,6 +20,7 @@ var g *magetools.Go
 var version string
 var commit string
 var artifactOutput = filepath.Join("artifacts")
+var integrationBin = filepath.Join("tests/integration/bin")
 
 func Clean() error {
 	if err := sh.Rm(artifactOutput); err != nil {
@@ -149,7 +150,45 @@ func Test() error {
 	if err := g.Test(flags, "./..."); err != nil {
 		return err
 	}
-	log.Printf("[Test] successfully tested wins version version %s \n", version)
+	log.Printf("[Test] successfully tested wins version %s \n", version)
+	return nil
+}
+
+// Integration target must be run on a wins system
+// with Containers feature / docker installed
+func Integration() error {
+	mg.Deps(Build)
+	log.Printf("[Integration] Starting Integration Test for wins version %s \n", version)
+
+	// make sure the docker files have access to the exe
+	if err := os.MkdirAll(integrationBin, os.ModePerm); err != nil {
+		return err
+	}
+
+	// move exe to right location
+	if err := sh.Copy(filepath.Join("tests", "integration", "docker", "wins.exe"), filepath.Join(artifactOutput, "wins.exe")); err != nil {
+		return err
+	}
+
+	// run test suite
+	if err := sh.Run("powershell.exe", filepath.Join("tests/integration/integration_suite_test.ps1")); err != nil {
+		return err
+	}
+
+	log.Printf("[Test] successfully ran integration tests on wins version %s \n", version)
+	return nil
+}
+
+func TestAll() error {
+	mg.Deps(Build)
+	// don't run Test and Integration in mg.Deps
+	// as deps run in an unordered asynchronous fashion
+	if err := Test(); err != nil {
+		return err
+	}
+	if err := Integration(); err != nil {
+		return err
+	}
 	return nil
 }
 

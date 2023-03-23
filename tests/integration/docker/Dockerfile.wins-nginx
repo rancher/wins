@@ -16,6 +16,6 @@ RUN $URL = 'http://nginx.org/download/nginx-1.21.3.zip'; \
     Remove-Item -Force -Path c:\nginx.zip | Out-Null; \
     \
     Write-Host 'Complete.'
-COPY bin/wins-container.exe /Windows/wins.exe
+COPY bin/wins.exe /Windows/wins.exe
 COPY tests/integration/docker/nginx.ps1 /Windows/
 ENTRYPOINT ["powershell", "-NoLogo", "-NonInteractive", "-File", "c:/Windows/nginx.ps1"]
