@@ -80,7 +80,7 @@ OPTIONS:
 
 ``` powershell
 # [host] start the wins server
-> wins.exe --debug srv app run --listen rancher_wins
+> wins.exe --debug srv app run
 
 # [host] verify the created npipe
 > Get-ChildItem //./pipe/ | Where-Object Name -eq "rancher_wins"
@@ -146,7 +146,7 @@ white_list:
 > $WINS_BIN_PATH=<...>; echo "`$NGINX_BIND_DIR=$NGINX_BIND_DIR"; docker run --rm -it -v //./pipe/rancher_wins://./pipe/rancher_wins -v "$($WINS_BIN_PATH):c:\host\wins" -v "c:\nginx:c:\nginx" -w c:\host\wins --entrypoint powershell mcr.microsoft.com/windows/servercore:ltsc2019
 
 # [inside container] start nginx and receive the running output
->> .\wins.exe cli app run --path c:\nginx\nginx-1.21.3\nginx.exe --exposes TCP:80
+>> .\wins.exe cli prc run --path c:\nginx\nginx-1.21.3\nginx.exe --exposes TCP:80
 
 # [host] verify the process
 > Get-Process rancher-wins-*
