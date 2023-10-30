@@ -639,11 +639,11 @@ csi-proxy:
 
             $newEnv += $PROXY_ENV_INFO
             if(Test-Path -Path HKLM:SYSTEM\CurrentControlSet\Services\$serviceName) {
-                Set-ItemProperty HKLM:SYSTEM\CurrentControlSet\Services\$serviceName -Name Environment -Value $([string]$newEnv)
+                Set-ItemProperty HKLM:SYSTEM\CurrentControlSet\Services\$serviceName -Name Environment -Value $newEnv
             }
             else {
                 New-Item HKLM:SYSTEM\CurrentControlSet\Services\$serviceName
-                New-ItemProperty HKLM:SYSTEM\CurrentControlSet\Services\$serviceName -Name Environment -PropertyType MultiString -Value $([string]$newEnv)
+                New-ItemProperty HKLM:SYSTEM\CurrentControlSet\Services\$serviceName -Name Environment -PropertyType MultiString -Value $newEnv
             }
         }
                 
