@@ -37,7 +37,7 @@ steps:
     build_args:
       - SERVERCORE_VERSION=1809
       - ARCH=amd64
-      - MAINTAINERS=rosskirkpat@outlook.com cphill11@gmail.com luther.monson@gmail.com
+      - MAINTAINERS=harrison.affel@suse.com arvind.iyengar@suse.com
       - REPO=https://github.com/rancher/wins
     custom_dns: 1.1.1.1
     dockerfile: Dockerfile
@@ -129,7 +129,7 @@ steps:
       build_args:
         - SERVERCORE_VERSION=ltsc2022
         - ARCH=amd64
-        - MAINTAINERS=rosskirkpat@outlook.com cphill11@gmail.com luther.monson@gmail.com
+        - MAINTAINERS=harrison.affel@suse.com arvind.iyengar@suse.com
         - REPO=https://github.com/rancher/wins
       custom_dns: 1.1.1.1
       dockerfile: Dockerfile
