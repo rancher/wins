@@ -171,7 +171,7 @@ func Integration() error {
 	}
 
 	// run test suite
-	if err := sh.Run("powershell.exe", filepath.Join("tests/integration/integration_suite_test.ps1")); err != nil {
+	if err := sh.RunV("powershell.exe", filepath.Join("tests/integration/integration_suite_test.ps1")); err != nil {
 		return err
 	}
 
