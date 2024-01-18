@@ -17,7 +17,7 @@ import (
 type routeService struct {
 }
 
-func (s *routeService) Add(ctx context.Context, req *types.RouteAddRequest) (resp *types.Void, respErr error) {
+func (s *routeService) Add(_ context.Context, req *types.RouteAddRequest) (resp *types.Void, respErr error) {
 	defer panics.DealWith(func(recoverObj interface{}) {
 		respErr = status.Errorf(codes.Unknown, "panic %v", recoverObj)
 	})

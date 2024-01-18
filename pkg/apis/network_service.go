@@ -22,7 +22,7 @@ import (
 type networkService struct {
 }
 
-func (s *networkService) Get(ctx context.Context, req *types.NetworkGetRequest) (resp *types.NetworkGetResponse, respErr error) {
+func (s *networkService) Get(_ context.Context, req *types.NetworkGetRequest) (resp *types.NetworkGetResponse, respErr error) {
 	defer panics.DealWith(func(recoverObj interface{}) {
 		respErr = status.Errorf(codes.Unknown, "panic %v", recoverObj)
 	})

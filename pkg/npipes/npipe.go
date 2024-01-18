@@ -30,8 +30,8 @@ func NewDialer(path string, timeout time.Duration) (Dialer, error) {
 // `sddl`: a format string of the Security Descriptor Definition Language, default is builtin administrators and local system
 // `bufferSize`: measurement is KB, default is 64
 // refer:
-// 	- https://docs.microsoft.com/en-us/windows/desktop/secauthz/security-descriptor-string-format
-//  - https://docs.microsoft.com/en-us/windows/desktop/secauthz/ace-strings
+//   - https://docs.microsoft.com/en-us/windows/desktop/secauthz/security-descriptor-string-format
+//   - https://docs.microsoft.com/en-us/windows/desktop/secauthz/ace-strings
 func New(path, sddl string, bufferSize int32) (net.Listener, error) {
 	path, err := ParsePath(path)
 	if err != nil {

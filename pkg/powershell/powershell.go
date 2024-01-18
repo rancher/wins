@@ -10,7 +10,7 @@ import (
 
 // Sourced from https://github.com/flannel-io/flannel/blob/d31b0dc85a5a15bda5e606acbbbb9f7089441a87/pkg/powershell/powershell.go
 
-//commandWrapper ensures that exceptions are written to stdout and the powershell process exit code is -1
+// commandWrapper ensures that exceptions are written to stdout and the powershell process exit code is -1
 const commandWrapper = `$ErrorActionPreference="Stop";try { %s } catch { Write-Host $_; os.Exit(-1) }`
 
 // RunCommand executes a given powershell command.
