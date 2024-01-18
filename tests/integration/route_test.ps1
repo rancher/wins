@@ -35,12 +35,12 @@ Describe "route" {
         $ret = Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/wins:c:/etc/rancher/wins", "wins-cli", "route", "add", "--addresses", "7.7.7.7") -PassThru
         if (-not $ret.Ok) {
             Log-Error $ret.Output
-            $false | Should Be $true
+            $false | Should -Be $true
         }
 
         # verify
         Start-Sleep -Seconds 5
-        Get-NetRoute -PolicyStore ActiveStore | Where-Object { ($_.DestinationPrefix -eq "7.7.7.7/32") } | Measure-Object | Select-Object -ExpandProperty Count | Should Be 1
+        Get-NetRoute -PolicyStore ActiveStore | Where-Object { ($_.DestinationPrefix -eq "7.7.7.7/32") } | Measure-Object | Select-Object -ExpandProperty Count | Should -Be 1
     }
 
 }

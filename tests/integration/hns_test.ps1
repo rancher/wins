@@ -57,14 +57,14 @@ Describe "hns" {
         $ret = Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/wins:c:/etc/rancher/wins", "wins-cli", "hns", "get-network", "--name", "test-cbr0") -PassThru
         if (-not $ret.Ok) {
             Log-Error $ret.Output
-            $false | Should Be $true
+            $false | Should -Be $true
         }
 
         # verify
         $expectedObj = $ret.Output | ConvertFrom-Json
         $actualObj = Get-HnsNetwork | Where-Object Name -eq "test-cbr0"
-        $expectedObj.Subnets[0].AddressCIDR -eq $actualObj.Subnets[0].AddressPrefix | Should Be $true
-        $expectedObj.Subnets[0].GatewayAddress -eq $actualObj.Subnets[0].GatewayAddress | Should Be $true
+        $expectedObj.Subnets[0].AddressCIDR -eq $actualObj.Subnets[0].AddressPrefix | Should -Be $true
+        $expectedObj.Subnets[0].GatewayAddress -eq $actualObj.Subnets[0].GatewayAddress | Should -Be $true
     }
 
 }

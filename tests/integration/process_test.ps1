@@ -54,7 +54,7 @@ Describe "process" {
         Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--name", "prc-run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/wins:c:/etc/rancher/wins", "-v", "c:/etc/nginx:c:/host/etc/nginx", "wins-nginx") -Backgroud
         {
             Wait-Ready -Path "c:\etc\nginx\rancher-wins-nginx.exe" -Throw
-        } | Should Not Throw
+        } | Should -Not -Throw
 
         # verify running
         {
@@ -62,10 +62,10 @@ Describe "process" {
             {
                 Get-Process -Name "rancher-wins-*" -ErrorAction Ignore
             } | Judge -Throw -Timeout 120
-        } | Should Not Throw
+        } | Should -Not -Throw
         $statusCode = $(curl.exe -sL -w "%{http_code}" -o /dev/null http://127.0.0.1)
-        $statusCode | Should Be 200
-        Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*-TCP-80" -ErrorAction Ignore | Should Not BeNullOrEmpty
+        $statusCode | Should -Be 200
+        Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*-TCP-80" -ErrorAction Ignore | Should -Not -BeNullOrEmpty
 
         # verify stopping
         Execute-Binary -FilePath "docker.exe" -ArgumentList @("rm", "-f", "prc-run") -PassThru | Out-Null
@@ -74,8 +74,8 @@ Describe "process" {
             {
                 Get-Process -Name "rancher-wins-*" -ErrorAction Ignore
             } | Judge -Reverse -Throw
-        } | Should Not Throw
-        Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*-TCP-80" -ErrorAction Ignore | Should BeNullOrEmpty
+        } | Should -Not -Throw
+        Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*-TCP-80" -ErrorAction Ignore | Should -BeNullOrEmpty
     }
 
     It "run not in whitelist" {
@@ -100,7 +100,7 @@ Describe "process" {
         Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--name", "prc-run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/wins:c:/etc/rancher/wins", "-v", "c:/etc/nginx:c:/host/etc/nginx", "wins-nginx") -Backgroud
         {
             Wait-Ready -Timeout 3 -Path "c:\etc\nginx\rancher-wins-nginx.exe" -Throw
-        } | Should Throw
+        } | Should -Throw
 
         # verify
         {
@@ -108,8 +108,8 @@ Describe "process" {
             {
                 Get-Process -Name "rancher-wins-*" -ErrorAction Ignore
             } | Judge -Timeout 3 -Throw
-        } | Should Throw
-        Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*-TCP-80" -ErrorAction Ignore | Should BeNullOrEmpty
+        } | Should -Throw
+        Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*-TCP-80" -ErrorAction Ignore | Should -BeNullOrEmpty
     }
 
 }
