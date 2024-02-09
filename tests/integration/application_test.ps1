@@ -1,4 +1,5 @@
 $ErrorActionPreference = "Stop"
+$serviceName = "rancher-wins"
 
 Import-Module -Name @(
     "$PSScriptRoot\utils.psm1"
@@ -13,8 +14,6 @@ catch {
 }
 
 Describe "application" {
-    $serviceName = "rancher-wins"
-
     It "register" {
         $ret = .\bin\wins.exe srv app run --register
         if (-not $?) {
@@ -57,11 +56,16 @@ Describe "application" {
                 $false | Should -Be $true
             }
 
+            $version = Execute-Binary -FilePath "git.exe" -ArgumentList @("rev-parse", "--short", "HEAD") -PassThru
+            if (-not $version.Ok) {
+                Log-Error $version.Output
+                $false | Should -Be $true
+            }
+
             #verify
             $expectedObj = $ret.Output | ConvertFrom-Json
-            $expectedObj.Server.Version | Should -Be "container"
-            $expectedObj.Server.Commit | Should -Be "container"
+            $expectedObj.Server.Version | Should -Be $version.Output.Trim()
+            $expectedObj.Server.Commit | Should -Be $version.Output.Trim()
         }
     }
-
 }
