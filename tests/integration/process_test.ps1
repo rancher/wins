@@ -81,7 +81,7 @@ Describe "process" {
     It "run not in whitelist" {
         # generated config
         $config = @{
-            whiteList = @{
+            white_List = @{
                 processPaths = @(
                     "C:\otherpath"
                 )
@@ -111,5 +111,4 @@ Describe "process" {
         } | Should -Throw
         Get-NetFirewallRule -PolicyStore ActiveStore -Name "rancher-wins-*-TCP-80" -ErrorAction Ignore | Should -BeNullOrEmpty
     }
-
 }
