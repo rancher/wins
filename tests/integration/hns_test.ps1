@@ -66,5 +66,4 @@ Describe "hns" {
         $expectedObj.Subnets[0].AddressCIDR -eq $actualObj.Subnets[0].AddressPrefix | Should -Be $true
         $expectedObj.Subnets[0].GatewayAddress -eq $actualObj.Subnets[0].GatewayAddress | Should -Be $true
     }
-
 }
