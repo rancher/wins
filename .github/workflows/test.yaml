@@ -17,14 +17,6 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-    # Environment requirements:
-    # https://learn.microsoft.com/en-us/virtualization/windowscontainers/quick-start/set-up-environment
-    - name: Test docker
-      run: |
-        docker version
-        docker pull hello-world
-        docker run hello-world
-
     - name: Checkout code
       uses: actions/checkout@v4
 
