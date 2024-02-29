@@ -1,4 +1,5 @@
 $ErrorActionPreference = "Stop"
+$serviceName = "rancher-wins"
 
 Import-Module -Name @(
     "$PSScriptRoot\utils.psm1"
@@ -13,28 +14,26 @@ catch {
 }
 
 Describe "application" {
-    $serviceName = "rancher-wins"
-
     It "register" {
         $ret = .\bin\wins.exe srv app run --register
         if (-not $?) {
             Log-Error $ret
-            $false | Should Be $true
+            $false | Should -Be $true
         }
 
         # verify
-        Get-Service -Name $serviceName -ErrorAction Ignore | Should Not BeNullOrEmpty
+        Get-Service -Name $serviceName -ErrorAction Ignore | Should -Not -BeNullOrEmpty
     }
 
     It "unregister" {
         $ret = .\bin\wins.exe srv app run --unregister
         if (-not $?) {
             Log-Error $ret
-            $false | Should Be $true
+            $false | Should -Be $true
         }
 
         # verify
-        Get-Service -Name $serviceName -ErrorAction Ignore | Should BeNullOrEmpty
+        Get-Service -Name $serviceName -ErrorAction Ignore | Should -BeNullOrEmpty
     }
 
     Context "upgrade" {
@@ -54,14 +53,19 @@ Describe "application" {
             $ret = Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/wins:c:/etc/rancher/wins", "wins-upgrade") -PassThru
             if (-not $ret.Ok) {
                 Log-Error $ret.Output
-                $false | Should Be $true
+                $false | Should -Be $true
+            }
+
+            $version = Execute-Binary -FilePath "git.exe" -ArgumentList @("rev-parse", "--short", "HEAD") -PassThru
+            if (-not $version.Ok) {
+                Log-Error $version.Output
+                $false | Should -Be $true
             }
 
             #verify
             $expectedObj = $ret.Output | ConvertFrom-Json
-            $expectedObj.Server.Version | Should Be "container"
-            $expectedObj.Server.Commit | Should Be "container"
+            $expectedObj.Server.Version | Should -Be $version.Output.Trim()
+            $expectedObj.Server.Commit | Should -Be $version.Output.Trim()
         }
     }
-
 }

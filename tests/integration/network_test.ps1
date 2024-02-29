@@ -77,7 +77,7 @@ Describe "network" {
         $ret = Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/wins:c:/etc/rancher/wins", "wins-cli", "network", "get") -PassThru
         if (-not $ret.Ok) {
             Log-Error $ret.Output
-            $false | Should Be $true
+            $false | Should -Be $true
         }
 
         # verify
@@ -86,9 +86,9 @@ Describe "network" {
         $actaulObj = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "IPEnabled=True and InterfaceIndex=$defaultNetIndex" | Select-Object -Property DefaultIPGateway, DNSHostName, InterfaceIndex, IPAddress, IPSubnet)
         $actaulObjSubnetMask = ConvertTo-MaskLength $actaulObj.IPSubnet[0]
         $actaulObjSubnetAddr = ConvertTo-DottedIP ((ConvertTo-DecimalIP $actaulObj.IPAddress[0]) -band (ConvertTo-DecimalIP $actaulObj.IPSubnet[0]))
-        $expectedObj.GatewayAddress -eq $actaulObj.DefaultIPGateway[0] | Should Be $true
-        $expectedObj.InterfaceIndex -eq $actaulObj.InterfaceIndex | Should Be $true
-        $expectedObj.SubnetCIDR -eq "$actaulObjSubnetAddr/$actaulObjSubnetMask" | Should Be $true
+        $expectedObj.GatewayAddress -eq $actaulObj.DefaultIPGateway[0] | Should -Be $true
+        $expectedObj.InterfaceIndex -eq $actaulObj.InterfaceIndex | Should -Be $true
+        $expectedObj.SubnetCIDR -eq "$actaulObjSubnetAddr/$actaulObjSubnetMask" | Should -Be $true
     }
 
 }

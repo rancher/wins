@@ -8,9 +8,19 @@ if (-not $SERVERCORE_VERSION) {
     $SERVERCORE_VERSION = "1809"
 }
 
+Write-Host "Server core version: $SERVERCORE_VERSION"
+
+$NGINX_URL = 'https://nginx.org/download/nginx-1.21.3.zip';
+Write-Host ('Downloading Nginx from {0}...'  -f $NGINX_URL);
+
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
+Invoke-WebRequest -UseBasicParsing -OutFile $PSScriptRoot\bin\nginx.zip -Uri $NGINX_URL;
+
 Get-ChildItem -Path $PSScriptRoot\docker -Name Dockerfile.* | ForEach-Object {
     $dockerfile = $_
     $tag = $dockerfile -replace "Dockerfile.", ""
+    Write-Host "Building $tag from $_"
+
     docker build `
         --build-arg SERVERCORE_VERSION=$SERVERCORE_VERSION `
         -t $tag `

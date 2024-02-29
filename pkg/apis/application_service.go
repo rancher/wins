@@ -16,7 +16,7 @@ import (
 type applicationService struct {
 }
 
-func (s *applicationService) Info(ctx context.Context, _ *types.Void) (resp *types.ApplicationInfoResponse, respErr error) {
+func (s *applicationService) Info(_ context.Context, _ *types.Void) (resp *types.ApplicationInfoResponse, respErr error) {
 	defer panics.DealWith(func(recoverObj interface{}) {
 		respErr = status.Errorf(codes.Unknown, "panic %v", recoverObj)
 	})

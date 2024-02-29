@@ -1,0 +1,46 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-2019, windows-latest]
+    
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+    # Environment requirements:
+    # https://learn.microsoft.com/en-us/virtualization/windowscontainers/quick-start/set-up-environment
+    - name: Test docker
+      run: |
+        docker version
+        docker pull hello-world
+        docker run hello-world
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 'stable'
+    
+    - name: Install Dependencies
+      run: |
+        go install github.com/magefile/mage@latest
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
+
+    - name: Run E2E tests
+      shell: pwsh
+      run: |
+        Install-Module -Name DockerMsftProvider -Force
+        Import-Module -Name HostNetworkingService
+        set PSModulePath=&&powershell -command "mage TestAll"

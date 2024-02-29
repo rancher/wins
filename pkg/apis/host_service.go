@@ -14,7 +14,7 @@ import (
 type hostService struct {
 }
 
-func (s *hostService) GetVersion(ctx context.Context, _ *types.Void) (resp *types.HostGetVersionResponse, respErr error) {
+func (s *hostService) GetVersion(_ context.Context, _ *types.Void) (resp *types.HostGetVersionResponse, respErr error) {
 	defer panics.DealWith(func(recoverObj interface{}) {
 		respErr = status.Errorf(codes.Unknown, "panic %v", recoverObj)
 	})
