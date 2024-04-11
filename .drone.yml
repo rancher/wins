@@ -15,7 +15,7 @@ clone:
 
 steps:
 - name: build
-  image: golang:1.18-windowsservercore
+  image: golang:1.22-windowsservercore
   environment:
      MAGEFILE_CACHE: C:/Drone/.magefile
      MAGEFILE_VERBOSE: 1
@@ -107,7 +107,7 @@ clone:
 
 steps:
   - name: build
-    image: golang:1.18-windowsservercore
+    image: golang:1.22-windowsservercore
     environment:
       MAGEFILE_CACHE: C:/Drone/.magefile
       MAGEFILE_VERBOSE: 1
