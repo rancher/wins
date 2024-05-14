@@ -3,8 +3,11 @@
 package main
 
 import (
+	"crypto/sha256"
+	"crypto/sha512"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -36,7 +39,7 @@ func Version() error {
 	}
 	commit = c
 
-	dt := os.Getenv("DRONE_TAG")
+	dt := os.Getenv("TAG")
 	isClean, err := magetools.IsGitClean()
 	if err != nil {
 		return err
@@ -124,13 +127,37 @@ func Build() error {
 		return err
 	}
 
+	// create sha256 and sha512 artifacts for wins.exe
+	exe, err := os.Open(filepath.Join(artifactOutput, "wins.exe"))
+	if err != nil {
+		return err
+	}
+
+	h256 := sha256.New()
+	h512 := sha512.New()
+	if _, err = io.Copy(h256, exe); err != nil {
+		return err
+	}
+
+	if _, err = io.Copy(h512, exe); err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(filepath.Join(artifactOutput, "sha256.txt"), h256.Sum(nil), os.ModePerm); err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(filepath.Join(artifactOutput, "sha512.txt"), h512.Sum(nil), os.ModePerm); err != nil {
+		return err
+	}
+
 	log.Printf("[Build] all required build artifacts have been staged \n")
 	files, err := os.ReadDir(artifactOutput)
 	if err != nil {
 		return err
 	}
 
-	if len(files) != 3 {
+	if len(files) != 5 {
 		return errors.New("[Build] a required build artifact is missing, exiting now \n")
 	}
 

@@ -1,0 +1,162 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  create-push-image-windows-2022:
+    runs-on: windows-2022
+    env:
+      REPO: rancher
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ github.ref_name }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: retrieve dockerhub credentials
+        uses: rancher-eio/read-vault-secrets@main
+        with:
+          secrets: |
+            secret/data/github/repo/${{ github.repository }}/dockerhub/credentials username | DOCKER_USERNAME ;
+            secret/data/github/repo/${{ github.repository }}/dockerhub/credentials password | DOCKER_PASSWORD
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Install Dependencies
+        run: |
+          go install github.com/magefile/mage@v1.15.0
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+      - name: build-binary
+        run: |
+          set PSModulePath=&&powershell -command "mage ci"
+
+      # Note: We cannot use the docker/build-push-action as it requires dependencies
+      # which cannot be installed onto windows VMs. Additionally, it is not possible to cross compile
+      # Windows images on linux. So, we're stuck with manual docker commands.
+      - name: Build Windows 2022
+        run: ./scripts/build-image.ps1 -ServerCoreVersion "ltsc2022" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
+
+      - name: push images
+        run: | 
+          docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022
+
+  create-push-image-windows-2019:
+    # Due to limitations on the number of free runners in the Rancher org (20)
+    # we do not build 2019 and 2022 in parallel
+    needs: [create-push-image-windows-2022]
+    runs-on: windows-2019
+    env:
+      REPO: rancher
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ github.ref_name }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v1
+      - name: retrieve dockerhub credentials
+        uses: rancher-eio/read-vault-secrets@main
+        with:
+          secrets: |
+            secret/data/github/repo/${{ github.repository }}/dockerhub/credentials username | DOCKER_USERNAME ;
+            secret/data/github/repo/${{ github.repository }}/dockerhub/credentials password | DOCKER_PASSWORD
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Install Dependencies
+        run: |
+          go install github.com/magefile/mage@v1.15.0
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: build-binary
+        run: |
+          set PSModulePath=&&powershell -command "mage ci"
+
+      # Note: We cannot use the docker/build-push-action as it requires dependencies
+      # which cannot be installed onto windows VMs. Additionally, it is not possible to cross compile
+      # Windows images on linux. So, we're stuck with manual docker commands.
+      - name: Build Windows 2019
+        run: ./scripts/build-image.ps1 -ServerCoreVersion "1809" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
+
+      - name: push images
+        run: |
+          docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-1809
+
+  create-github-release:
+    needs: [ create-push-image-windows-2019, create-push-image-windows-2022 ]
+    runs-on: windows-2022
+    permissions:
+      contents: write # required for writing release artifacts
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Install Dependencies
+        run: |
+          go install github.com/magefile/mage@v1.15.0
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
+
+      - name: build-binary
+        run: |
+          set PSModulePath=&&powershell -command "mage ci"
+
+      - name: Create GH Release
+        run: gh release create ${{ env.TAG }} --verify-tag --generate-notes .\artifacts\wins.exe .\artifacts\sha256.txt .\artifacts\sha512.txt LICENSE
+
+  create-manifest:
+    needs: [ create-push-image-windows-2019, create-push-image-windows-2022 ]
+    permissions:
+      id-token: write
+    env:
+      REPO: rancher
+      TAG: ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: retrieve dockerhub credentials
+        uses: rancher-eio/read-vault-secrets@main
+        with:
+          secrets: |
+            secret/data/github/repo/${{ github.repository }}/dockerhub/credentials username | DOCKER_USERNAME ;
+            secret/data/github/repo/${{ github.repository }}/dockerhub/credentials password | DOCKER_PASSWORD
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: create manifest list
+        run: |
+          docker manifest create ${{ env.REPO }}/wins:${{ env.TAG }} ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022 ${{ env.REPO }}/wins:${{ env.TAG }}-windows-1809
+          docker manifest push ${{ env.REPO }}/wins:${{ env.TAG }}
