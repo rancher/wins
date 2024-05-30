@@ -16,7 +16,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - name: retrieve dockerhub credentials
         uses: rancher-eio/read-vault-secrets@main
@@ -67,7 +67,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: retrieve dockerhub credentials
         uses: rancher-eio/read-vault-secrets@main
         with:
