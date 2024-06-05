@@ -7,7 +7,7 @@ replace (
 	github.com/docker/docker => github.com/docker/docker v20.10.24+incompatible
 	github.com/google/go-cmp => github.com/google/go-cmp v0.5.7
 	github.com/klauspost/compress => github.com/klauspost/compress v1.15.4
-	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
+	golang.org/x/oauth2 => golang.org/x/oauth2 v0.21.0
 	golang.org/x/sync => golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
 	k8s.io/api => k8s.io/api v0.24.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.0
@@ -47,6 +47,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/magefile/mage v1.13.0
 	github.com/mattn/go-colorable v0.1.11
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
@@ -57,8 +58,9 @@ require (
 	golang.org/x/sys v0.10.0
 	google.golang.org/grpc v1.45.0
 	inet.af/tcpproxy v0.0.0-20200125044825-b6bb9b5b8252
-	github.com/magefile/mage v1.13.0
-	k8s.io/client-go v0.24.2
+)
+
+require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -117,7 +119,6 @@ require (
 	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
-	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
@@ -127,6 +128,7 @@ require (
 	k8s.io/api v0.24.2 // indirect
 	k8s.io/apimachinery v0.24.2 // indirect
 	k8s.io/apiserver v0.24.0 // indirect
+	k8s.io/client-go v0.24.2 // indirect
 	k8s.io/component-base v0.24.2 // indirect
 	k8s.io/klog/v2 v2.70.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20220328201542-3ee0da9b0b42 // indirect
