@@ -38,7 +38,7 @@ replace (
 )
 
 require (
-	github.com/Microsoft/go-winio v0.5.2
+	github.com/Microsoft/go-winio v0.6.2
 	github.com/Microsoft/hcsshim v0.8.22
 	github.com/buger/jsonparser v1.1.1
 	github.com/fsnotify/fsnotify v1.5.1
@@ -52,7 +52,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
 	github.com/rancher/system-agent v0.2.12
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/sync v0.1.0
 	golang.org/x/sys v0.10.0
