@@ -16,7 +16,7 @@ winsConfigs:
   image:
     # TODO(aiyengar2): replace with an image that just contains wins
     repository: rancher/wins
-    tag: v0.1.1
+    tag: v0.4.16
     os: "windows"
   config: |
     debug: false
