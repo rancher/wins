@@ -53,7 +53,7 @@ require (
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
 	github.com/rancher/system-agent v0.2.12
 	github.com/sirupsen/logrus v1.8.1
-	github.com/urfave/cli/v2 v2.3.0
+	github.com/urfave/cli/v2 v2.27.2
 	golang.org/x/sync v0.1.0
 	golang.org/x/sys v0.10.0
 	google.golang.org/grpc v1.45.0
@@ -68,7 +68,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/containerd/cgroups v1.0.1 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.11.4 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/cli v20.10.17+incompatible // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
@@ -112,6 +112,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/urfave/cli v1.22.9 // indirect
 	github.com/vbatts/tar-split v0.11.2 // indirect
+	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220628200809-02e64fa58f26 // indirect
