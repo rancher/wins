@@ -8,7 +8,7 @@ replace (
 	github.com/google/go-cmp => github.com/google/go-cmp v0.5.7
 	github.com/klauspost/compress => github.com/klauspost/compress v1.15.4
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
-	golang.org/x/sync => golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
+	golang.org/x/sync => golang.org/x/sync v0.7.0
 	k8s.io/api => k8s.io/api v0.24.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.0
 	k8s.io/apimachinery => k8s.io/apimachinery v0.24.2
@@ -54,7 +54,7 @@ require (
 	github.com/rancher/system-agent v0.2.12
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli/v2 v2.3.0
-	golang.org/x/sync v0.1.0
+	golang.org/x/sync v0.7.0
 	golang.org/x/sys v0.10.0
 	google.golang.org/grpc v1.45.0
 	inet.af/tcpproxy v0.0.0-20200125044825-b6bb9b5b8252
