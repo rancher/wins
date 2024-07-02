@@ -52,7 +52,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
 	github.com/rancher/system-agent v0.2.12
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/sync v0.1.0
 	golang.org/x/sys v0.10.0
