@@ -55,7 +55,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/sync v0.1.0
-	golang.org/x/sys v0.10.0
+	golang.org/x/sys v0.21.0
 	google.golang.org/grpc v1.45.0
 	inet.af/tcpproxy v0.0.0-20200125044825-b6bb9b5b8252
 )
