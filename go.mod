@@ -14,7 +14,7 @@ replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.24.2
 	k8s.io/apiserver => k8s.io/apiserver v0.24.2
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.24.0
-	k8s.io/client-go => github.com/rancher/client-go v1.24.0-rancher1
+	k8s.io/client-go => github.com/rancher/client-go v11.0.0+incompatible
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.23.8
 	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.24.0
 	k8s.io/code-generator => k8s.io/code-generator v0.24.0
