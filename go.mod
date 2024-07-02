@@ -6,7 +6,7 @@ replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.16+incompatible
 	github.com/docker/docker => github.com/docker/docker v20.10.24+incompatible
 	github.com/google/go-cmp => github.com/google/go-cmp v0.5.7
-	github.com/klauspost/compress => github.com/klauspost/compress v1.15.4
+	github.com/klauspost/compress => github.com/klauspost/compress v1.17.9
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
 	golang.org/x/sync => golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
 	k8s.io/api => k8s.io/api v0.24.2
