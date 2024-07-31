@@ -19,7 +19,7 @@ func NewClientDialer(path string) (dialer *websocket.Dialer, err error) {
 		return nil, err
 	}
 	return &websocket.Dialer{
-		NetDialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+		NetDialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
 			return winio.DialPipeContext(ctx, path)
 		},
 	}, nil
@@ -43,7 +43,7 @@ func GetClientOnConnect(ports []int) func(context.Context, *remotedialer.Session
 		for _, p := range ports {
 			listenAddress := fmt.Sprintf(":%d", p)
 			forwardAddress := fmt.Sprintf("localhost:%d", p)
-			dialContext := func(ctx context.Context, network, address string) (net.Conn, error) {
+			dialContext := func(ctx context.Context, _, _ string) (net.Conn, error) {
 				return s.Dial(ctx, "tcp", forwardAddress)
 			}
 			proxy.AddRoute(listenAddress, &tcpproxy.DialProxy{DialContext: dialContext})
