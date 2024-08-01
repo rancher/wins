@@ -127,7 +127,7 @@ func (p *Proxy) download() error {
 	}(file)
 
 	client := http.Client{
-		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+		CheckRedirect: func(r *http.Request, _ []*http.Request) error {
 			r.URL.Opaque = r.URL.Path
 			return nil
 		},

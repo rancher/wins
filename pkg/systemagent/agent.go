@@ -3,7 +3,6 @@ package systemagent
 import (
 	"context"
 	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/applyinator"
 	"github.com/rancher/system-agent/pkg/config"
@@ -34,8 +33,8 @@ func (a *Agent) Run(ctx context.Context) error {
 	logrus.Infof("Setting %s as the working directory", a.cfg.WorkDir)
 
 	imageUtil := image.NewUtility(a.cfg.ImagesDir, a.cfg.ImageCredentialProviderConfig, a.cfg.ImageCredentialProviderBinDir, a.cfg.AgentRegistriesFile)
-	applier := applyinator.NewApplyinator(a.cfg.WorkDir, a.cfg.PreserveWorkDir, a.cfg.AppliedPlanDir, imageUtil)
-
+	// Currently we do not support the 'interlockDir' on Windows, as the system-agent install script does not yet utilize those files
+	applier := applyinator.NewApplyinator(a.cfg.WorkDir, a.cfg.PreserveWorkDir, a.cfg.AppliedPlanDir, "", imageUtil)
 	if a.cfg.RemoteEnabled {
 		logrus.Infof("Starting remote watch of plans")
 
@@ -45,7 +44,7 @@ func (a *Agent) Run(ctx context.Context) error {
 			return fmt.Errorf("unable to parse connection info file: %v", err)
 		}
 
-		k8splan.Watch(ctx, *applier, connInfo)
+		k8splan.Watch(ctx, *applier, connInfo, false)
 	}
 
 	if a.cfg.LocalEnabled {

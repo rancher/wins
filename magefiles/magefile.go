@@ -86,7 +86,7 @@ func Validate() error {
 	envs := map[string]string{"GOOS": "windows", "ARCH": "amd64", "CGO_ENABLED": "0", "MAGEFILE_VERBOSE": "1"}
 
 	log.Printf("[Validate] Running: golangci-lint \n")
-	if err := sh.RunWithV(envs, "golangci-lint", "run"); err != nil {
+	if err := sh.RunWithV(envs, "golangci-lint", "run", "--timeout", "10m"); err != nil {
 		return err
 	}
 
