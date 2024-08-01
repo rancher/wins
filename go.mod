@@ -4,7 +4,7 @@ go 1.21
 
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.16+incompatible
-	github.com/docker/docker => github.com/docker/docker v20.10.24+incompatible
+	github.com/docker/docker => github.com/docker/docker v24.0.9+incompatible
 	github.com/google/go-cmp => github.com/google/go-cmp v0.5.7
 	github.com/klauspost/compress => github.com/klauspost/compress v1.15.4
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
