@@ -13,7 +13,7 @@ replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.28.12
 	k8s.io/apiserver => k8s.io/apiserver v0.28.12
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.28.12
-	k8s.io/client-go => github.com/rancher/client-go v1.27.4-rancher1
+	k8s.io/client-go => github.com/rancher/client-go v1.28.6-rancher1
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.28.12
 	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.28.12
 	k8s.io/code-generator => k8s.io/code-generator v0.28.12
@@ -91,7 +91,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/cel-go v0.16.1 // indirect
-	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-containerregistry v0.17.0 // indirect
