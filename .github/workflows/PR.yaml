@@ -15,10 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64
+        uses: golangci/golangci-lint-action@v6.1.0
         with:
           args: --timeout=10m
-          version: v1.55
+          version: v1.59
 
   test:
     strategy:
