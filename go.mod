@@ -1,6 +1,6 @@
 module github.com/rancher/wins
 
-go 1.21
+go 1.22
 
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.27+incompatible
