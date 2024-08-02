@@ -5,13 +5,9 @@ go 1.21
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.16+incompatible
 	github.com/docker/docker => github.com/docker/docker v20.10.24+incompatible
-	github.com/google/go-cmp => github.com/google/go-cmp v0.5.7
-	github.com/klauspost/compress => github.com/klauspost/compress v1.15.4
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.46.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.23.1
-	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
-	golang.org/x/sync => golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
 	k8s.io/api => k8s.io/api v0.27.16
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.27.16
 	k8s.io/apimachinery => k8s.io/apimachinery v0.27.16
@@ -157,7 +153,6 @@ require (
 	golang.org/x/term v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240528184218-531527333157 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
