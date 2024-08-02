@@ -49,13 +49,13 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/gogo/protobuf v1.3.2
-	github.com/gorilla/websocket v1.4.2
+	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/magefile/mage v1.13.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
+	github.com/rancher/remotedialer v0.4.1
 	github.com/rancher/system-agent v0.3.7
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.25.7
@@ -109,7 +109,7 @@ require (
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.2 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -120,10 +120,10 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc3 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
-	github.com/prometheus/client_golang v1.14.0 // indirect
+	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.37.0 // indirect
-	github.com/prometheus/procfs v0.8.0 // indirect
+	github.com/prometheus/common v0.42.0 // indirect
+	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/rancher/lasso v0.0.0-20230830164424-d684fdeb6f29 // indirect
 	github.com/rancher/wharfie v0.6.2 // indirect
 	github.com/rancher/wrangler v1.1.1 // indirect
