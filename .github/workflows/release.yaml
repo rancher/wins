@@ -99,11 +99,11 @@ jobs:
       # which cannot be installed onto windows VMs. Additionally, it is not possible to cross compile
       # Windows images on linux. So, we're stuck with manual docker commands.
       - name: Build Windows 2019
-        run: ./scripts/build-image.ps1 -ServerCoreVersion "1809" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
+        run: ./scripts/build-image.ps1 -ServerCoreVersion "ltsc2019" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
 
       - name: push images
         run: |
-          docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-1809
+          docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2019
 
   create-github-release:
     needs: [ create-push-image-windows-2019, create-push-image-windows-2022 ]
@@ -158,5 +158,5 @@ jobs:
 
       - name: create manifest list
         run: |
-          docker manifest create ${{ env.REPO }}/wins:${{ env.TAG }} ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022 ${{ env.REPO }}/wins:${{ env.TAG }}-windows-1809
+          docker manifest create ${{ env.REPO }}/wins:${{ env.TAG }} ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022 ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2019
           docker manifest push ${{ env.REPO }}/wins:${{ env.TAG }}

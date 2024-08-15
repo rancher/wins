@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -25,18 +26,20 @@ func DefaultConfig() *Config {
 			Mode:         "watching",
 			WatchingPath: defaults.UpgradeWatchingPath,
 		},
+		AgentStrictTLSMode: false,
 	}
 }
 
 type Config struct {
-	Debug       bool                `yaml:"debug" json:"debug"`
-	Listen      string              `yaml:"listen" json:"listen"`
-	Proxy       string              `yaml:"proxy" json:"proxy"`
-	WhiteList   WhiteListConfig     `yaml:"white_list" json:"white_list"`
-	Upgrade     UpgradeConfig       `yaml:"upgrade" json:"upgrade"`
-	SystemAgent *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
-	CSIProxy    *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy"`
-	TLSConfig   *wintls.Config      `yaml:"tls-config" json:"tls-config"`
+	Debug              bool                `yaml:"debug" json:"debug"`
+	Listen             string              `yaml:"listen" json:"listen"`
+	Proxy              string              `yaml:"proxy" json:"proxy"`
+	WhiteList          WhiteListConfig     `yaml:"white_list" json:"white_list"`
+	Upgrade            UpgradeConfig       `yaml:"upgrade" json:"upgrade"`
+	SystemAgent        *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
+	AgentStrictTLSMode bool                `yaml:"agentStrictTLSMode" json:"agentStrictTLSMode"`
+	CSIProxy           *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy"`
+	TLSConfig          *wintls.Config      `yaml:"tls-config" json:"tls-config"`
 }
 
 func (c *Config) Validate() error {
@@ -102,7 +105,7 @@ func (c *UpgradeConfig) IsWatchingMode() bool {
 
 func LoadConfig(path string, v *Config) error {
 	if v == nil {
-		return errors.New("config could not be nil")
+		return errors.New("config cannot not be nil")
 	}
 
 	stat, err := os.Stat(path)
@@ -120,6 +123,19 @@ func LoadConfig(path string, v *Config) error {
 	}
 
 	return v.Validate()
+}
+
+func SaveConfig(path string, v *Config) error {
+	if v == nil {
+		return fmt.Errorf("config cannot be nil")
+	}
+
+	yml, err := yaml.Marshal(v)
+	if err != nil {
+		return fmt.Errorf("could not marshal provided config")
+	}
+
+	return os.WriteFile(path, yml, os.ModePerm)
 }
 
 func DecodeConfig(path string, v *Config) error {

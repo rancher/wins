@@ -59,7 +59,10 @@ param (
     $Token,
     [Parameter()]
     [Switch]
-    $Worker
+    $Worker,
+    [Parameter()]
+    [Switch]
+    $StrictTlsVerification
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -222,6 +225,12 @@ function Invoke-WinsInstaller {
         }
         else {
             $env:CATTLE_AGENT_LOGLEVEL = $env:CATTLE_AGENT_LOGLEVEL.ToLower()
+        }
+
+        if ((-Not $env:STRICT_VERIFY) -and ($StrictTlsVerification)) {
+            $env:STRICT_VERIFY = "true"
+        } elseif (-Not $env:STRICT_VERIFY){
+            $env:STRICT_VERIFY = "false"
         }
 
         if ($env:CATTLE_AGENT_BINARY_LOCAL -eq "true") {
@@ -472,6 +481,7 @@ white_list:
 
         $agentConfig = 
         @"
+agentStrictTLSMode: $(($env:STRICT_VERIFY).ToString().ToLower())
 systemagent:
   workDirectory: $($env:CATTLE_AGENT_VAR_DIR)/work
   appliedPlanDirectory: $($env:CATTLE_AGENT_VAR_DIR)/applied
@@ -658,9 +668,16 @@ csi-proxy:
             Pop-Location
             Start-Sleep -s 5
         }
-        
-        Write-LogInfo "Starting $serviceName service."
-        Start-Service -Name $serviceName
+
+        try
+        {
+            Write-LogInfo "Starting $serviceName service."
+            Start-Service -Name $serviceName
+        } catch {
+            Write-LogInfo "$serviceName failed to start. Check the $serviceName logs for more information"
+            Write-LogInfo "Command: Get-WinEvent -ProviderName $serviceName | select-object TimeCreated,Message | Format-Table -wrap"
+            exit 1
+        }
         while ((Get-Service $serviceName).Status -ne 'Running') {
             Write-LogInfo "Waiting for $serviceName service to start."
             Start-Sleep -s 5

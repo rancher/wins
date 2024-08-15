@@ -1,5 +1,5 @@
-ARG SERVERCORE_VERSION
-FROM mcr.microsoft.com/windows/servercore:${SERVERCORE_VERSION} as wins
+ARG NANOSERVER_VERSION
+FROM mcr.microsoft.com/windows/nanoserver:${NANOSERVER_VERSION} as wins
 ARG VERSION
 ARG MAINTAINERS
 ARG REPO
@@ -19,14 +19,8 @@ LABEL org.opencontainers.image.vendor="Rancher Labs"
 LABEL org.opencontainers.image.version=${VERSION}
 WORKDIR C:/
 
-COPY ./artifacts C:/
-# staging for backwards compatibility
-# Create a symbolic link pwsh.exe that points to powershell.exe for consistency
-RUN New-Item -ItemType SymbolicLink -Target "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -Path "C:\Windows\System32\WindowsPowerShell\v1.0\pwsh.exe" ; \
-    Copy-Item wins.exe -Destination C:/Windows
+COPY ./artifacts/wins-suc.exe C:/
+COPY ./suc/update-connection-info.ps1 C:/
 
 USER ContainerAdministrator
-ENTRYPOINT [ "powershell", "-Command", "./run.ps1"]
-
-
-
+ENTRYPOINT [ "wins-suc.exe" ]

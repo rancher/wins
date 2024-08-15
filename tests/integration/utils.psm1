@@ -140,6 +140,46 @@ function Wait-Ready {
     } | Judge -Throw:$Throw -Timeout $Timeout
 }
 
+function Set-WinsConfig {
+    $winsConfig =
+    @"
+white_list:
+  processPaths:
+    - C:/etc/rancher/wins/powershell.exe
+    - C:/etc/rancher/wins/wins-upgrade.exe
+    - C:/etc/wmi-exporter/wmi-exporter.exe
+    - C:/etc/windows-exporter/windows-exporter.exe
+  proxyPorts:
+    - 9796
+agentStrictTLSMode: false
+debug: false
+systemagent:
+  workDirectory: C:/etc/rancher/wins/work
+  appliedPlanDirectory: C:/etc/rancher/wins/applied
+  remoteEnabled: false
+  localEnabled: true
+  preserveWorkDirectory: false
+csi-proxy:
+  url: https://acs-mirror.azureedge.net/csi-proxy/%[1]s/binaries/csi-proxy-%[1]s.tar.gz
+  version: v1.1.3
+  kubeletPath: fake
+"@
+    Add-Content -Path C:/etc/rancher/wins/config -Value $winsConfig
+}
+
+function New-Directory {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [string]
+        $Path
+    )
+    if (-not (Test-Path -Path $Path)) {
+        New-Item -Path $Path -ItemType Directory | Out-Null
+    }
+}
+
+
 Export-ModuleMember -Function Log-Info
 Export-ModuleMember -Function Log-Warn
 Export-ModuleMember -Function Log-Error
@@ -147,3 +187,5 @@ Export-ModuleMember -Function Log-Fatal
 Export-ModuleMember -Function Execute-Binary
 Export-ModuleMember -Function Judge
 Export-ModuleMember -Function Wait-Ready
+Export-ModuleMember -Function New-Directory
+Export-ModuleMember -Function Set-WinsConfig

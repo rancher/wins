@@ -40,13 +40,13 @@ func TestExecuteCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			o, err := RunCommand(tt.args.command)
 			if err != nil && !tt.error {
-				t.Errorf("error occurred, " + err.Error())
+				t.Errorf("error occurred, %s", err.Error())
 			}
 
 			if !tt.error {
 				got := strings.TrimSpace(string(o))
 				if got != tt.want {
-					t.Errorf("error, should be " + tt.want + ", but got " + got)
+					t.Errorf("error, should be %s, but got %s ", tt.want, got)
 				}
 			}
 		})

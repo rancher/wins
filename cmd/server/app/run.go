@@ -110,6 +110,9 @@ func _runAction(cliCtx *cli.Context) error {
 	// adding system agent
 	agent := systemagent.New(cfg.SystemAgent)
 
+	// Determine if the agent should use strict verification
+	agent.StrictTLSMode = cfg.AgentStrictTLSMode
+
 	//checking if CSI Proxy has config, if so enables it.
 	if cfg.CSIProxy != nil {
 		logrus.Infof("CSI Proxy will be enabled as a Windows service.")
