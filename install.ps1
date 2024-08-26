@@ -67,7 +67,7 @@ param (
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$FALLBACK = "v0.3.0"
+$FALLBACK = "v0.4.15"
 
 function Invoke-WinsInstaller {
     [CmdletBinding()]
@@ -471,7 +471,6 @@ function Invoke-WinsInstaller {
 white_list:
   processPaths:
     - $($env:CATTLE_AGENT_CONFIG_DIR)/powershell.exe
-    - $($env:CATTLE_AGENT_CONFIG_DIR)/wins-upgrade.exe
     - C:/etc/wmi-exporter/wmi-exporter.exe
     - C:/etc/windows-exporter/windows-exporter.exe
   proxyPorts:

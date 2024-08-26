@@ -146,7 +146,6 @@ function Set-WinsConfig {
 white_list:
   processPaths:
     - C:/etc/rancher/wins/powershell.exe
-    - C:/etc/rancher/wins/wins-upgrade.exe
     - C:/etc/wmi-exporter/wmi-exporter.exe
     - C:/etc/windows-exporter/windows-exporter.exe
   proxyPorts:

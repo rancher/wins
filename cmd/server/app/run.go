@@ -87,11 +87,6 @@ func _runAction(cliCtx *cli.Context) error {
 		return errors.Wrapf(err, "failed to load config from %s", cfgPath)
 	}
 
-	err = setupUpgrading(ctx, cfg)
-	if err != nil {
-		return errors.Wrap(err, "failed to setup upgrading")
-	}
-
 	serverOptions := []grpc.ServerOption{
 		grpc.ConnectionTimeout(5 * time.Second),
 	}
