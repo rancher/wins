@@ -39,7 +39,7 @@ func RefreshWinsService() error {
 			return err
 		}
 	default:
-		logrus.Warnf("Unknown service state '%d', will not start or restart service: ", state)
+		logrus.Warnf("Unexpected service state '%s', will not start or restart service: ", serviceStateToString(state))
 	}
 
 	return nil
@@ -66,13 +66,20 @@ func restartService(s *mgr.Service) error {
 		return fmt.Errorf("cannot restart the %s service as it is not yet running", s.Name)
 	}
 
-	_, err = s.Control(mgr.ServiceRestart)
-	if err != nil {
-		logrus.Errorf("Encountered error attempting to restart the %s service: %v", s.Name, err)
-		return fmt.Errorf("encountered error attempting to restart the %s service: %v", s.Name, err)
+	if err = stopService(s); err != nil {
+		logrus.Errorf("Encountered error attempting to stop the %s service: %v", s.Name, err)
+		return fmt.Errorf("encountered error attempting to stop the %s service: %v", s.Name, err)
 	}
 
-	return waitForServiceState(s, svc.Running, 5*time.Second, 5)
+	if err = waitForServiceState(s, svc.Stopped, 5, 5); err != nil {
+		return err
+	}
+
+	if err = s.Start(); err != nil {
+		return err
+	}
+
+	return waitForServiceState(s, svc.Running, 5, 5)
 }
 
 func openService(name string) (*mgr.Service, error) {
@@ -84,13 +91,13 @@ func openService(name string) (*mgr.Service, error) {
 	return svcMgr.OpenService(name)
 }
 
-func StopService(s *mgr.Service) error {
+func stopService(s *mgr.Service) error {
 	_, err := s.Control(svc.Stop)
 	if err != nil {
 		return err
 	}
 
-	return waitForServiceState(s, svc.Stopped, 5*time.Second, 5)
+	return waitForServiceState(s, svc.Stopped, 5, 5)
 }
 
 func waitForServiceState(s *mgr.Service, desiredState svc.State, delayInSeconds time.Duration, maxAttempts int) error {
@@ -107,6 +114,7 @@ func waitForServiceState(s *mgr.Service, desiredState svc.State, delayInSeconds 
 			transitionedSuccessfully = true
 			break
 		}
+		logrus.Infof("Waiting for service '%s' to enter state '%s', current state: '%s'", s.Name, serviceStateToString(desiredState), serviceStateToString(state))
 		time.Sleep(time.Second * delayInSeconds)
 	}
 
@@ -114,6 +122,7 @@ func waitForServiceState(s *mgr.Service, desiredState svc.State, delayInSeconds 
 		return fmt.Errorf("%s failed to transition to desired state of '%s' within expected timeframe of %d seconds. last known state was '%s'", s.Name, serviceStateToString(desiredState), int(delayInSeconds.Seconds()*float64(maxAttempts)), serviceStateToString(state))
 	}
 
+	logrus.Infof("Service '%s' successfully transitioned to state '%s'", s.Name, serviceStateToString(desiredState))
 	return nil
 }
 
@@ -129,6 +138,6 @@ func serviceStateToString(state svc.State) string {
 	case svc.StartPending:
 		return "Start Pending"
 	default:
-		return ""
+		return "Unknown State"
 	}
 }

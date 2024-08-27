@@ -28,6 +28,9 @@ func Run(_ *cli.Context) error {
 	}
 
 	logrus.Infof("successfully updated connection info")
+	if o != "" {
+		logrus.Infof(" Script output:\n%s", o)
+	}
 
 	// update the config using env vars
 	restartServiceDueToConfigChange, err := service.UpdateConfigFromEnvVars("")
