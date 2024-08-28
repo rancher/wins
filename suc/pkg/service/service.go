@@ -10,36 +10,18 @@ import (
 	"golang.org/x/sys/windows/svc/mgr"
 )
 
-type StartType int
-
 func RefreshWinsService() error {
 	logrus.Infof("Restarting the %s service", defaults.WindowsServiceDisplayName)
 	winSrv, err := openService(defaults.WindowsServiceName)
 	if err != nil {
 		logrus.Errorf("Cannot restart %s as the service failed to open: %v", defaults.WindowsServiceName, err)
-		return err
+		return fmt.Errorf("failed to refresh the %s service: %w", winSrv.Name, err)
 	}
 	defer winSrv.Close()
 
-	state, err := getServiceState(winSrv)
+	err = restartService(winSrv)
 	if err != nil {
-		logrus.Errorf("Could not determine the state of the %s service: %v", defaults.WindowsServiceName, err)
-		return fmt.Errorf("could not determine the state of the %s service: %v", defaults.WindowsServiceName, err)
-	}
-
-	switch state {
-	case svc.Running:
-		err = restartService(winSrv)
-		if err != nil {
-			return err
-		}
-	case svc.Stopped:
-		err = winSrv.Start()
-		if err != nil {
-			return err
-		}
-	default:
-		logrus.Warnf("Unexpected service state '%s', will not start or restart service: ", serviceStateToString(state))
+		return fmt.Errorf("failed to refresh the %s service: %w", winSrv.Name, err)
 	}
 
 	return nil
@@ -57,26 +39,18 @@ func getServiceState(s *mgr.Service) (svc.State, error) {
 func restartService(s *mgr.Service) error {
 	currentState, err := getServiceState(s)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get state of service %s: %w", s.Name, err)
 	}
 
-	if currentState != svc.Running {
-		// can't restart a service that isn't running
-		logrus.Warnf("Cannot restart the %s service as it is not yet running", s.Name)
-		return fmt.Errorf("cannot restart the %s service as it is not yet running", s.Name)
-	}
-
-	if err = stopService(s); err != nil {
-		logrus.Errorf("Encountered error attempting to stop the %s service: %v", s.Name, err)
-		return fmt.Errorf("encountered error attempting to stop the %s service: %v", s.Name, err)
-	}
-
-	if err = waitForServiceState(s, svc.Stopped, 5, 5); err != nil {
-		return err
+	if currentState == svc.Running {
+		if err = stopService(s); err != nil {
+			logrus.Errorf("Encountered error attempting to stop the %s service: %v", s.Name, err)
+			return fmt.Errorf("encountered error attempting to stop the %s service: %w", s.Name, err)
+		}
 	}
 
 	if err = s.Start(); err != nil {
-		return err
+		return fmt.Errorf("failed to restart the %s service: %w", s.Name, err)
 	}
 
 	return waitForServiceState(s, svc.Running, 5, 5)
@@ -85,7 +59,7 @@ func restartService(s *mgr.Service) error {
 func openService(name string) (*mgr.Service, error) {
 	svcMgr, err := mgr.Connect()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to service manager: %w", err)
 	}
 	defer svcMgr.Disconnect()
 	return svcMgr.OpenService(name)
@@ -94,7 +68,7 @@ func openService(name string) (*mgr.Service, error) {
 func stopService(s *mgr.Service) error {
 	_, err := s.Control(svc.Stop)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to send Stop signal to %s: %w", s.Name, err)
 	}
 
 	return waitForServiceState(s, svc.Stopped, 5, 5)
@@ -108,21 +82,21 @@ func waitForServiceState(s *mgr.Service, desiredState svc.State, delayInSeconds 
 	for i := 0; i < maxAttempts; i++ {
 		state, err = getServiceState(s)
 		if err != nil {
-			return fmt.Errorf("failed to query service %s: %v", s.Name, err)
+			return fmt.Errorf("failed to query service %s: %w", s.Name, err)
 		}
 		if state == desiredState {
 			transitionedSuccessfully = true
 			break
 		}
-		logrus.Infof("Waiting for service '%s' to enter state '%s', current state: '%s'", s.Name, serviceStateToString(desiredState), serviceStateToString(state))
+		logrus.Infof("Waiting for service %s to enter state %s, current state: %s", s.Name, serviceStateToString(desiredState), serviceStateToString(state))
 		time.Sleep(time.Second * delayInSeconds)
 	}
 
 	if !transitionedSuccessfully {
-		return fmt.Errorf("%s failed to transition to desired state of '%s' within expected timeframe of %d seconds. last known state was '%s'", s.Name, serviceStateToString(desiredState), int(delayInSeconds.Seconds()*float64(maxAttempts)), serviceStateToString(state))
+		return fmt.Errorf("%s failed to transition to desired state of %s within expected timeframe of %d seconds. last known state was %s", s.Name, serviceStateToString(desiredState), int(delayInSeconds.Seconds()*float64(maxAttempts)), serviceStateToString(state))
 	}
 
-	logrus.Infof("Service '%s' successfully transitioned to state '%s'", s.Name, serviceStateToString(desiredState))
+	logrus.Infof("Service %s successfully transitioned to state %s", s.Name, serviceStateToString(desiredState))
 	return nil
 }
 

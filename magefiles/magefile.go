@@ -5,7 +5,6 @@ package main
 import (
 	"crypto/sha256"
 	"crypto/sha512"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -161,7 +160,7 @@ func Build() error {
 	}
 
 	if len(files) != requiredFilesCount {
-		return errors.New(fmt.Sprintf("[Build] a required build artifact is missing, expected %d artifacts and only got %d, exiting now \n", requiredFilesCount, len(files)))
+		return fmt.Errorf("[Build] a required build artifact is missing, expected %d artifacts and only got %d, exiting now \n", requiredFilesCount, len(files))
 	}
 
 	var artifacts strings.Builder

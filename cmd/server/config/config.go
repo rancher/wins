@@ -31,10 +31,10 @@ type Config struct {
 	Listen             string              `yaml:"listen" json:"listen"`
 	Proxy              string              `yaml:"proxy" json:"proxy"`
 	WhiteList          WhiteListConfig     `yaml:"white_list" json:"white_list"`
-	SystemAgent        *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
+	SystemAgent        *config.AgentConfig `yaml:"systemagent" json:"systemagent,omitempty"`
 	AgentStrictTLSMode bool                `yaml:"agentStrictTLSMode" json:"agentStrictTLSMode"`
-	CSIProxy           *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy"`
-	TLSConfig          *wintls.Config      `yaml:"tls-config" json:"tls-config"`
+	CSIProxy           *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy,omitempty"`
+	TLSConfig          *wintls.Config      `yaml:"tls-config" json:"tls-config,omitempty"`
 }
 
 func (c *Config) Validate() error {
@@ -72,7 +72,7 @@ func (c *WhiteListConfig) Validate() error {
 
 func LoadConfig(path string, v *Config) error {
 	if v == nil {
-		return errors.New("config cannot not be nil")
+		return errors.New("config cannot be nil")
 	}
 
 	stat, err := os.Stat(path)
@@ -94,12 +94,12 @@ func LoadConfig(path string, v *Config) error {
 
 func SaveConfig(path string, v *Config) error {
 	if v == nil {
-		return fmt.Errorf("config cannot be nil")
+		return errors.New("config cannot be nil")
 	}
 
 	yml, err := yaml.Marshal(v)
 	if err != nil {
-		return fmt.Errorf("could not marshal provided config")
+		return fmt.Errorf("could not marshal provided config: %w", err)
 	}
 
 	return os.WriteFile(path, yml, os.ModePerm)

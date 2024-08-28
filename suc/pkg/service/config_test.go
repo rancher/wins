@@ -4,6 +4,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -14,16 +15,22 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-const (
+var (
 	// configFileLoc denotes where the test
 	// config will be placed on disk when running in GHA.
 	// The drive letter is intentionally omitted.
-	configFileLoc = "./wins-test-config"
+	configFileLoc = ""
 )
 
 func setupTest(vars []v1.EnvVar, t *testing.T) {
+	h, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal("Could not find user home directory")
+	}
+
+	configFileLoc = fmt.Sprintf("%s\\wins-test-config", h)
 	for _, evar := range os.Environ() {
-		if !strings.Contains(evar, "CATTLE") {
+		if !strings.Contains(evar, "CATTLE") && evar != "STRICT_VERIFY" {
 			continue
 		}
 		err := os.Unsetenv(strings.Split(evar, "=")[0])
@@ -31,16 +38,19 @@ func setupTest(vars []v1.EnvVar, t *testing.T) {
 			t.Fatalf("failed to clear environment variable %s: %v", evar, err)
 		}
 	}
+
 	for _, evar := range vars {
 		err := os.Setenv(evar.Name, evar.Value)
 		if err != nil {
 			t.Fatalf("failed to set environment variable %s: %v", evar.Name, err)
 		}
 	}
-	err := os.Setenv(ConfigDirEnvVar.name(), "./config")
+
+	err = os.Setenv(ConfigDirEnvVar, configFileLoc)
 	if err != nil {
-		t.Fatalf("Could not set %s", ConfigDirEnvVar.name())
+		t.Fatalf("Could not set %s", ConfigDirEnvVar)
 	}
+
 	err = os.Remove(configFileLoc)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("unable to remove existing config file")
@@ -60,7 +70,7 @@ func Test_UpdateConfigFromEnvVars(t *testing.T) {
 			name: "Update single known field",
 			envVars: []v1.EnvVar{
 				{
-					Name:  DebugEnvVar.name(),
+					Name:  DebugEnvVar,
 					Value: "true",
 				},
 			},
@@ -96,11 +106,11 @@ func Test_UpdateConfigFromEnvVars(t *testing.T) {
 			name: "Update many known fields",
 			envVars: []v1.EnvVar{
 				{
-					Name:  DebugEnvVar.name(),
+					Name:  DebugEnvVar,
 					Value: "true",
 				},
 				{
-					Name:  AgentStringTLSEnvVar.simpleName(),
+					Name:  AgentStringTLSEnvVar,
 					Value: "true",
 				},
 			},

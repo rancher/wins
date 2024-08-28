@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/rancher/wins/cmd/server/config"
@@ -11,59 +10,32 @@ import (
 )
 
 var (
-	ConfigDirEnvVar      = envVar{varName: "wins_config_dir"}
-	DebugEnvVar          = envVar{varName: "debug"}
-	AgentStringTLSEnvVar = envVar{varName: "strict_verify"}
+	ConfigDirEnvVar      = "CATTLE_WINS_CONFIG_DIR"
+	DebugEnvVar          = "CATTLE_WINS_DEBUG"
+	AgentStringTLSEnvVar = "STRICT_VERIFY"
 )
 
 const (
-	defaultConfigFile = "C:/etc/rancher/wins/config"
+	defaultConfigFile = "c:/etc/rancher/wins/config"
 )
 
-type envVar struct {
-	varName string
-}
-
-// get returns the value of the environment variable
-// using os.Getenv. The full name is passed to os.Getenv
-// (i.e. CATTLE_WINS_*)
-func (e *envVar) get() string {
-	return os.Getenv(e.name())
-}
-
-// getSimple returns the value of the environment variable
-// using os.Getenv. The simple name is passed to os.Getenv
-// (i.e. there is no 'CATTLE_WINS_' prefix)
-func (e *envVar) getSimple() string {
-	return os.Getenv(e.simpleName())
-}
-
-// name returns the name of the environment variable, including
-// a 'CATTLE_WINS_' prefix
-func (e *envVar) name() string {
-	return fmt.Sprintf("CATTLE_WINS_%s", strings.ToUpper(e.varName))
-}
-
-// simpleName returns the name of the environment variable, without
-// including the 'CATTLE_WINS_' prefix
-func (e *envVar) simpleName() string {
-	return strings.ToUpper(e.varName)
-}
-
-// loadConfig utilizes the ConfigDirEnvVar environment variable and path parameter to load
-// a config file located on the host. If both are provided, the path parameter will take
-// precedence. If neither are provided, then the defaultConfigFile path is used.
-func loadConfig(path string) (*config.Config, error) {
-	configDirEnv := os.Getenv(ConfigDirEnvVar.get())
+func getConfigPath(path string) string {
+	configDirEnv := os.Getenv(ConfigDirEnvVar)
 	if path == "" && configDirEnv != "" {
 		path = configDirEnv
 	}
 	if path == "" {
 		path = defaultConfigFile
 	}
+	return path
+}
 
+// loadConfig utilizes the ConfigDirEnvVar environment variable and path parameter to load
+// a config file located on the host. If both are provided, the path parameter will take
+// precedence. If neither are provided, then the defaultConfigFile path is used.
+func loadConfig(path string) (*config.Config, error) {
 	cfg := config.DefaultConfig()
-	err := config.LoadConfig(path, cfg)
+	err := config.LoadConfig(getConfigPath(path), cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -71,19 +43,11 @@ func loadConfig(path string) (*config.Config, error) {
 	return cfg, nil
 }
 
-// loadConfig utilizes the ConfigDirEnvVar environment variable and path parameter to save
+// saveConfig utilizes the ConfigDirEnvVar environment variable and path parameter to save
 // a config file on the host. If both are provided, the path parameter will take
 // precedence. If neither are provided, then the defaultConfigFile path is used.
 func saveConfig(cfg *config.Config, path string) error {
-	configDirEnv := os.Getenv(ConfigDirEnvVar.get())
-	if path == "" && configDirEnv != "" {
-		path = configDirEnv
-	}
-	if path == "" {
-		path = defaultConfigFile
-	}
-
-	return config.SaveConfig(path, cfg)
+	return config.SaveConfig(getConfigPath(path), cfg)
 }
 
 // UpdateConfigFromEnvVars is responsible for updating the rancher-wins config file
@@ -93,44 +57,42 @@ func saveConfig(cfg *config.Config, path string) error {
 // value does not equal the currently set value in the config file. UpdateConfigFromEnvVars returns a boolean
 // indicating if the config file has been updated and any errors encountered.
 func UpdateConfigFromEnvVars(path string) (bool, error) {
-	logrus.Infof("Loading config from host")
+	logrus.Info("Loading config from host")
 	cfg, err := loadConfig(path)
 	if err != nil {
 		return false, fmt.Errorf("failed to load config: %v", err)
 	}
 
 	configNeedsUpdate := false
-	logrus.Infof("Checking for %s value. This is a boolean flag, expecting 'true' or 'false'", DebugEnvVar.name())
-	if v := DebugEnvVar.get(); v != "" {
-		logrus.Infof("Found value '%s' for %s", v, DebugEnvVar.name())
-		givenBool := strings.ToLower(DebugEnvVar.get()) == "true"
+	logrus.Infof("Checking the %s value. This is a boolean flag, expecting 'true' or 'false'", DebugEnvVar)
+	if v := os.Getenv(DebugEnvVar); v != "" {
+		logrus.Infof("Found value '%s' for %s", v, DebugEnvVar)
+		givenBool := strings.ToLower(v) == "true"
 		if cfg.Debug != givenBool {
 			cfg.Debug = givenBool
 			configNeedsUpdate = true
 		}
 	}
 
-	logrus.Infof("Checking for %s value. This is a boolean flag, expecting 'true' or 'false'", AgentStringTLSEnvVar.simpleName())
-	if v := AgentStringTLSEnvVar.getSimple(); v != "" {
-		logrus.Infof("Found value '%s' for %s", v, AgentStringTLSEnvVar.simpleName())
-		tlsMode, err := strconv.ParseBool(strings.ToLower(v))
-		if err != nil {
-			logrus.Errorf("Error encountered while pasring %s, field will not be updated: %v", AgentStringTLSEnvVar.getSimple(), err)
-		} else if cfg.AgentStrictTLSMode != tlsMode {
-			cfg.AgentStrictTLSMode = tlsMode
+	logrus.Infof("Checking the %s value. This is a boolean flag, expecting 'true' or 'false'", AgentStringTLSEnvVar)
+	if v := os.Getenv(AgentStringTLSEnvVar); v != "" {
+		logrus.Infof("Found value '%s' for %s", v, AgentStringTLSEnvVar)
+		givenBool := strings.ToLower(v) == "true"
+		if cfg.AgentStrictTLSMode != givenBool {
+			cfg.AgentStrictTLSMode = givenBool
 			configNeedsUpdate = true
 		}
 	}
 
 	// If we haven't made any changes there is no reason to update the config file
 	if configNeedsUpdate {
-		logrus.Infof("Detected a change in configuration, updating config file")
+		logrus.Info("Detected a change in configuration, updating config file")
 		err = saveConfig(cfg, path)
 		if err != nil {
 			return configNeedsUpdate, fmt.Errorf("failed to save config: %v", err)
 		}
 	} else {
-		logrus.Infof("Did not detect a change in configuration")
+		logrus.Info("Did not detect a change in configuration")
 	}
 
 	return configNeedsUpdate, nil

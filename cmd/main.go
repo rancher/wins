@@ -75,7 +75,7 @@ func main() {
 		},
 		&cli.BoolFlag{
 			Name:  "quiet",
-			Usage: "Turn on off all logging",
+			Usage: "Turn off all logging",
 		},
 	}
 

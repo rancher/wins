@@ -227,10 +227,11 @@ function Invoke-WinsInstaller {
             $env:CATTLE_AGENT_LOGLEVEL = $env:CATTLE_AGENT_LOGLEVEL.ToLower()
         }
 
-        if ((-Not $env:STRICT_VERIFY) -and ($StrictTlsVerification)) {
-            $env:STRICT_VERIFY = "true"
-        } elseif (-Not $env:STRICT_VERIFY){
+        if (-Not $env:STRICT_VERIFY) {
             $env:STRICT_VERIFY = "false"
+        }
+        if ($StrictTlsVerification -eq $true) {
+            $env:STRICT_VERIFY = "true"
         }
 
         if ($env:CATTLE_AGENT_BINARY_LOCAL -eq "true") {

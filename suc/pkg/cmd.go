@@ -1,9 +1,9 @@
 package pkg
 
 import (
-	"errors"
 	"fmt"
 
+	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/suc/pkg/rancher"
 	"github.com/rancher/wins/suc/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -11,54 +11,45 @@ import (
 )
 
 func Run(_ *cli.Context) error {
-	var errs []error
-	refreshService := false
-
 	initialState, err := service.BuildInitialState()
 	if err != nil {
-		return fmt.Errorf("could not build initial state for rancher-wins: %v", err)
+		return fmt.Errorf("could not build initial state for rancher-wins: %w", err)
 	}
 
-	logrus.Infof("Updating rancher connection info")
-	o, err := rancher.UpdateConnectionInformation()
+	logrus.Info("Updating rancher connection info")
+	output, err := rancher.UpdateConnectionInformation()
 	if err != nil {
-		logrus.Errorf("Could not update rancher connection information. Script output:")
-		logrus.Error(o)
-		return fmt.Errorf("error encountered while refreshing connection information: %v", err)
+		logrus.Errorf("Could not update rancher connection information")
+		logrus.Errorf("Script output:\n%s", output)
+		return fmt.Errorf("error encountered while refreshing connection information: %w", err)
 	}
 
-	logrus.Infof("successfully updated connection info")
-	if o != "" {
-		logrus.Infof(" Script output:\n%s", o)
+	logrus.Info("Successfully updated connection info")
+	if output != "" {
+		logrus.Infof("Script output:\n%s", output)
 	}
 
 	// update the config using env vars
-	restartServiceDueToConfigChange, err := service.UpdateConfigFromEnvVars("")
-	refreshService = restartServiceDueToConfigChange
-	if err != nil {
-		errs = append(errs, err)
-	}
-
-	if refreshService && (errs == nil || len(errs) == 0) {
-		if err = service.RefreshWinsService(); err != nil {
-			return fmt.Errorf("error encountered while attempting to restart rancher-wins: %v", err)
-		}
-	} else if errs != nil && len(errs) > 0 {
-		logrus.Errorf("Attempting to restore initial state due to error(s) encountered while updating rancher-wins: %v", combineErrors(errs))
+	restartServiceDueToConfigChange, updateErr := service.UpdateConfigFromEnvVars("")
+	if updateErr != nil {
+		logrus.Errorf("Attempting to restore initial state due to error encountered while updating rancher-wins: %v", updateErr)
 		err = service.RestoreInitialState(initialState)
 		if err != nil {
-			errs = append(errs, err)
-			return fmt.Errorf("failed to restore initial state: %v", combineErrors(errs))
+			return fmt.Errorf("failed to restore initial state: %w", err)
+		}
+		logrus.Info("Successfully restored initial config state")
+		return fmt.Errorf("failed to update rancher-wins config file: %w", updateErr)
+	}
+
+	if restartServiceDueToConfigChange {
+		if err = service.RefreshWinsService(); err != nil {
+			return fmt.Errorf("error encountered while attempting to restart rancher-wins: %w", err)
 		}
 	}
 
-	return combineErrors(errs)
-}
-
-func combineErrors(errs []error) error {
-	var err error
-	for _, e := range errs {
-		err = errors.Join(err, e)
+	if err != nil {
+		return fmt.Errorf("%s encountered an error while updating the node: %w", defaults.WindowsSUCName, err)
 	}
-	return err
+
+	return nil
 }
