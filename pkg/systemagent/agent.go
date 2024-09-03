@@ -3,6 +3,7 @@ package systemagent
 import (
 	"context"
 	"fmt"
+
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/applyinator"
 	"github.com/rancher/system-agent/pkg/config"
@@ -14,7 +15,8 @@ import (
 )
 
 type Agent struct {
-	cfg *config.AgentConfig
+	cfg           *config.AgentConfig
+	StrictTLSMode bool
 }
 
 func (a *Agent) Run(ctx context.Context) error {
@@ -37,6 +39,7 @@ func (a *Agent) Run(ctx context.Context) error {
 	applier := applyinator.NewApplyinator(a.cfg.WorkDir, a.cfg.PreserveWorkDir, a.cfg.AppliedPlanDir, "", imageUtil)
 	if a.cfg.RemoteEnabled {
 		logrus.Infof("Starting remote watch of plans")
+		logrus.Debugf("Agent Strict TLS Mode is %t", a.StrictTLSMode)
 
 		var connInfo config.ConnectionInfo
 
@@ -44,7 +47,7 @@ func (a *Agent) Run(ctx context.Context) error {
 			return fmt.Errorf("unable to parse connection info file: %v", err)
 		}
 
-		k8splan.Watch(ctx, *applier, connInfo, false)
+		k8splan.Watch(ctx, *applier, connInfo, a.StrictTLSMode)
 	}
 
 	if a.cfg.LocalEnabled {

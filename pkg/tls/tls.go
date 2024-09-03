@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	Insecure     *bool  `yaml:"insecure" json:"insecure"`
+	Insecure     *bool  `yaml:"insecure" json:"insecure,omitempty"`
 	CertFilePath string `yaml:"certFilePath" json:"certFilePath"`
 }
 

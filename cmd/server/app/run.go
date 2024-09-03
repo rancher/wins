@@ -87,11 +87,6 @@ func _runAction(cliCtx *cli.Context) error {
 		return errors.Wrapf(err, "failed to load config from %s", cfgPath)
 	}
 
-	err = setupUpgrading(ctx, cfg)
-	if err != nil {
-		return errors.Wrap(err, "failed to setup upgrading")
-	}
-
 	serverOptions := []grpc.ServerOption{
 		grpc.ConnectionTimeout(5 * time.Second),
 	}
@@ -109,6 +104,9 @@ func _runAction(cliCtx *cli.Context) error {
 
 	// adding system agent
 	agent := systemagent.New(cfg.SystemAgent)
+
+	// Determine if the agent should use strict verification
+	agent.StrictTLSMode = cfg.AgentStrictTLSMode
 
 	//checking if CSI Proxy has config, if so enables it.
 	if cfg.CSIProxy != nil {

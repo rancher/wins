@@ -5,7 +5,6 @@ package main
 import (
 	"crypto/sha256"
 	"crypto/sha512"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -18,12 +17,14 @@ import (
 	"github.com/rancher/wins/magetools"
 )
 
-var Default = Build
+var Default = BuildAll
 var g *magetools.Go
 var version string
 var commit string
 var artifactOutput = filepath.Join("artifacts")
 var integrationBin = filepath.Join("tests/integration/bin")
+
+const requiredFilesCount = 4
 
 func Clean() error {
 	if err := sh.Rm(artifactOutput); err != nil {
@@ -39,13 +40,13 @@ func Version() error {
 	}
 	commit = c
 
-	dt := os.Getenv("TAG")
+	ght := os.Getenv("TAG")
 	isClean, err := magetools.IsGitClean()
 	if err != nil {
 		return err
 	}
-	if dt != "" && isClean {
-		version = dt
+	if ght != "" && isClean {
+		version = ght
 		return nil
 	}
 
@@ -64,7 +65,7 @@ func Version() error {
 		log.Printf("[Version] dirty version encountered: %s \n", version)
 	}
 	// check if this is a release version and fail if the version contains `dirty`
-	if strings.Contains(version, "dirty") && os.Getenv("DRONE_TAG") != "" || tag != "" {
+	if strings.Contains(version, "dirty") && ght != "" || tag != "" {
 		return fmt.Errorf("[Version] releases require a non-dirty tag: %s", version)
 	}
 	log.Printf("[Version] version: %s \n", version)
@@ -99,6 +100,11 @@ func Validate() error {
 	return nil
 }
 
+func BuildAll() error {
+	mg.SerialDeps(Build, BuildSUC)
+	return nil
+}
+
 func Build() error {
 	mg.Deps(Clean, Dependencies, Validate)
 	winsOutput := filepath.Join("bin", "wins.exe")
@@ -120,10 +126,6 @@ func Build() error {
 	}
 
 	if err := sh.Copy(filepath.Join(artifactOutput, "wins.exe"), winsOutput); err != nil {
-		return err
-	}
-
-	if err := sh.Copy(filepath.Join(artifactOutput, "run.ps1"), filepath.Join("suc", "run.ps1")); err != nil {
 		return err
 	}
 
@@ -157,8 +159,8 @@ func Build() error {
 		return err
 	}
 
-	if len(files) != 5 {
-		return errors.New("[Build] a required build artifact is missing, exiting now \n")
+	if len(files) != requiredFilesCount {
+		return fmt.Errorf("[Build] a required build artifact is missing, expected %d artifacts and only got %d, exiting now \n", requiredFilesCount, len(files))
 	}
 
 	var artifacts strings.Builder
@@ -171,8 +173,20 @@ func Build() error {
 	return nil
 }
 
+func BuildSUC() error {
+	log.Printf("[Build] Building wins SUC version: %s \n", version)
+	winsSucOutput := filepath.Join("bin", "wins-suc.exe")
+	if err := g.Build(flags, "suc/main.go", winsSucOutput); err != nil {
+		return err
+	}
+	if err := sh.Copy(filepath.Join(artifactOutput, "wins-suc.exe"), winsSucOutput); err != nil {
+		return err
+	}
+	return nil
+}
+
 func Test() error {
-	mg.Deps(Build)
+	mg.Deps(BuildAll)
 	log.Printf("[Test] Testing wins version %s \n", version)
 	if err := g.Test(flags, "./..."); err != nil {
 		return err
@@ -207,7 +221,7 @@ func Integration() error {
 }
 
 func TestAll() error {
-	mg.Deps(Build)
+	mg.Deps(BuildAll)
 	// don't run Test and Integration in mg.Deps
 	// as deps run in an unordered asynchronous fashion
 	if err := Test(); err != nil {

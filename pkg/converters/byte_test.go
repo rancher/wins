@@ -8,7 +8,7 @@ func TestUnsafeStringToBytes(t *testing.T) {
 	want := "hello world"
 	got := string(UnsafeStringToBytes("hello world"))
 	if string(got) != string(want) {
-		t.Errorf("error, should be " + want + ", but got " + got)
+		t.Errorf("error, should be %s, but got %s", want, got)
 	}
 }
 
@@ -16,7 +16,7 @@ func TestUnsafeBytesToString(t *testing.T) {
 	want := "hello world"
 	got := UnsafeBytesToString([]byte("hello world"))
 	if string(got) != string(want) {
-		t.Errorf("error, should be " + want + ", but got " + got)
+		t.Errorf("error, should be %s, but got %s", want, got)
 	}
 }
 

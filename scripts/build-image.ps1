@@ -5,18 +5,18 @@
     Runs the docker build command for a given windows OS version, docker repository, and tag
 .NOTES
     Parameters:
-      - ServerCoreVersion: Defines the windows OS version used to build the image. Can be either '1809' or 'ltsc2022'
+      - NanoServerVersion: Defines the windows OS version used to build the image. Can be either 'ltsc2019' or 'ltsc2022'
       - Repo: Dockerhub Repo
       - Tag: Docker Tag
 
 .EXAMPLE
-    build-image -ServerCoreVersion "1809" -Repo "rancher" -Tag "v1.2.3"
+    build-image -NanoServerVersion "ltsc2019" -Repo "myRepo" -Tag "v1.2.3"
 #>
 
 param (
     [Parameter()]
     [String]
-    $ServerCoreVersion,
+    $NanoServerVersion,
 
     [Parameter()]
     [String]
@@ -27,9 +27,9 @@ param (
     $Tag
 )
 
-if (($ServerCoreVersion -eq "") -or
-        (($ServerCoreVersion -ne "ltsc2022") -and ($ServerCoreVersion -ne "1809"))) {
-    Write-Host "-ServerCoreVersion must be provided. Accepted values are '1809' and 'ltsc2022'"
+if (($NanoServerVersion -eq "") -or
+        (($NanoServerVersion -ne "ltsc2022") -and ($NanoServerVersion -ne "ltsc2019"))) {
+    Write-Host "-NanoServerVersion must be provided. Accepted values are 'ltsc2019' and 'ltsc2022'"
 }
 
 if ($Repo -eq "") {
@@ -43,4 +43,4 @@ if ($Tag -eq "") {
 }
 
 # Don't run this command from the scripts directory, always use the parent directory (i.e ./scripts/build-image)
-docker build -f Dockerfile --build-arg SERVERCORE_VERSION=$ServerCoreVersion --build-arg ARCH=amd64 --build-arg MAINTAINERS="harrison.affel@suse.com arvind.iyengar@suse.com" --build-arg REPO=https://github.com/rancher/wins -t $Repo/wins:$Tag-windows-$ServerCoreVersion .
+docker build -f Dockerfile --build-arg NANOSERVER_VERSION=$NanoServerVersion --build-arg ARCH=amd64 --build-arg MAINTAINERS="harrison.affel@suse.com" --build-arg REPO=https://github.com/rancher/wins -t $Repo/wins:$Tag-windows-$NanoServerVersion .

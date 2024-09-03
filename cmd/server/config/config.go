@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -21,22 +22,19 @@ func DefaultConfig() *Config {
 			ProcessPaths: []string{},
 			ProxyPorts:   []int{},
 		},
-		Upgrade: UpgradeConfig{
-			Mode:         "watching",
-			WatchingPath: defaults.UpgradeWatchingPath,
-		},
+		AgentStrictTLSMode: false,
 	}
 }
 
 type Config struct {
-	Debug       bool                `yaml:"debug" json:"debug"`
-	Listen      string              `yaml:"listen" json:"listen"`
-	Proxy       string              `yaml:"proxy" json:"proxy"`
-	WhiteList   WhiteListConfig     `yaml:"white_list" json:"white_list"`
-	Upgrade     UpgradeConfig       `yaml:"upgrade" json:"upgrade"`
-	SystemAgent *config.AgentConfig `yaml:"systemagent" json:"systemagent"`
-	CSIProxy    *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy"`
-	TLSConfig   *wintls.Config      `yaml:"tls-config" json:"tls-config"`
+	Debug              bool                `yaml:"debug" json:"debug"`
+	Listen             string              `yaml:"listen" json:"listen"`
+	Proxy              string              `yaml:"proxy" json:"proxy"`
+	WhiteList          WhiteListConfig     `yaml:"white_list" json:"white_list"`
+	SystemAgent        *config.AgentConfig `yaml:"systemagent" json:"systemagent,omitempty"`
+	AgentStrictTLSMode bool                `yaml:"agentStrictTLSMode" json:"agentStrictTLSMode"`
+	CSIProxy           *csiproxy.Config    `yaml:"csi-proxy" json:"csi-proxy,omitempty"`
+	TLSConfig          *wintls.Config      `yaml:"tls-config" json:"tls-config,omitempty"`
 }
 
 func (c *Config) Validate() error {
@@ -47,11 +45,6 @@ func (c *Config) Validate() error {
 	// validate white list field
 	if err := c.WhiteList.Validate(); err != nil {
 		return errors.Wrap(err, "[Validate] failed to validate white list field")
-	}
-
-	// validate upgrade field
-	if err := c.Upgrade.Validate(); err != nil {
-		return errors.Wrap(err, "[Validate] failed to validate upgrade field")
 	}
 
 	return nil
@@ -77,32 +70,9 @@ func (c *WhiteListConfig) Validate() error {
 	return nil
 }
 
-type UpgradeConfig struct {
-	Mode         string `yaml:"mode" json:"mode"`
-	WatchingPath string `yaml:"watching_path" json:"watchingPath"`
-}
-
-func (c *UpgradeConfig) Validate() error {
-	switch strings.TrimSpace(c.Mode) {
-	case "watching":
-		if strings.TrimSpace(c.WatchingPath) == "" {
-			return errors.New("could not accept blank path as watching path")
-		}
-	case "none", "":
-	default:
-		return errors.Errorf("could not accept %q as upgrade mode", c.Mode)
-	}
-
-	return nil
-}
-
-func (c *UpgradeConfig) IsWatchingMode() bool {
-	return c.Mode == "watching"
-}
-
 func LoadConfig(path string, v *Config) error {
 	if v == nil {
-		return errors.New("config could not be nil")
+		return errors.New("config cannot be nil")
 	}
 
 	stat, err := os.Stat(path)
@@ -120,6 +90,19 @@ func LoadConfig(path string, v *Config) error {
 	}
 
 	return v.Validate()
+}
+
+func SaveConfig(path string, v *Config) error {
+	if v == nil {
+		return errors.New("config cannot be nil")
+	}
+
+	yml, err := yaml.Marshal(v)
+	if err != nil {
+		return fmt.Errorf("could not marshal provided config: %w", err)
+	}
+
+	return os.WriteFile(path, yml, os.ModePerm)
 }
 
 func DecodeConfig(path string, v *Config) error {
