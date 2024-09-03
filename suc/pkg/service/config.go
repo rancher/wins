@@ -20,14 +20,13 @@ const (
 )
 
 func getConfigPath(path string) string {
-	configDirEnv := os.Getenv(ConfigDirEnvVar)
-	if path == "" && configDirEnv != "" {
-		path = configDirEnv
+	if path != "" {
+		return path
 	}
-	if path == "" {
-		path = defaultConfigFile
+	if path = os.Getenv(ConfigDirEnvVar); path != "" {
+		return path
 	}
-	return path
+	return defaultConfigFile
 }
 
 // loadConfig utilizes the ConfigDirEnvVar environment variable and path parameter to load
@@ -56,8 +55,9 @@ func saveConfig(cfg *config.Config, path string) error {
 // constant is used. The config file will only be updated if a given environment variable is present, and its
 // value does not equal the currently set value in the config file. UpdateConfigFromEnvVars returns a boolean
 // indicating if the config file has been updated and any errors encountered.
-func UpdateConfigFromEnvVars(path string) (bool, error) {
+func UpdateConfigFromEnvVars() (bool, error) {
 	logrus.Info("Loading config from host")
+	path := getConfigPath("")
 	cfg, err := loadConfig(path)
 	if err != nil {
 		return false, fmt.Errorf("failed to load config: %v", err)
@@ -89,7 +89,7 @@ func UpdateConfigFromEnvVars(path string) (bool, error) {
 		logrus.Info("Detected a change in configuration, updating config file")
 		err = saveConfig(cfg, path)
 		if err != nil {
-			return configNeedsUpdate, fmt.Errorf("failed to save config: %v", err)
+			return configNeedsUpdate, fmt.Errorf("failed to save config: %w", err)
 		}
 	} else {
 		logrus.Info("Did not detect a change in configuration")

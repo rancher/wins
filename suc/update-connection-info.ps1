@@ -194,7 +194,11 @@ function Update-ConnectionInfo()
         $env:CATTLE_AGENT_CONFIG_DIR = $env:CATTLE_WINS_CONFIG_DIR
     }
 
-    $env:CATTLE_AGENT_VAR_DIR = "$env:RKE2_DATA_ROOT\agent"
+    if ((-Not $env:CATTLE_AGENT_VAR_DIR) -or ($env:CATTLE_AGENT_VAR_DIR -eq ""))
+    {
+        $env:CATTLE_AGENT_VAR_DIR = "$env:RKE2_DATA_ROOT\agent"
+    }
+
     $env:CATTLE_ID = Get-Content -Path "$env:CATTLE_AGENT_CONFIG_DIR\cattle-id"
 
     Test-RancherConnection

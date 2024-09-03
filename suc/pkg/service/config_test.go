@@ -129,7 +129,7 @@ func Test_UpdateConfigFromEnvVars(t *testing.T) {
 			setupTest(tc.envVars, t)
 			expectedConfig := tc.expectedConfig()
 
-			updated, err := UpdateConfigFromEnvVars(configFileLoc)
+			updated, err := UpdateConfigFromEnvVars()
 			if err != nil {
 				t.Logf("UpdateConfigFromEnvVars returned an unexpected error: %v", err)
 				t.FailNow()

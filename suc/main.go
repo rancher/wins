@@ -30,9 +30,11 @@ func main() {
 		}
 		if c.Bool("quiet") {
 			logrus.SetOutput(io.Discard)
+		} else {
+			logrus.SetOutput(c.App.Writer)
 		}
+
 		logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true, FullTimestamp: true})
-		logrus.SetOutput(c.App.Writer)
 		return nil
 	}
 

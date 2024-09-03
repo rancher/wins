@@ -3,7 +3,6 @@ package pkg
 import (
 	"fmt"
 
-	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/suc/pkg/rancher"
 	"github.com/rancher/wins/suc/pkg/service"
 	"github.com/sirupsen/logrus"
@@ -30,7 +29,7 @@ func Run(_ *cli.Context) error {
 	}
 
 	// update the config using env vars
-	restartServiceDueToConfigChange, updateErr := service.UpdateConfigFromEnvVars("")
+	restartServiceDueToConfigChange, updateErr := service.UpdateConfigFromEnvVars()
 	if updateErr != nil {
 		logrus.Errorf("Attempting to restore initial state due to error encountered while updating rancher-wins: %v", updateErr)
 		err = service.RestoreInitialState(initialState)
@@ -45,10 +44,6 @@ func Run(_ *cli.Context) error {
 		if err = service.RefreshWinsService(); err != nil {
 			return fmt.Errorf("error encountered while attempting to restart rancher-wins: %w", err)
 		}
-	}
-
-	if err != nil {
-		return fmt.Errorf("%s encountered an error while updating the node: %w", defaults.WindowsSUCName, err)
 	}
 
 	return nil

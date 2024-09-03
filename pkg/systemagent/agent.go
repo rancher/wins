@@ -39,6 +39,7 @@ func (a *Agent) Run(ctx context.Context) error {
 	applier := applyinator.NewApplyinator(a.cfg.WorkDir, a.cfg.PreserveWorkDir, a.cfg.AppliedPlanDir, "", imageUtil)
 	if a.cfg.RemoteEnabled {
 		logrus.Infof("Starting remote watch of plans")
+		logrus.Debugf("Agent Strict TLS Mode is %t", a.StrictTLSMode)
 
 		var connInfo config.ConnectionInfo
 

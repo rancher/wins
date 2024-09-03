@@ -30,7 +30,7 @@ func RefreshWinsService() error {
 func getServiceState(s *mgr.Service) (svc.State, error) {
 	q, err := s.Query()
 	if err != nil {
-		return 0, fmt.Errorf("could not query service %s: %v", s.Name, err)
+		return 0, fmt.Errorf("could not query service %s: %w", s.Name, err)
 	}
 
 	return q.State, nil
