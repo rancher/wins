@@ -31,15 +31,16 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
       - name: Install Dependencies
         run: |
           go install github.com/magefile/mage@v1.15.0
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
 
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: 'stable'
       - name: build-binary
         run: |
           set PSModulePath=&&powershell -command "mage ci"
@@ -48,7 +49,7 @@ jobs:
       # which cannot be installed onto windows VMs. Additionally, it is not possible to cross compile
       # Windows images on linux. So, we're stuck with manual docker commands.
       - name: Build Windows 2022
-        run: ./scripts/build-image.ps1 -ServerCoreVersion "ltsc2022" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
+        run: ./scripts/build-image.ps1 -NanoServerVersion "ltsc2022" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
 
       - name: push images
         run: | 
@@ -81,15 +82,15 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Install Dependencies
-        run: |
-          go install github.com/magefile/mage@v1.15.0
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
-
       - name: Install Go
         uses: actions/setup-go@v5
         with:
           go-version: 'stable'
+
+      - name: Install Dependencies
+        run: |
+          go install github.com/magefile/mage@v1.15.0
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
 
       - name: build-binary
         run: |
@@ -99,7 +100,7 @@ jobs:
       # which cannot be installed onto windows VMs. Additionally, it is not possible to cross compile
       # Windows images on linux. So, we're stuck with manual docker commands.
       - name: Build Windows 2019
-        run: ./scripts/build-image.ps1 -ServerCoreVersion "ltsc2019" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
+        run: ./scripts/build-image.ps1 -NanoServerVersion "ltsc2019" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
 
       - name: push images
         run: |
