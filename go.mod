@@ -65,7 +65,7 @@ require (
 	golang.org/x/sync v0.7.0
 	golang.org/x/sys v0.21.0
 	google.golang.org/grpc v1.65.0
-	inet.af/tcpproxy v0.0.0-20200125044825-b6bb9b5b8252
+	inet.af/tcpproxy v0.0.0-20231102063150-2862066fc2a9
 	k8s.io/api v0.30.0
 )
 
