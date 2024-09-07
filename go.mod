@@ -52,13 +52,13 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/gogo/protobuf v1.3.2
-	github.com/gorilla/websocket v1.5.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/magefile/mage v1.13.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/remotedialer v0.2.6-0.20201012155453-8b1b7bb7d05f
+	github.com/rancher/remotedialer v0.4.1
 	github.com/rancher/system-agent v0.3.8
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.25.7
