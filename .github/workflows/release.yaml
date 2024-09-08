@@ -55,7 +55,7 @@ jobs:
         run: | 
           docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022
 
-  create-push-image-windows-2019:
+  create-push-image-windows-2022:
     # Due to limitations on the number of free runners in the Rancher org (20)
     # we do not build 2019 and 2022 in parallel
     needs: [create-push-image-windows-2022]
