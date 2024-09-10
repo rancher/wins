@@ -477,7 +477,8 @@ white_list:
   proxyPorts:
     - 9796
 "@
-        Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $winsConfig
+        # Overwrite the existing contents of the file using 'Set-Content'
+        Set-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $winsConfig
 
         $agentConfig = 
         @"
