@@ -6,7 +6,7 @@ toolchain go1.22.7
 
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.16+incompatible
-	github.com/docker/docker => github.com/docker/docker v20.10.24+incompatible
+	github.com/docker/docker => github.com/docker/docker v27.2.1+incompatible
 	github.com/google/go-cmp => github.com/google/go-cmp v0.5.7
 	github.com/klauspost/compress => github.com/klauspost/compress v1.15.4
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.46.0
