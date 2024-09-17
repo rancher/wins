@@ -13,7 +13,7 @@ replace (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.23.1
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
-	golang.org/x/sync => golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
+	golang.org/x/sync => golang.org/x/sync v0.8.0
 	k8s.io/api => k8s.io/api v0.29.7
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.29.7
 	k8s.io/apimachinery => k8s.io/apimachinery v0.29.7
@@ -62,7 +62,7 @@ require (
 	github.com/rancher/system-agent v0.3.8
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.3
-	golang.org/x/sync v0.7.0
+	golang.org/x/sync v0.8.0
 	golang.org/x/sys v0.23.0
 	google.golang.org/grpc v1.65.0
 	inet.af/tcpproxy v0.0.0-20200125044825-b6bb9b5b8252
