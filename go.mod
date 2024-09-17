@@ -12,7 +12,7 @@ replace (
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.46.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.23.1
-	golang.org/x/oauth2 => golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
+	golang.org/x/oauth2 => golang.org/x/oauth2 v0.23.0
 	golang.org/x/sync => golang.org/x/sync v0.0.0-20220513210516-0976fa681c29
 	k8s.io/api => k8s.io/api v0.29.7
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.29.7
@@ -158,7 +158,6 @@ require (
 	golang.org/x/term v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20231212172506-995d672761c0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
