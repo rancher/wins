@@ -145,6 +145,7 @@ function Wait-Ready {
 }
 
 function Set-WinsConfig {
+    # Note: The csi proxy config is intentionally omitted
     $winsConfig =
     @"
 white_list:
@@ -162,10 +163,6 @@ systemagent:
   remoteEnabled: false
   localEnabled: true
   preserveWorkDirectory: false
-csi-proxy:
-  url: https://acs-mirror.azureedge.net/csi-proxy/%[1]s/binaries/csi-proxy-%[1]s.tar.gz
-  version: v1.1.3
-  kubeletPath: fake
 "@
     Add-Content -Path C:/etc/rancher/wins/config -Value $winsConfig
 }
@@ -180,6 +177,69 @@ function New-Directory {
     if (-not (Test-Path -Path $Path)) {
         New-Item -Path $Path -ItemType Directory | Out-Null
     }
+}
+
+function Add-DummyRke2Service {
+    Log-Info "Creating dummy rke2 service"
+    $dummyServiceScript = @"
+  using System;
+  class Hello {
+    static void Main() {
+        // Intentionally empty
+    }
+  }
+"@
+    # Compile the above c# into a binary that can be used as a service.
+    # Note: This service will not start, as there is no service handler implemented.
+    Add-Type -TypeDefinition $dummyServiceScript -Language CSharp -OutputAssembly "rke2.exe" -OutputType ConsoleApplication
+    New-Service -Name "rke2" -BinaryPathName "rke2.exe"
+}
+
+function Remove-DummyRke2Service {
+    Log-Info "Removing dummy rke2 service"
+    sc.exe delete rke2
+}
+
+function Remove-RancherWinsService {
+    Log-Info "Removing rancher-wins service"
+    # stop and remove the services
+    Stop-Service rancher-wins
+    $ret = .\bin\wins.exe srv app run --unregister
+    if ($LASTEXITCODE -ne 0) {
+        Log-Error $ret
+        $false | Should -Be $true
+    }
+
+    # Force kill any running processes
+    Stop-Process -Name "rancher-wins" -ErrorAction SilentlyContinue
+    Log-Info "Removing rancher-wins config file"
+    # Remove any existing config files
+    Remove-Item -Force -Recurse $env:CATTLE_AGENT_CONFIG_DIR -ErrorAction Ignore
+}
+
+function Add-RancherWinsService {
+    Log-Info "Resetting the rancher-wins config directory"
+    # (Re)create the config file directory
+    $env:CATTLE_AGENT_CONFIG_DIR = "C:/etc/rancher/wins"
+    # The CATTLE_AGENT_CONFIG_DIR may have been created in other tests
+    # we should clear it out to ensure we have a clean slate for this test
+    Remove-Item -Force -Recurse $env:CATTLE_AGENT_CONFIG_DIR -ErrorAction Ignore
+    New-Directory -Path $env:CATTLE_AGENT_CONFIG_DIR
+
+    # create the config file
+    Set-WinsConfig
+
+    # register the service
+    Log-Info "Adding rancher-wins service"
+    $ret = .\bin\wins.exe srv app run --register
+    if ($LASTEXITCODE -ne 0) {
+        Log-Error $ret
+        $false | Should -Be $true
+    }
+
+    # verify
+    Get-Service -Name rancher-wins -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    Log-Info (Get-Service -Name rancher-wins -ErrorAction Ignore)
 }
 
 function Get-Permissions {
@@ -264,5 +324,9 @@ Export-ModuleMember -Function Judge
 Export-ModuleMember -Function Wait-Ready
 Export-ModuleMember -Function New-Directory
 Export-ModuleMember -Function Set-WinsConfig
+Export-ModuleMember -Function Add-DummyRke2Service
+Export-ModuleMember -Function Remove-DummyRke2Service
+Export-ModuleMember -Function Add-RancherWinsService
+Export-ModuleMember -Function Remove-RancherWinsService
 Export-ModuleMember -Function Get-Permissions
 Export-ModuleMember -Function Test-Permissions
