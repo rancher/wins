@@ -97,9 +97,9 @@ func ConfigureDelayedStart() error {
 			return fmt.Errorf("failed to update %s service configuration while configuring service start type: %w", defaults.WindowsServiceName, err)
 		}
 		return nil
-	} else {
-		logrus.Infof("%s delayed start already set to %t", defaults.WindowsServiceName, delayedStart)
 	}
+
+	logrus.Infof("%s delayed start already set to %t", defaults.WindowsServiceName, delayedStart)
 
 	return nil
 }
