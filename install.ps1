@@ -22,14 +22,15 @@
       - CATTLE_AGENT_BINARY_URL (default: latest GitHub release)
       - CATTLE_PRESERVE_WORKDIR (default: false)
       - CATTLE_REMOTE_ENABLED (default: true)
+      - CATTLE_LOCAL_ENABLED (default: false)
       - CATTLE_ID (default: autogenerate)
       - CATTLE_AGENT_BINARY_LOCAL (default: false)
       - CATTLE_AGENT_BINARY_LOCAL_LOCATION (default: )
       - CSI_PROXY_URL (default: )
       - CSI_PROXY_VERSION (default: )
       - CSI_PROXY_KUBELET_PATH (default: )
-.EXAMPLE 
-    
+.EXAMPLE
+
 #>
 #Make sure this params matches the CmdletBinding below
 param (
@@ -213,6 +214,12 @@ function Invoke-WinsInstaller {
             $env:CATTLE_REMOTE_ENABLED = $env:CATTLE_REMOTE_ENABLED.ToLower()
         }
 
+        if (-Not $env:CATTLE_LOCAL_ENABLED) {
+            $env:CATTLE_LOCAL_ENABLED = "false"
+        } else {
+            $env:CATTLE_LOCAL_ENABLED = $env:CATTLE_LOCAL_ENABLED.ToLower()
+        }
+
         if (-Not $env:CATTLE_PRESERVE_WORKDIR) {
             $env:CATTLE_PRESERVE_WORKDIR = "false"
         }
@@ -275,6 +282,14 @@ function Invoke-WinsInstaller {
             if (-Not $env:CATTLE_SERVER) {
                 Write-LogFatal "Environment variable CATTLE_SERVER was not set"
             }
+        }
+
+        if (($env:CATTLE_REMOTE_ENABLED -eq "true") -and ($env:CATTLE_LOCAL_ENABLED -eq "true")){
+            Write-LogFatal "Both CATTLE_LOCAL_ENABLED and CATTLE_REMOTE_ENABLED were enabled, exiting as only one can be enabled"
+        }
+
+        if (($env:CATTLE_REMOTE_ENABLED -eq "false") -and ($env:CATTLE_LOCAL_ENABLED -eq "false")){
+            Write-LogFatal "Neither CATTLE_LOCAL_ENABLED nor CATTLE_REMOTE_ENABLED were enabled, exiting as one must be enabled"
         }
 
         if (-Not $env:CATTLE_AGENT_CONFIG_DIR) {
@@ -463,6 +478,7 @@ function Invoke-WinsInstaller {
                     }
                 }
             }
+            Set-RestrictedPermissions -Path $env:CATTLE_AGENT_VAR_DIR/rancher2_connection_info.json
         }
     }
 
@@ -487,6 +503,7 @@ systemagent:
   workDirectory: $($env:CATTLE_AGENT_VAR_DIR)/work
   appliedPlanDirectory: $($env:CATTLE_AGENT_VAR_DIR)/applied
   remoteEnabled: $($env:CATTLE_REMOTE_ENABLED)
+  localEnabled: $($env:CATTLE_LOCAL_ENABLED)
   preserveWorkDirectory: $($env:CATTLE_PRESERVE_WORKDIR)
 "@
         Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $agentConfig
@@ -501,6 +518,7 @@ systemagent:
 "@
             Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $tlsConfig
         }
+        Set-RestrictedPermissions -Path $env:CATTLE_AGENT_CONFIG_DIR/config
     }
 
     function Set-CsiProxyConfig() {
@@ -614,10 +632,84 @@ csi-proxy:
         }
     }
 
+    function Set-RestrictedPermissions {
+        [CmdletBinding()]
+        param (
+            [Parameter(Mandatory=$true)]
+            [string]
+            $Path,
+            [Parameter(Mandatory=$false)]
+            [Switch]
+            $Directory
+        )
+
+        $Owner = "BUILTIN\Administrators"
+        $Group = "NT AUTHORITY\SYSTEM"
+
+        $acl = Get-Acl $Path
+
+        # cleanup existing rules by removing both explicit and inherited rules.
+        foreach ($rule in $acl.GetAccessRules($true, $true, [System.Security.Principal.SecurityIdentifier])) {
+            $acl.RemoveAccessRule($rule) | Out-Null
+        }
+
+        $acl.SetAccessRuleProtection($true, $false)
+        $acl.SetOwner((New-Object System.Security.Principal.NTAccount($Owner)))
+        $acl.SetGroup((New-Object System.Security.Principal.NTAccount($Group)))
+
+        Set-FileSystemAccessRule -Directory $Directory -acl $acl
+
+        Set-Acl -Path $Path -AclObject $acl
+    }
+
+    function Set-FileSystemAccessRule() {
+        [CmdletBinding()]
+        param (
+            [Parameter(Mandatory=$true)]
+            [Boolean]
+            $Directory,
+            [Parameter(Mandatory=$false)]
+            [System.Security.AccessControl.ObjectSecurity]
+            $acl
+        )
+        $users = @(
+            $acl.Owner,
+            $acl.Group
+        )
+        # Note that the function signature for files and directories
+        # intentionally differ.
+        $FullPath = Resolve-Path $Path
+        if ($Directory -eq $true) {
+            Write-LogInfo "Setting restricted ACL on $FullPath directory"
+            foreach ($user in $users) {
+                $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+                $user,
+                [System.Security.AccessControl.FileSystemRights]::FullControl,
+                [System.Security.AccessControl.InheritanceFlags]'ObjectInherit,ContainerInherit',
+                [System.Security.AccessControl.PropagationFlags]::None,
+                [System.Security.AccessControl.AccessControlType]::Allow
+                )
+                $acl.AddAccessRule($rule)
+            }
+        } else {
+            Write-LogInfo "Setting restricted ACL on $FullPath"
+            foreach ($user in $users) {
+                $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+                $user,
+                [System.Security.AccessControl.FileSystemRights]::FullControl,
+                [System.Security.AccessControl.AccessControlType]::Allow
+                )
+                $acl.AddAccessRule($rule)
+            }
+        }
+    }
+
     function Invoke-WinsAgentInstall() {
         $serviceName = "rancher-wins"
         Get-Args
         Set-Environment
+        Set-RestrictedPermissions -Path $env:CATTLE_AGENT_CONFIG_DIR -Directory
+        Set-RestrictedPermissions -Path $env:CATTLE_AGENT_VAR_DIR -Directory
         Set-Path
         Test-CaCheckSum
 

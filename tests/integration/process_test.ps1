@@ -87,6 +87,7 @@ Describe "process" {
                 )
             }
         }
+        New-Directory "c:\etc\rancher\wins"
         $config | ConvertTo-Json -Compress -Depth 32 | Out-File -NoNewline -Encoding utf8 -Force -FilePath "c:\etc\rancher\wins\config"
         $configJson = Get-Content -Raw -Path "c:\etc\rancher\wins\config"
         Log-Info $configJson
@@ -97,7 +98,7 @@ Describe "process" {
 
         # wins.exe cli prc run --path xxx --exposes xxx
         # docker run --name prc-run --rm -v //./pipe/rancher_wins://./pipe/rancher_wins -v c:/etc/rancher/wins:c:/etc/rancher/wins -v c:/etc/nginx:c:/host/etc/nginx wins-nginx
-        Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--name", "prc-run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/wins:c:/etc/rancher/wins", "-v", "c:/etc/nginx:c:/host/etc/nginx", "wins-nginx") -Backgroud
+        Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--name", "prc-run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/pipe:c:/etc/rancher/pipe", "-v", "c:/etc/nginx:c:/host/etc/nginx", "wins-nginx") -Backgroud
         {
             Wait-Ready -Timeout 3 -Path "c:\etc\nginx\rancher-wins-nginx.exe" -Throw
         } | Should -Throw
