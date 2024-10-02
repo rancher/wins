@@ -59,7 +59,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.4.1
-	github.com/rancher/system-agent v0.3.9
+	github.com/rancher/system-agent v0.3.10-rc.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.4
 	golang.org/x/sync v0.8.0
@@ -100,7 +100,7 @@ require (
 	github.com/google/cel-go v0.17.8 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/go-containerregistry v0.20.1 // indirect
+	github.com/google/go-containerregistry v0.20.2 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
@@ -126,7 +126,8 @@ require (
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/rancher/lasso v0.0.0-20230830164424-d684fdeb6f29 // indirect
-	github.com/rancher/wharfie v0.6.6 // indirect
+	github.com/rancher/permissions v0.0.0-20240924180251-69b0dcb34065 // indirect
+	github.com/rancher/wharfie v0.6.7 // indirect
 	github.com/rancher/wrangler v1.1.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/cobra v1.7.0 // indirect
@@ -171,7 +172,7 @@ require (
 	k8s.io/cloud-provider v0.0.0 // indirect
 	k8s.io/component-base v0.29.7 // indirect
 	k8s.io/controller-manager v0.29.7 // indirect
-	k8s.io/klog/v2 v2.120.1 // indirect
+	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kms v0.29.7 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/kubelet v0.24.2 // indirect

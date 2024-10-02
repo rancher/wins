@@ -1,20 +1,24 @@
 function Log-Info {
-    Write-Host -NoNewline -ForegroundColor Blue "INFO "
+    $ts = (Get-Date).ToString("hh:mm:ss.fff")
+    Write-Host -NoNewline -ForegroundColor Blue "[INFO $ts] "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 }
 
 function Log-Warn {
-    Write-Host -NoNewline -ForegroundColor DarkYellow "WARN "
+    $ts = (Get-Date).ToString("hh:mm:ss.fff")
+    Write-Host -NoNewline -ForegroundColor DarkYellow "[WARN $ts] "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 }
 
 function Log-Error {
-    Write-Host -NoNewline -ForegroundColor DarkRed "ERRO "
+    $ts = (Get-Date).ToString("hh:mm:ss.fff")
+    Write-Host -NoNewline -ForegroundColor DarkRed "[ERRO $ts] "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 }
 
 function Log-Fatal {
-    Write-Host -NoNewline -ForegroundColor DarkRed "FATA "
+    $ts = (Get-Date).ToString("hh:mm:ss.fff")
+    Write-Host -NoNewline -ForegroundColor DarkRed "[FATA $ts] "
     Write-Host -ForegroundColor Gray ("{0,-44}" -f ($args -join " "))
 
     exit 255
@@ -178,6 +182,78 @@ function New-Directory {
     }
 }
 
+function Get-Permissions {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Path
+    )
+
+    $exists = Test-Path $Path
+    if (-not $exists) {
+        throw "Cannot get permissions on path $Path if a file or directory does not exist"
+    }
+
+    $acl = Get-Acl $Path
+
+    $owner = $acl.Owner
+    $group = $acl.Group
+    $permissions = @()
+    foreach ($rule in $acl.Access) {
+        $permissions += [PSCustomObject]@{
+            AccessMask = $rule.FileSystemRights.ToString()
+            Type = $rule.AccessControlType
+            Identity = $rule.IdentityReference.Value
+        }
+    }
+
+    return $owner, $group, $permissions
+}
+
+function Test-Permissions {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Path,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $ExpectedOwner,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $ExpectedGroup,
+
+        [Parameter(Mandatory=$true)]
+        [System.Object[]]
+        $ExpectedPermissions
+    )
+
+    $owner, $group, $permissions = Get-Permissions -Path $Path
+
+    $errors = @()
+
+    if ($owner -ne $ExpectedOwner) {
+        $errors += "expected owner $ExpectedOwner, found $owner"
+    }
+
+    if ($group -ne $ExpectedGroup) {
+        $errors += "expected group $ExpectedGroup, found $group"
+    }
+
+    $expected = $ExpectedPermissions | ConvertTo-Json
+    $found = $permissions | ConvertTo-Json
+
+    if ($expected -ne $found) {
+        $errors += "expected permissions $expected, found $found"
+    }
+
+    # Check
+    if ($errors.Count -gt 0) {
+        $errors_joined = $errors -join "`n- "
+        throw "Permissions don't match expectations:`n- $errors_joined"
+    }
+}
 
 Export-ModuleMember -Function Log-Info
 Export-ModuleMember -Function Log-Warn
@@ -188,3 +264,5 @@ Export-ModuleMember -Function Judge
 Export-ModuleMember -Function Wait-Ready
 Export-ModuleMember -Function New-Directory
 Export-ModuleMember -Function Set-WinsConfig
+Export-ModuleMember -Function Get-Permissions
+Export-ModuleMember -Function Test-Permissions

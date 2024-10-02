@@ -74,7 +74,9 @@ Describe "network" {
     It "get default adapter" {
         # wins.exe cli network get
         # docker run --rm -v //./pipe/rancher_wins://./pipe/rancher_wins -v c:/etc/rancher/wins:c:/etc/rancher/wins wins-cli network get
-        $ret = Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/wins:c:/etc/rancher/wins", "wins-cli", "network", "get") -PassThru
+        New-Directory "c:/etc/rancher/pipe"
+
+        $ret = Execute-Binary -FilePath "docker.exe" -ArgumentList @("run", "--rm", "-v", "//./pipe/rancher_wins://./pipe/rancher_wins", "-v", "c:/etc/rancher/pipe:c:/etc/rancher/pipe", "wins-cli", "network", "get") -PassThru
         if (-not $ret.Ok) {
             Log-Error $ret.Output
             $false | Should -Be $true
