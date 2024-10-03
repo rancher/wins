@@ -5,7 +5,7 @@ go 1.22.0
 toolchain go1.22.7
 
 replace (
-	github.com/docker/cli => github.com/docker/cli v27.2.1+incompatible
+	github.com/docker/cli => github.com/docker/cli v27.3.1+incompatible
 	github.com/docker/docker => github.com/docker/docker v27.2.1+incompatible
 	github.com/google/go-cmp => github.com/google/go-cmp v0.6.0
 	github.com/klauspost/compress => github.com/klauspost/compress v1.17.9
