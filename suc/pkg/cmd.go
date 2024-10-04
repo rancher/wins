@@ -20,18 +20,15 @@ func Run(_ *cli.Context) error {
 	}
 
 	logrus.Info("Updating rancher connection info")
-	output, scriptExists, err := rancher.UpdateConnectionInformation()
+	output, err := rancher.UpdateConnectionInformation()
 	if err != nil {
 		logrus.Errorf("Could not update rancher connection information")
 		logrus.Errorf("Script output:\n%s", output)
 		return fmt.Errorf("error encountered while refreshing connection information: %w", err)
 	}
 
-	if scriptExists {
-		logrus.Info("Successfully updated connection info")
-		if output != "" {
-			logrus.Debugf("Script output:\n%s", output)
-		}
+	if output != "" {
+		logrus.Debugf("Script output:\n%s", output)
 	}
 
 	// update the config using env vars
@@ -42,7 +39,7 @@ func Run(_ *cli.Context) error {
 
 	// Neither changing the start type nor service
 	// dependencies require any service restarts
-	err = service.ConfigureDelayedStart()
+	err = service.ConfigureWinsDelayedStart()
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -63,10 +60,11 @@ func Run(_ *cli.Context) error {
 		logrus.Errorf("Attempting to restore initial state due to error(s) encountered while updating rancher-wins: %v", errors.Join(errs...))
 		err = state.RestoreInitialState(initialState)
 		if err != nil {
-			return fmt.Errorf("failed to restore initial state: %w", err)
+			errs = append(errs, fmt.Errorf("failed to restore initial state: %w", err))
+		} else {
+			logrus.Info("Successfully restored initial config state")
 		}
-		logrus.Info("Successfully restored initial config state")
-		return fmt.Errorf("failed to update rancher-wins config file: %w", updateErr)
+		return errors.Join(errs...)
 	}
 
 	return nil

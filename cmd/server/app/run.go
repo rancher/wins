@@ -41,6 +41,11 @@ var _runFlags = []cli.Flag{
 		Usage: "[optional] Specifies the name of the file to write the profile to",
 		Value: "profile.pprof",
 	},
+	&cli.BoolFlag{
+		Name:  "delayed-start",
+		Usage: "[optional] configure the rancher-wins service with a start type of 'Automatic (Delayed)'",
+		Value: false,
+	},
 }
 
 func _profilingInit(cliCtx *cli.Context) error {

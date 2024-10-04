@@ -39,7 +39,7 @@ func BuildInitialState() (InitialState, error) {
 		return InitialState{}, fmt.Errorf("could not open rancher-wins config while building initial state: %w", err)
 	}
 
-	winsSvc, winsExists, err := service.Open(defaults.WindowsServiceName)
+	winsSvc, winsExists, err := service.OpenRancherWinsService()
 	if err != nil {
 		return InitialState{}, fmt.Errorf("could not open rancher-wins service while building initial state: %w", err)
 	}
@@ -49,7 +49,7 @@ func BuildInitialState() (InitialState, error) {
 	}
 	defer winsSvc.Close()
 
-	rke2Svc, rke2Exists, err := service.Open("rke2")
+	rke2Svc, rke2Exists, err := service.OpenRKE2Service()
 	if err != nil {
 		return InitialState{}, fmt.Errorf("encountered error getting config file for %s service: %w", "rke2", err)
 	}
@@ -64,8 +64,11 @@ func BuildInitialState() (InitialState, error) {
 
 	logrus.Debugf("rancher-wins delayed start is set to %t", winsSvc.Config.DelayedAutoStart)
 	logrus.Debugf("rke2 service dependencies: %v", rke2Deps)
-	j, _ := json.MarshalIndent(winsCfg, "", " ")
-	logrus.Debugf("initial rancher-wins config file:\n%v", string(j))
+	j, err := json.MarshalIndent(winsCfg, "", " ")
+	if err != nil {
+		return InitialState{}, fmt.Errorf("could not marshal rancher-wins config to json while building initial state: %w", err)
+	}
+	logrus.Debugf("initial rancher-wins config file:\n%s", string(j))
 
 	return InitialState{
 		InitialConfig: winsCfg,
@@ -80,45 +83,39 @@ func BuildInitialState() (InitialState, error) {
 func RestoreInitialState(state InitialState) error {
 	var errs []error
 	// restore rancher-wins service configuration
-	winsSvc, _, err := service.Open(defaults.WindowsServiceName)
+	winsSvc, _, err := service.OpenRancherWinsService()
 	if err != nil {
 		errs = append(errs, fmt.Errorf("failed to open %s while restoring initial configuration: %w", defaults.WindowsServiceName, err))
 	}
 
-	saveWinsConfig := false
 	if winsSvc.Config.DelayedAutoStart != state.InitialServiceConfig.winsDelayedStart {
-		saveWinsConfig = true
-		winsSvc.Config.DelayedAutoStart = state.InitialServiceConfig.winsDelayedStart
-	}
-
-	if saveWinsConfig {
-		logrus.Infof("Restoring %s service config", defaults.WindowsServiceName)
-		err = winsSvc.UpdateConfig()
+		err = winsSvc.ConfigureDelayedStart(state.InitialServiceConfig.winsDelayedStart)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("failed to restore initial configuration of %s service: %w", defaults.WindowsServiceName, err))
+			errs = append(errs, fmt.Errorf("failed to revert rancher-wins delayed start to %t: %w", state.InitialServiceConfig.winsDelayedStart, err))
 		}
 	}
 
 	// restore rke2 service configuration
 	saveRke2Config := false
-	rke2, rke2Exists, err := service.Open("rke2")
+	rke2Srv, rke2Exists, err := service.OpenRKE2Service()
 	if err != nil {
 		errs = append(errs, fmt.Errorf("failed to open %s while restoring initial configuration: %w", "rke2", err))
 	}
 
 	if rke2Exists {
 		logrus.Infof("Restoring rke2 service configuration")
-		if !service.SlicesMatch(rke2.Config.Dependencies, state.InitialServiceConfig.rke2Dependencies) {
+		if !service.UnorderedSlicesEqual(rke2Srv.Config.Dependencies, state.InitialServiceConfig.rke2Dependencies) {
 			saveRke2Config = true
-			rke2.Config.Dependencies = state.InitialServiceConfig.rke2Dependencies
+			rke2Srv.Config.Dependencies = state.InitialServiceConfig.rke2Dependencies
 		}
 
 		if saveRke2Config {
-			err = rke2.UpdateConfig()
+			err = rke2Srv.UpdateConfig()
 			if err != nil {
 				errs = append(errs, fmt.Errorf("failed to restore initial configuration of %s service: %w", "rke2", err))
 			}
 		}
+		rke2Srv.Close()
 	}
 
 	// restore rancher-wins config file

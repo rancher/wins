@@ -179,7 +179,7 @@ function New-Directory {
     }
 }
 
-function Add-DummyRke2Service {
+function Add-DummyRKE2Service {
     Log-Info "Creating dummy rke2 service"
     $dummyServiceScript = @"
   using System;
@@ -190,18 +190,20 @@ function Add-DummyRke2Service {
   }
 "@
     # Compile the above c# into a binary that can be used as a service.
-    # Note: This service will not start, as there is no service handler implemented.
+    # Note: This service will not start, as there is no service handler implemented, however it can still
+    # be configured in the same ways that any other functional service can be.
     Add-Type -TypeDefinition $dummyServiceScript -Language CSharp -OutputAssembly "rke2.exe" -OutputType ConsoleApplication
     New-Service -Name "rke2" -BinaryPathName "rke2.exe"
 }
 
-function Remove-DummyRke2Service {
+function Remove-DummyRKE2Service {
     Log-Info "Removing dummy rke2 service"
     sc.exe delete rke2
 }
 
 function Remove-RancherWinsService {
     Log-Info "Removing rancher-wins service"
+    $env:CATTLE_AGENT_CONFIG_DIR = "C:/etc/rancher/wins"
     # stop and remove the services
     Stop-Service rancher-wins
     $ret = .\bin\wins.exe srv app run --unregister
@@ -315,6 +317,29 @@ function Test-Permissions {
     }
 }
 
+function Ensure-DependencyExistsForService {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]
+        $ServiceName,
+        [Parameter(Mandatory=$true)]
+        [string]
+        $DependencyName
+    )
+
+    $dependencies = (Get-Service -Name $ServiceName).ServicesDependedOn
+    Log-Info "Checking for $ServiceName service dependency on $DependencyName..."
+    $found = $false
+    foreach ($dep in $dependencies) {
+        Log-Info "found dependency $($DependencyName)"
+        if ($dep.Name -eq "rancher-wins") {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 Export-ModuleMember -Function Log-Info
 Export-ModuleMember -Function Log-Warn
 Export-ModuleMember -Function Log-Error
@@ -324,9 +349,10 @@ Export-ModuleMember -Function Judge
 Export-ModuleMember -Function Wait-Ready
 Export-ModuleMember -Function New-Directory
 Export-ModuleMember -Function Set-WinsConfig
-Export-ModuleMember -Function Add-DummyRke2Service
-Export-ModuleMember -Function Remove-DummyRke2Service
+Export-ModuleMember -Function Add-DummyRKE2Service
+Export-ModuleMember -Function Remove-DummyRKE2Service
 Export-ModuleMember -Function Add-RancherWinsService
 Export-ModuleMember -Function Remove-RancherWinsService
 Export-ModuleMember -Function Get-Permissions
 Export-ModuleMember -Function Test-Permissions
+Export-ModuleMember -Function Ensure-DependencyExistsForService

@@ -3,13 +3,18 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
-	"golang.org/x/sys/windows"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
+)
+
+const (
+	stateTransitionAttempts       = 5
+	stateTransitionDelayInSeconds = 5
 )
 
 // Service is a wrapper around a mgr.Service which simplifies
@@ -24,7 +29,7 @@ type Service struct {
 // If the provided service does not exist, a nil error and a false boolean will be returned.
 // The caller of Open is responsible for closing the returned Service (via Service.Close()).
 func Open(name string) (service *Service, serviceExists bool, err error) {
-	logrus.Infof("Opening %s service", name)
+	logrus.Debugf("Opening %s service", name)
 	svcMgr, err := mgr.Connect()
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to connect to service manager: %w", err)
@@ -87,7 +92,7 @@ func (s *Service) Restart() error {
 		return fmt.Errorf("failed to start the %s service while attempting to restart: %w", s.Name, err)
 	}
 
-	return s.WaitForState(svc.Running, 5, 5)
+	return s.WaitForState(svc.Running, stateTransitionDelayInSeconds, stateTransitionAttempts)
 }
 
 // Stop sends a svc.Stop control signal to the Service and waits
@@ -98,7 +103,7 @@ func (s *Service) Stop() error {
 		return fmt.Errorf("failed to send Stop signal to %s: %w", s.Name, err)
 	}
 
-	return s.WaitForState(svc.Stopped, 5, 5)
+	return s.WaitForState(svc.Stopped, stateTransitionDelayInSeconds, stateTransitionAttempts)
 }
 
 // Close closes the Service
@@ -112,6 +117,8 @@ func (s *Service) WaitForState(desiredState svc.State, delayInSeconds time.Durat
 	transitionedSuccessfully := false
 	var err error
 	var state svc.State
+
+	logrus.Infof("Waiting for service %s to enter state %s", s.Name, serviceStateToString(desiredState))
 
 	for i := 0; i < maxAttempts; i++ {
 		state, err = s.GetState()
@@ -134,9 +141,14 @@ func (s *Service) WaitForState(desiredState svc.State, delayInSeconds time.Durat
 	return nil
 }
 
-// UpdateConfig commits the stored Service.Config to the registry
+// UpdateConfig commits the stored Service.Config to the registry. Note that
+// the config can only be updated a single time after a service has been opened.
+// In order to update the config again, the service must be closed and reopened.
 func (s *Service) UpdateConfig() error {
-	j, _ := json.MarshalIndent(s.Config, "", " ")
+	j, err := json.MarshalIndent(s.Config, "", " ")
+	if err != nil {
+		return fmt.Errorf("error encountered while saving config, could not marshal to json: %w", err)
+	}
 	logrus.Debugf("Updating config for %s service. Config to be saved:\n%s ", s.Name, string(j))
 	return s.svc.UpdateConfig(s.Config)
 }

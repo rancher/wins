@@ -4,7 +4,10 @@ import (
 	"golang.org/x/sys/windows/svc"
 )
 
-func SlicesMatch(s1 []string, s2 []string) bool {
+func UnorderedSlicesEqual[T comparable](s1 []T, s2 []T) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
 	for _, e := range s1 {
 		found := false
 		for _, e2 := range s2 {
@@ -20,8 +23,8 @@ func SlicesMatch(s1 []string, s2 []string) bool {
 	return true
 }
 
-func removeFromSlice(x string, s []string) []string {
-	var n []string
+func removeAllFromSlice[T comparable](x T, s []T) []T {
+	var n []T
 	for _, e := range s {
 		if e == x {
 			continue
