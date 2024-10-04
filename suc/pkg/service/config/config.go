@@ -77,7 +77,7 @@ func UpdateConfigFromEnvVars() (bool, error) {
 	logrus.Infof("Checking the %s value. This is a boolean flag, expecting 'true' or 'false'", AgentStringTLSEnvVar)
 	if v := os.Getenv(AgentStringTLSEnvVar); v != "" {
 		logrus.Infof("Found value '%s' for %s", v, AgentStringTLSEnvVar)
-		givenBool := strings.ToLower(v) == "true"
+		givenBool = strings.ToLower(v) == "true"
 		if cfg.AgentStrictTLSMode != givenBool {
 			cfg.AgentStrictTLSMode = givenBool
 			configNeedsUpdate = true

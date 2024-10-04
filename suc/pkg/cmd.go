@@ -42,7 +42,7 @@ func Run(_ *cli.Context) error {
 
 	// Neither changing the start type nor service
 	// dependencies require any service restarts
-	err = service.ConfigureDelayedStart()
+	err = service.ConfigureWinsDelayedStart()
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -63,10 +63,14 @@ func Run(_ *cli.Context) error {
 		logrus.Errorf("Attempting to restore initial state due to error(s) encountered while updating rancher-wins: %v", errors.Join(errs...))
 		err = state.RestoreInitialState(initialState)
 		if err != nil {
-			return fmt.Errorf("failed to restore initial state: %w", err)
+			errs = append(errs, fmt.Errorf("failed to restore initial state: %w", err))
+		} else {
+			logrus.Info("Successfully restored initial config state")
 		}
-		logrus.Info("Successfully restored initial config state")
-		return fmt.Errorf("failed to update rancher-wins config file: %w", updateErr)
+		if len(errs) == 0 {
+			return nil
+		}
+		return errors.Join(errs...)
 	}
 
 	return nil
