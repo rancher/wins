@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/mattn/go-colorable"
 	"github.com/rancher/wins/pkg/defaults"
@@ -25,7 +26,7 @@ func main() {
 	app.Writer = colorable.NewColorableStdout()
 	app.ErrWriter = colorable.NewColorableStderr()
 	app.Before = func(c *cli.Context) error {
-		if c.Bool("debug") {
+		if c.Bool("debug") || strings.ToLower(os.Getenv("CATTLE_WINS_DEBUG")) == "true" {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 		if c.Bool("quiet") {

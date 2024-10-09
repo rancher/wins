@@ -18,7 +18,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6.1.0
         with:
           args: --timeout=10m
-          version: v1.59
+          version: v1.60
 
   test:
     strategy:
@@ -31,6 +31,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # This step is required otherwise the 'mage'
+    # command cannot be used in subsequent steps
     - name: Install Go
       uses: actions/setup-go@v5
       with:
@@ -39,7 +41,7 @@ jobs:
     - name: Install Dependencies
       run: |
         go install github.com/magefile/mage@v1.15.0
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.0
 
     - name: Run E2E tests
       shell: pwsh

@@ -16,7 +16,8 @@
       "tests",
       "scripts",
       "charts",
-      "package"
+      "package",
+      "pkg/powershell/powershell.go"
     ]
   }
 }
