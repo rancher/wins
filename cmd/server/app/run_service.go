@@ -23,7 +23,7 @@ import (
 	"golang.org/x/sys/windows/svc/mgr"
 )
 
-func registerService() error {
+func registerService(delayedStart bool) error {
 	// confirm wins binary path
 	binaryPath, err := paths.GetBinaryPath(os.Args[0])
 	if err != nil {
@@ -81,11 +81,12 @@ func registerService() error {
 		defaults.WindowsServiceName,
 		binaryPath,
 		mgr.Config{
-			ServiceType:    windows.SERVICE_WIN32_OWN_PROCESS,
-			StartType:      mgr.StartAutomatic,
-			ErrorControl:   mgr.ErrorNormal,
-			DisplayName:    defaults.WindowsServiceDisplayName,
-			BinaryPathName: binaryPath,
+			ServiceType:      windows.SERVICE_WIN32_OWN_PROCESS,
+			StartType:        mgr.StartAutomatic,
+			ErrorControl:     mgr.ErrorNormal,
+			DisplayName:      defaults.WindowsServiceDisplayName,
+			DelayedAutoStart: delayedStart,
+			BinaryPathName:   binaryPath,
 		},
 		args...,
 	)

@@ -41,6 +41,11 @@ var _runFlags = []cli.Flag{
 		Usage: "[optional] Specifies the name of the file to write the profile to",
 		Value: "profile.pprof",
 	},
+	&cli.BoolFlag{
+		Name:  "delayed-start",
+		Usage: "[optional] configure the rancher-wins service with a start type of 'Automatic (Delayed)'",
+		Value: false,
+	},
 }
 
 func _profilingInit(cliCtx *cli.Context) error {
@@ -60,12 +65,13 @@ func _runAction(cliCtx *cli.Context) error {
 	// register / unregister service
 	register := cliCtx.Bool("register")
 	unregister := cliCtx.Bool("unregister")
+	delayedStart := cliCtx.Bool("delayed-start")
 	if register {
 		if unregister {
 			return errors.New("failed to execute: --register and --unregister could not use together")
 		}
 
-		err := registerService()
+		err := registerService(delayedStart)
 		if err != nil {
 			return errors.Wrap(err, "failed to register service")
 		}

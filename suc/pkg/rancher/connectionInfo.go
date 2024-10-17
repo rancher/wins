@@ -14,7 +14,7 @@ const connInfoScriptName = "/hpc/update-connection-info.ps1"
 func UpdateConnectionInformation() (string, error) {
 	_, err := os.Stat(connInfoScriptName)
 	if errors.Is(err, os.ErrNotExist) {
-		logrus.Errorf("Could not find %s, will not attempt to update Rancher connection information.", connInfoScriptName)
+		logrus.Warnf("Could not find %s, will not attempt to update Rancher connection information", connInfoScriptName)
 		return "", nil
 	} else if err != nil {
 		return "", fmt.Errorf("failed to open %s: %w", connInfoScriptName, err)
@@ -27,5 +27,7 @@ func UpdateConnectionInformation() (string, error) {
 	if err != nil {
 		return string(o), fmt.Errorf("failed to update connection info: %w", err)
 	}
+
+	logrus.Info("Successfully updated connection info")
 	return string(o), nil
 }
