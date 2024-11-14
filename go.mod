@@ -59,7 +59,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.4.1
-	github.com/rancher/system-agent v0.3.11-rc.1
+	github.com/rancher/system-agent v0.3.11
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.4
 	golang.org/x/sync v0.8.0
