@@ -340,6 +340,15 @@ function Ensure-DependencyExistsForService {
     return $false
 }
 
+function Get-LatestCommitOrTag {
+    $currentTag = $(git tag -l --contains HEAD)
+    if ($null -ne $currentTag) {
+        return $currentTag
+    }
+
+    return $(git rev-parse --short HEAD)
+}
+
 Export-ModuleMember -Function Log-Info
 Export-ModuleMember -Function Log-Warn
 Export-ModuleMember -Function Log-Error
@@ -356,3 +365,4 @@ Export-ModuleMember -Function Remove-RancherWinsService
 Export-ModuleMember -Function Get-Permissions
 Export-ModuleMember -Function Test-Permissions
 Export-ModuleMember -Function Ensure-DependencyExistsForService
+Export-ModuleMember -Function Get-LatestCommitOrTag

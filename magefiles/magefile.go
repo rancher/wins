@@ -101,12 +101,12 @@ func Validate() error {
 }
 
 func BuildAll() error {
-	mg.SerialDeps(Build, BuildSUC)
+	mg.SerialDeps(Build, BuildSUC, Validate)
 	return nil
 }
 
 func Build() error {
-	mg.Deps(Clean, Dependencies, Validate)
+	mg.Deps(Clean, Dependencies)
 	winsOutput := filepath.Join("bin", "wins.exe")
 
 	log.Printf("[Build] Building wins version: %s \n", version)
@@ -175,6 +175,12 @@ func Build() error {
 
 func BuildSUC() error {
 	log.Printf("[Build] Building wins SUC version: %s \n", version)
+	// move wins.exe into the suc package so that it can be embedded
+	err := sh.Copy(filepath.Join("suc/pkg/host/wins.exe"), filepath.Join(artifactOutput, "wins.exe"))
+	if err != nil {
+		log.Printf("failed to copy wins.exe to suc/pkg/host")
+		return err
+	}
 	winsSucOutput := filepath.Join("bin", "wins-suc.exe")
 	if err := g.Build(flags, "suc/main.go", winsSucOutput); err != nil {
 		return err
@@ -198,7 +204,7 @@ func Test() error {
 // Integration target must be run on a wins system
 // with Containers feature / docker installed
 func Integration() error {
-	mg.Deps(Build)
+	mg.Deps(BuildAll)
 	log.Printf("[Integration] Starting Integration Test for wins version %s \n", version)
 
 	// make sure the docker files have access to the exe
@@ -221,20 +227,12 @@ func Integration() error {
 }
 
 func TestAll() error {
-	mg.Deps(BuildAll)
-	// don't run Test and Integration in mg.Deps
-	// as deps run in an unordered asynchronous fashion
-	if err := Test(); err != nil {
-		return err
-	}
-	if err := Integration(); err != nil {
-		return err
-	}
+	mg.SerialDeps(Test, Integration)
 	return nil
 }
 
 func CI() {
-	mg.Deps(Test)
+	mg.Deps(TestAll)
 }
 
 func flags(version string, commit string) string {

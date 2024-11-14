@@ -17,7 +17,8 @@
       "scripts",
       "charts",
       "package",
-      "pkg/powershell/powershell.go"
+      "pkg/powershell/powershell.go",
+      "suc/pkg/host/embed.go"
     ]
   }
 }

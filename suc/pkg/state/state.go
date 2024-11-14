@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	winsConfig "github.com/rancher/wins/cmd/server/config"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/suc/pkg/service"
@@ -125,5 +124,9 @@ func RestoreInitialState(state InitialState) error {
 		errs = append(errs, err)
 	}
 
-	return errors.Join(errs...)
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+
+	return service.RefreshWinsService()
 }

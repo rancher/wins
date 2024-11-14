@@ -98,7 +98,17 @@ func (s *Service) Restart() error {
 // Stop sends a svc.Stop control signal to the Service and waits
 // for it to enter the svc.Stopped state
 func (s *Service) Stop() error {
-	_, err := s.svc.Control(svc.Stop)
+	state, err := s.GetState()
+	if err != nil {
+		return fmt.Errorf("error getting state for %s service while attempting to send stop signal", s.Name)
+	}
+
+	if state == windows.SERVICE_STOPPED {
+		logrus.Debugf("cannot stop service %s as it is not running", s.Name)
+		return nil
+	}
+
+	_, err = s.svc.Control(svc.Stop)
 	if err != nil {
 		return fmt.Errorf("failed to send Stop signal to %s: %w", s.Name, err)
 	}

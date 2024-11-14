@@ -35,7 +35,6 @@ Describe "install" {
             # note: since this script may not be run by an administrator, it's possible that it might fail
             # on trying to delete certain files with ACLs attached to them.
             # If you are running this locally, make sure you run with admin privileges.
-            # On CI, since we don't run as an admin today, this prevents automatic failure when the right ACLs are set.
             .\uninstall.ps1
         } catch {
             Log-Warn "You need to manually run uninstall.ps1, encountered error: $($_.Exception.Message)"
