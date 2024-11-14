@@ -65,7 +65,7 @@ Describe "SUC rancher-wins Service Configurator" {
 
         Execute-Binary -FilePath "bin\wins-suc.exe"
         $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $($LASTEXITCODE -eq 0)"
+        Log-Info "Command exited successfully"
 
         Log-Info (sc.exe qc "rancher-wins" | Out-String)
         $winsStartType = (sc.exe qc "rancher-wins" | Select-String "START_TYPE" | ForEach-Object { ($_ -replace '\s+', ' ').trim().Split(" ") | Select-Object -Last 1 })
@@ -80,7 +80,7 @@ Describe "SUC rancher-wins Service Configurator" {
 
         Execute-Binary -FilePath "bin\wins-suc.exe"
         $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $?"
+        Log-Info "Command exited successfully"
 
         Log-Info (sc.exe qc "rancher-wins" | Out-String)
         $winsStartType = (sc.exe qc "rancher-wins" | Select-String "START_TYPE" | ForEach-Object { ($_ -replace '\s+', ' ').trim().Split(" ") | Select-Object -Last 1 })
@@ -95,7 +95,7 @@ Describe "SUC rancher-wins Service Configurator" {
 
         Execute-Binary -FilePath "bin\wins-suc.exe"
         $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $($LASTEXITCODE -eq 0)"
+        Log-Info "Command exited successfully"
 
         Log-Info (sc.exe qc rke2 | Out-String)
         $dependencies = (Get-Service -Name rke2).ServicesDependedOn
@@ -114,7 +114,7 @@ Describe "SUC rancher-wins Service Configurator" {
 
         Execute-Binary -FilePath "bin\wins-suc.exe"
         $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $($LASTEXITCODE -eq 0)"
+        Log-Info "Command exited successfully"
 
         Log-Info (sc.exe qc rke2 | Out-String)
         $dependencies = (Get-Service -Name rke2).ServicesDependedOn
@@ -132,7 +132,7 @@ Describe "SUC rancher-wins Service Configurator" {
 
         Execute-Binary -FilePath "bin\wins-suc.exe"
         $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $($LASTEXITCODE -eq 0)"
+        Log-Info "Command exited successfully"
 
         Log-Info (sc.exe qc rke2 | Out-String)
         Log-Info "Confirming rancher-wins service dependency has been added..."
@@ -143,9 +143,8 @@ Describe "SUC rancher-wins Service Configurator" {
         Log-Info "Updating rancher-wins config file"
         $env:CATTLE_WINS_DEBUG="false"
         Execute-Binary -FilePath "bin\wins-suc.exe"
-
-        Log-Info "Command exited successfully: $?"
         $LASTEXITCODE | Should -Be -ExpectedValue 0
+        Log-Info "Command exited successfully"
 
         $out = $(Get-Content $env:CATTLE_AGENT_CONFIG_DIR/config | out-string)
         Log-Info $out

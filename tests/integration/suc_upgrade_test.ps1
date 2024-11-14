@@ -61,7 +61,6 @@ Describe "install" {
         $env:CATTLE_WINS_SKIP_BINARY_UPGRADE = "false"
         $env:CATTLE_WINS_DEBUG = "true"
         Execute-Binary -FilePath "bin\wins-suc.exe"
-        Log-Info "Command exited successfully: $?"
         $LASTEXITCODE | Should -Be -ExpectedValue 0
 
         # Get the updated version string

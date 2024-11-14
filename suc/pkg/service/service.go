@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	stateTransitionAttempts       = 5
+	stateTransitionAttempts       = 12
 	stateTransitionDelayInSeconds = 5
 )
 
