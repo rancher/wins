@@ -42,7 +42,7 @@ func TestParseWinsVersion(t *testing.T) {
 			errExpected:     true,
 		},
 		{
-			name:            "unepxected format output",
+			name:            "unexpected format output",
 			winsOutput:      "rancher-wins version",
 			expectedVersion: "",
 			errExpected:     true,

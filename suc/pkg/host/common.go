@@ -50,6 +50,17 @@ func getRancherWinsVersionFromBinary(path string) (string, error) {
 	return parseWinsVersion(string(out))
 }
 
+func confirmWinsBinaryIsInstalled() (bool, error) {
+	_, err := os.Stat(defaultWinsPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, fmt.Errorf("could not determine if installed wins binary exists: %v", err)
+	}
+	return true, nil
+}
+
 func confirmWinsBinaryVersion(desiredVersion string, path string) error {
 	installedVersion, err := getRancherWinsVersionFromBinary(path)
 	if err != nil {

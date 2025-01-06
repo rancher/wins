@@ -33,14 +33,21 @@ func UpgradeRancherWinsBinary() (bool, error) {
 		return false, fmt.Errorf("will not attempt to upgrade wins.exe version, refusing to install embedded dirty version (version: %s)", desiredVersion)
 	}
 
-	currentVersion, err := getRancherWinsVersionFromBinary(defaultWinsPath)
+	binaryExists, err := confirmWinsBinaryIsInstalled()
 	if err != nil {
-		return false, fmt.Errorf("could not determine current wins.exe version: %w", err)
+		return false, err
 	}
 
-	if currentVersion == desiredVersion {
-		logrus.Debugf("wins.exe is up to date (%s)", currentVersion)
-		return false, nil
+	if binaryExists {
+		currentVersion, err := getRancherWinsVersionFromBinary(defaultWinsPath)
+		if err != nil {
+			return false, fmt.Errorf("could not determine current wins.exe version: %w", err)
+		}
+
+		if currentVersion == desiredVersion {
+			logrus.Debugf("wins.exe is up to date (%s)", currentVersion)
+			return false, nil
+		}
 	}
 
 	restartService, upgradeErr := updateBinaries(desiredVersion)
@@ -72,16 +79,17 @@ func updateBinaries(desiredVersion string) (bool, error) {
 	}
 
 	logrus.Info("Stopping rancher-wins...")
-	rw, _, err := service.OpenRancherWinsService()
+	rw, rwExists, err := service.OpenRancherWinsService()
 	if err != nil {
 		return false, fmt.Errorf("failed to open rancher-wins service while attempting to upgrade binary: %w", err)
 	}
 
-	// The service needs to be stopped before we can modify
-	// the binary it uses
-	err = rw.Stop()
-	if err != nil {
-		return false, fmt.Errorf("failed to stop rancher-wins service while attempting to upgrade binary: %w", err)
+	if rwExists {
+		// The service needs to be stopped before we can modify the binary it uses
+		err = rw.Stop()
+		if err != nil {
+			return false, fmt.Errorf("failed to stop rancher-wins service while attempting to upgrade binary: %w", err)
+		}
 	}
 
 	logrus.Infof("Copying %s to %s", updatedBinaryPath, defaultWinsPath)
@@ -107,7 +115,7 @@ func updateBinaries(desiredVersion string) (bool, error) {
 		return false, err
 	}
 
-	err = confirmWinsBinaryVersion(desiredVersion, getWinsUsrLocalBinBinary())
+	err = confirmWinsBinaryVersion(desiredVersion, usrLocalBinPath)
 	if err != nil {
 		return false, err
 	}
@@ -119,5 +127,5 @@ func updateBinaries(desiredVersion string) (bool, error) {
 	}
 
 	logrus.Infof("Successfully upgraded wins.exe to version %s", desiredVersion)
-	return true, nil
+	return rwExists, nil
 }
