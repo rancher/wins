@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/rancher/wins/suc/pkg/host"
 	"github.com/rancher/wins/suc/pkg/rancher"
 	"github.com/rancher/wins/suc/pkg/service"
 	"github.com/rancher/wins/suc/pkg/service/config"
-	"github.com/rancher/wins/suc/pkg/service/state"
+	"github.com/rancher/wins/suc/pkg/state"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -49,7 +50,12 @@ func Run(_ *cli.Context) error {
 		errs = append(errs, err)
 	}
 
-	if restartServiceDueToConfigChange {
+	restartServiceDueToBinaryUpgrade, err := host.UpgradeRancherWinsBinary()
+	if err != nil {
+		return fmt.Errorf("failed to upgrade wins.exe: %w", err)
+	}
+
+	if restartServiceDueToConfigChange || restartServiceDueToBinaryUpgrade {
 		err = service.RefreshWinsService()
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error encountered while attempting to restart rancher-wins: %w", err))
