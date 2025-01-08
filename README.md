@@ -5,6 +5,15 @@
 
 `wins` is a way to operate the Windows host inside the Windows container.
 
+## Release Lines
+
++ `release/v0.4.x`, `v0.4.x` 
+  + Currently in maintenance mode, intended for use by Rancher versions <= 2.9.x
++ `main`, `v0.5.x`
+  + Currently accepting new features, intended for use by Rancher versions >= v2.10.x
+
+While Rancher versions <= v2.9.x are supported, CVEs must be addressed in both rancher-wins release lines and bumped in the relevant Rancher branches.   
+
 ## How to use
 
 ### Modules
