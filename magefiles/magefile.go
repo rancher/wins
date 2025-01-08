@@ -111,7 +111,7 @@ func Build() error {
 
 	log.Printf("[Build] Building wins version: %s \n", version)
 	log.Printf("[Build] Output: %s \n", winsOutput)
-	if err := g.Build(flags, "cmd/main.go", winsOutput); err != nil {
+	if err := g.Build(flags, "./cmd/", winsOutput); err != nil {
 		return err
 	}
 	log.Printf("[Build] successfully built wins version %s \n", version)
@@ -176,7 +176,7 @@ func Build() error {
 func BuildSUC() error {
 	log.Printf("[Build] Building wins SUC version: %s \n", version)
 	winsSucOutput := filepath.Join("bin", "wins-suc.exe")
-	if err := g.Build(flags, "suc/main.go", winsSucOutput); err != nil {
+	if err := g.Build(flags, "./suc/", winsSucOutput); err != nil {
 		return err
 	}
 	if err := sh.Copy(filepath.Join(artifactOutput, "wins-suc.exe"), winsSucOutput); err != nil {
