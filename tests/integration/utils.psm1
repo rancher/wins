@@ -244,6 +244,10 @@ function Add-RancherWinsService {
     Log-Info (Get-Service -Name rancher-wins -ErrorAction Ignore)
 }
 
+function Add-RKE2WinsDependency {
+    sc.exe config rke2 depend= rancher-wins
+}
+
 function Get-Permissions {
     param (
         [Parameter(Mandatory=$true)]
@@ -356,3 +360,4 @@ Export-ModuleMember -Function Remove-RancherWinsService
 Export-ModuleMember -Function Get-Permissions
 Export-ModuleMember -Function Test-Permissions
 Export-ModuleMember -Function Ensure-DependencyExistsForService
+Export-ModuleMember -Function Add-RKE2WinsDependency

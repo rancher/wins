@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	winsConfig "github.com/rancher/wins/cmd/server/config"
-	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/suc/pkg/service"
 	sucConfig "github.com/rancher/wins/suc/pkg/service/config"
 	"github.com/sirupsen/logrus"
@@ -24,7 +23,6 @@ type InitialState struct {
 }
 
 type Configuration struct {
-	winsDelayedStart bool
 	rke2Dependencies []string
 }
 
@@ -73,7 +71,6 @@ func BuildInitialState() (InitialState, error) {
 	return InitialState{
 		InitialConfig: winsCfg,
 		InitialServiceConfig: Configuration{
-			winsDelayedStart: winsSvc.Config.DelayedAutoStart,
 			rke2Dependencies: rke2Deps,
 		},
 	}, nil
@@ -82,18 +79,6 @@ func BuildInitialState() (InitialState, error) {
 // RestoreInitialState will clear all changes made to the host and reinstate the values contained within InitialState.
 func RestoreInitialState(state InitialState) error {
 	var errs []error
-	// restore rancher-wins service configuration
-	winsSvc, _, err := service.OpenRancherWinsService()
-	if err != nil {
-		errs = append(errs, fmt.Errorf("failed to open %s while restoring initial configuration: %w", defaults.WindowsServiceName, err))
-	}
-
-	if winsSvc.Config.DelayedAutoStart != state.InitialServiceConfig.winsDelayedStart {
-		err = winsSvc.ConfigureDelayedStart(state.InitialServiceConfig.winsDelayedStart)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("failed to revert rancher-wins delayed start to %t: %w", state.InitialServiceConfig.winsDelayedStart, err))
-		}
-	}
 
 	// restore rke2 service configuration
 	saveRke2Config := false

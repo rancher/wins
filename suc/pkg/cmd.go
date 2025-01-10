@@ -37,18 +37,6 @@ func Run(_ *cli.Context) error {
 		errs = append(errs, updateErr)
 	}
 
-	// Neither changing the start type nor service
-	// dependencies require any service restarts
-	err = service.ConfigureWinsDelayedStart()
-	if err != nil {
-		errs = append(errs, err)
-	}
-
-	err = service.ConfigureRKE2ServiceDependency()
-	if err != nil {
-		errs = append(errs, err)
-	}
-
 	if restartServiceDueToConfigChange {
 		err = service.RefreshWinsService()
 		if err != nil {

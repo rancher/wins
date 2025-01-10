@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/rancher/wins/pkg/defaults"
-	"github.com/sirupsen/logrus"
 )
 
 type RancherWinsService struct {
@@ -26,19 +25,4 @@ func OpenRancherWinsService() (*RancherWinsService, bool, error) {
 	}
 
 	return x, exists, nil
-}
-
-func (rw *RancherWinsService) ConfigureDelayedStart(enabled bool) error {
-	logrus.Infof("%s service has delayed auto start configured: %t", defaults.WindowsServiceName, rw.Config.DelayedAutoStart)
-	if rw.Config.DelayedAutoStart != enabled {
-		logrus.Infof("updating %s delayed auto start setting to %t", defaults.WindowsServiceName, enabled)
-		rw.Config.DelayedAutoStart = enabled
-		err := rw.UpdateConfig()
-		if err != nil {
-			return fmt.Errorf("failed to update %s service configuration while configuring service start type: %w", defaults.WindowsServiceName, err)
-		}
-	} else {
-		logrus.Infof("%s delayed start already set to %t, nothing to do", defaults.WindowsServiceName, enabled)
-	}
-	return nil
 }
