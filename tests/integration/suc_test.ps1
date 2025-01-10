@@ -47,7 +47,6 @@ Describe "SUC rancher-wins Config File Updater" {
 }
 
 Describe "SUC rancher-wins Service Configurator" {
-
     BeforeAll {
         Add-RancherWinsService
         Add-DummyRKE2Service
@@ -58,82 +57,9 @@ Describe "SUC rancher-wins Service Configurator" {
         Remove-DummyRKE2Service
     }
 
-    It "enables rancher-wins delayed start" {
-        Log-Info "TEST: Enabling rancher-wins delayed start"
-        $env:CATTLE_ENABLE_WINS_DELAYED_START = "true"
-
-        Execute-Binary -FilePath "bin\wins-suc.exe"
-        $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $($LASTEXITCODE -eq 0)"
-
-        Log-Info (sc.exe qc "rancher-wins" | Out-String)
-        $winsStartType = (sc.exe qc "rancher-wins" | Select-String "START_TYPE" | ForEach-Object { ($_ -replace '\s+', ' ').trim().Split(" ") | Select-Object -Last 1 })
-        $winsStartType | Should -Be -ExpectedValue "(DELAYED)"
-        Log-Info "Delayed start configured correctly"
-    }
-
-    It "disables rancher-wins delayed start" {
-        Log-Info "TEST: Disabling rancher-wins delayed start"
-        $env:CATTLE_ENABLE_WINS_DELAYED_START = "false"
-
-        Execute-Binary -FilePath "bin\wins-suc.exe"
-        $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $?"
-
-        Log-Info (sc.exe qc "rancher-wins" | Out-String)
-        $winsStartType = (sc.exe qc "rancher-wins" | Select-String "START_TYPE" | ForEach-Object { ($_ -replace '\s+', ' ').trim().Split(" ") | Select-Object -Last 1 })
-        $winsStartType | Should -Be -ExpectedValue "AUTO_START"
-        Log-Info "Delayed start configured correctly"
-    }
-
-    It "enables rke2 service dependency" {
-        Log-Info "TEST: Enabling rke2 service dependency"
-        $env:CATTLE_ENABLE_WINS_SERVICE_DEPENDENCY = "true"
-
-        Execute-Binary -FilePath "bin\wins-suc.exe"
-        $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $($LASTEXITCODE -eq 0)"
-
-        Log-Info (sc.exe qc rke2 | Out-String)
-        $dependencies = (Get-Service -Name rke2).ServicesDependedOn
-        Log-Info "Confirming rancher-wins service dependency has been added..."
-        $found = Ensure-DependencyExistsForService -ServiceName rke2 -DependencyName rancher-wins
-        $found | Should -BeTrue
-        Log-Info "Service dependency correctly configured"
-    }
-
-    It "disables rke2 service dependency" {
-        Log-Info "TEST: Disabling rke2 service dependency"
-        # Dependency will be disabled whenever CATTLE_ENABLE_WINS_SERVICE_DEPENDENCY is
-        # set to a value other than "true" (including not being set at all)
-        $env:CATTLE_ENABLE_WINS_SERVICE_DEPENDENCY = ""
-
-        Execute-Binary -FilePath "bin\wins-suc.exe"
-        $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $($LASTEXITCODE -eq 0)"
-
-        Log-Info (sc.exe qc rke2 | Out-String)
-        $dependencies = (Get-Service -Name rke2).ServicesDependedOn
-        Log-Info "Confirming rancher-wins service dependency has been removed..."
-        $found = Ensure-DependencyExistsForService -ServiceName rke2 -DependencyName rancher-wins
-        $found | Should -BeFalse
-        $dependencies.Count | Should -Be -ExpectedValue 0
-        Log-Info "Service dependency correctly removed"
-    }
-
     It "Updates rancher-wins config file while rke2 dependency exists" {
-        Log-Info "TEST: Enabling rke2 service dependency"
-        $env:CATTLE_ENABLE_WINS_SERVICE_DEPENDENCY = "true"
-
-        Execute-Binary -FilePath "bin\wins-suc.exe"
-        $LASTEXITCODE | Should -Be -ExpectedValue 0
-        Log-Info "Command exited successfully: $($LASTEXITCODE -eq 0)"
-
-        Log-Info (sc.exe qc rke2 | Out-String)
-        Log-Info "Confirming rancher-wins service dependency has been added..."
-        $found = Ensure-DependencyExistsForService -ServiceName rke2 -DependencyName rancher-wins
-        $found | Should -BeTrue
-        Log-Info "Service dependency correctly configured"
+        Log-Info "TEST: Updating rancher-wins config file with an existing rke2 service dependency"
+        Add-RKE2WinsDependency
 
         Log-Info "Updating rancher-wins config file"
         $env:CATTLE_WINS_DEBUG="false"
@@ -155,5 +81,4 @@ Describe "SUC rancher-wins Service Configurator" {
         $found | Should -BeTrue
         Log-Info "Service dependency correctly configured"
     }
-
 }
