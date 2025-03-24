@@ -92,7 +92,7 @@ func (s *Service) Restart() error {
 		return fmt.Errorf("failed to start the %s service while attempting to restart: %w", s.Name, err)
 	}
 
-	return s.WaitForState(svc.Running, stateTransitionDelayInSeconds, stateTransitionAttempts)
+	return s.WaitForState(svc.Running, getStateTransitionDelayInSeconds(), getStateTransitionAttempts())
 }
 
 // Stop sends a svc.Stop control signal to the Service and waits
@@ -113,7 +113,7 @@ func (s *Service) Stop() error {
 		return fmt.Errorf("failed to send Stop signal to %s: %w", s.Name, err)
 	}
 
-	return s.WaitForState(svc.Stopped, stateTransitionDelayInSeconds, stateTransitionAttempts)
+	return s.WaitForState(svc.Stopped, getStateTransitionDelayInSeconds(), getStateTransitionAttempts())
 }
 
 // Close closes the Service

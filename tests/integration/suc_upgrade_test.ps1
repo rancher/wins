@@ -44,6 +44,9 @@ Describe "install" {
     }
 
     It "Installs and upgrades" {
+        $env:CATTLE_WINS_STATE_TRANSITION_ATTEMPTS = 60
+        $env:CATTLE_WINS_STATE_TRANSITION_SECONDS = 1
+
         # We currently have the latest release installed, we now need to test upgrading to our version.
         # Get the expected version of the new wins.exe binary. On PR's this
         # will be a commit hash, and on tag runs it should be a full version (v0.x.y[-rc.z]).

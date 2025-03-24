@@ -1,8 +1,39 @@
 package service
 
 import (
+	"os"
+	"strconv"
+	"time"
+
+	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/windows/svc"
 )
+
+func getStateTransitionAttempts() int {
+	env := os.Getenv("CATTLE_WINS_STATE_TRANSITION_ATTEMPTS")
+	if env != "" {
+		i, err := strconv.Atoi(env)
+		if err != nil {
+			logrus.Debugf("failed to cast 'CATTLE_WINDOWS_STATE_TRANSITION_ATTEMPTS' (%s) to an integer, returning default value of %d", env, stateTransitionAttempts)
+			return stateTransitionAttempts
+		}
+		return i
+	}
+	return stateTransitionAttempts
+}
+
+func getStateTransitionDelayInSeconds() time.Duration {
+	env := os.Getenv("CATTLE_WINS_STATE_TRANSITION_SECONDS")
+	if env != "" {
+		i, err := strconv.Atoi(env)
+		if err != nil {
+			logrus.Debugf("failed to cast 'CATTLE_WINDOWS_STATE_TRANSITION_SECONDS' (%s) to an integer, returning default value of %d", env, stateTransitionDelayInSeconds)
+			return stateTransitionDelayInSeconds
+		}
+		return time.Duration(i)
+	}
+	return stateTransitionDelayInSeconds
+}
 
 func UnorderedSlicesEqual[T comparable](s1 []T, s2 []T) bool {
 	if len(s1) != len(s2) {
