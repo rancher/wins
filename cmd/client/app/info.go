@@ -11,7 +11,7 @@ import (
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/paths"
 	"github.com/rancher/wins/pkg/types"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var _infoFlags = internal.NewGRPCClientConn([]cli.Flag{})

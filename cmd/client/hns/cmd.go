@@ -1,7 +1,7 @@
 package hns
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func NewCommand() *cli.Command {

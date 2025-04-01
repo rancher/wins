@@ -13,7 +13,7 @@ import (
 	"github.com/rancher/wins/pkg/profilings"
 	"github.com/rancher/wins/pkg/systemagent"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 )
 
