@@ -39,7 +39,7 @@ jobs:
       - name: Install Dependencies
         run: |
           go install github.com/magefile/mage@v1.15.0
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.0
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.7
 
       - name: build-binary
         run: |
@@ -52,7 +52,7 @@ jobs:
         run: ./scripts/build-image.ps1 -NanoServerVersion "ltsc2022" -Repo "${{ env.REPO }}" -Tag "${{ env.TAG }}"
 
       - name: push images
-        run: | 
+        run: |
           docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022
 
   create-push-image-windows-2019:
@@ -69,6 +69,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
       - name: retrieve dockerhub credentials
         uses: rancher-eio/read-vault-secrets@main
         with:
@@ -92,7 +93,7 @@ jobs:
       - name: Install Dependencies
         run: |
           go install github.com/magefile/mage@v1.15.0
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.0
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.7
 
       - name: build-binary
         run: |
@@ -128,7 +129,7 @@ jobs:
       - name: Install Dependencies
         run: |
           go install github.com/magefile/mage@v1.15.0
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.0
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.7
 
       - name: build-binary
         run: |
