@@ -14,7 +14,7 @@ replace (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.33.0
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.25.0
 	golang.org/x/sync => golang.org/x/sync v0.8.0
-	inet.af/tcpproxy => github.com/inetaf/tcpproxy v0.0.0-20240214030015-3ce58045626c
+	inet.af/tcpproxy => github.com/inetaf/tcpproxy v0.0.0-20250222171855-c4b9df066048
 	k8s.io/api => k8s.io/api v0.32.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.32.2
 	k8s.io/apimachinery => k8s.io/apimachinery v0.32.2
