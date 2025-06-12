@@ -55,11 +55,8 @@ jobs:
         run: |
           docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022
 
-  create-push-image-windows-2019:
-    # Due to limitations on the number of free runners in the Rancher org (20)
-    # we do not build 2019 and 2022 in parallel
-    needs: [create-push-image-windows-2022]
-    runs-on: windows-2019
+  create-push-image-windows-2019-using-2025:
+    runs-on: windows-2025
     env:
       REPO: rancher
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -110,7 +107,7 @@ jobs:
           docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2019
 
   create-github-release:
-    needs: [ create-push-image-windows-2019, create-push-image-windows-2022 ]
+    needs: [ create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
     runs-on: windows-2022
     permissions:
       contents: write # required for writing release artifacts
@@ -139,7 +136,7 @@ jobs:
         run: gh release create ${{ env.TAG }} --verify-tag --generate-notes .\artifacts\wins.exe .\artifacts\sha256.txt .\artifacts\sha512.txt LICENSE
 
   create-manifest:
-    needs: [ create-push-image-windows-2019, create-push-image-windows-2022 ]
+    needs: [ create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
     permissions:
       id-token: write
     env:

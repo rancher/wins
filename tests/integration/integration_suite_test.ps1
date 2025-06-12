@@ -1,12 +1,23 @@
 $ErrorActionPreference = "Stop"
 
 # docker build
-$buildTags = @{ "17763" = "1809"; "20348" = "ltsc2022";}
+$buildTags = @{ "17763" = "1809"; "20348" = "ltsc2022"; "26100" = "2025"}
 $buildNumber = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' -ErrorAction Ignore).CurrentBuildNumber
 $SERVERCORE_VERSION = $buildTags[$buildNumber]
 if (-not $SERVERCORE_VERSION) {
     $SERVERCORE_VERSION = "1809"
 }
+
+# Testing on 2025 is a bit tricky. We're actually only using it to build the 2019 artifacts since 2019 was removed from GHA.
+# So, all of our integration tests expect us to be on 2019. This prevents some test containers from
+# building correctly. Since we don't actually support 2025 yet, there isn't much point running the integration
+# tests anyway. It's also important to note that these integration tests cover functionality that is no longer used
+# by Rancher provisioning, so we aren't losing any relevant test coverage by short circuiting here.
+if ($SERVERCORE_VERSION -eq "2025") {
+    Write-Host "Detected that we are running on Windows 2025. Integration tests are not yet supported on this version. Exiting."
+    exit 0
+}
+
 
 Write-Host "Server core version: $SERVERCORE_VERSION"
 
