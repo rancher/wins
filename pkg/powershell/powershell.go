@@ -1,7 +1,6 @@
 package powershell
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os/exec"
@@ -37,22 +36,4 @@ func RunCommand(command string) ([]byte, error) {
 // When the command throws a powershell exception, RunCommandf will return the exception message as error.
 func RunCommandf(command string, a ...interface{}) ([]byte, error) {
 	return RunCommand(fmt.Sprintf(command, a...))
-}
-
-// RunCommandWithJSONResult executes a given powershell command.
-// The command will be wrapped with ConvertTo-Json.
-//
-// You can Wrap your command with @(<cmd>) to ensure that the returned json is an array
-//
-// When the command throws a powershell exception, RunCommandf will return the exception message as error.
-func RunCommandWithJSONResult(command string, v interface{}) error {
-	wrappedCommand := fmt.Sprintf(commandWrapper, "ConvertTo-Json (%s)")
-	wrappedCommand = fmt.Sprintf(wrappedCommand, command)
-
-	stdout, err := RunCommandf(wrappedCommand)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(stdout, v)
 }
