@@ -1,7 +1,6 @@
-<!-- This template is for Devs to give QA details before moving the issue To-Test -->
 ### Summary
-Fixes #
-<!-- Define findings related to the feature or bug issue. -->
+<!-- Add a link to a tracking GitHub issue, typically located in rancher/rancher -->
+Issue:
 
 ### Occurred changes and/or fixed issues
 <!-- Include information of the changes, including collateral areas which have been affected by this PR as requirement or for convenience. -->
