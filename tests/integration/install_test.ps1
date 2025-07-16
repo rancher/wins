@@ -18,15 +18,22 @@ Describe "install" {
     BeforeEach {
         # note: we cannot test system agent install today since we need a mocked API server
         Log-Info "Running install script"
+
+        # Create a test specific copy of the install script
+        # as the environment variables being set may differ between tests
+        Copy-Item install.ps1 installer-test.ps1 -Force
+
         # note: Simply running the install script does not do anything. During normal provisioning,
         # Rancher will mutate the install script to both add environment variables, and to call
         # the primary function 'Invoke-WinsInstaller'. As this is an integration test, we need to manually
         # update the install script ourselves.
-        Add-Content -Path ./install.ps1 -Value '$env:CATTLE_REMOTE_ENABLED = "false"'
-        Add-Content -Path ./install.ps1 -Value '$env:CATTLE_LOCAL_ENABLED = "true"'
-        Add-Content -Path ./install.ps1 -Value Invoke-WinsInstaller
+        Add-Content -Path ./installer-test.ps1 -Value '$env:CATTLE_REMOTE_ENABLED = "false"'
+        Add-Content -Path ./installer-test.ps1 -Value '$env:CATTLE_LOCAL_ENABLED = "true"'
+        Add-Content -Path ./installer-test.ps1 -Value "Invoke-WinsInstaller"
+        # reset the agent directory
+        Remove-Item "C:/etc/rancher/wins" -Force -ErrorAction Ignore
 
-        .\install.ps1
+        .\installer-test.ps1
     }
 
     AfterEach {
@@ -42,6 +49,7 @@ Describe "install" {
     }
 
     It "creates files and directories with scoped down permissions" {
+        Log-Info "TEST: [creates files and directories with scoped down permissions]"
         # While these get set in install.ps1, pester removes them as
         # install.ps1 is called in the BeforeEach block
         $env:CATTLE_AGENT_VAR_DIR = "c:/var/lib/rancher/agent"
