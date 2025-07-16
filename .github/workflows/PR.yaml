@@ -12,6 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [windows-2022]
+
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -24,6 +25,7 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: 'stable'
+        cache: 'false'
 
     - name: Install Dependencies
       run: |

@@ -35,6 +35,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 'stable'
+          cache: 'false'
 
       - name: Install Dependencies
         run: |
@@ -86,6 +87,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 'stable'
+          cache: 'false'
 
       - name: Install Dependencies
         run: |
