@@ -74,55 +74,17 @@ Describe "Install script certificate tests" {
         # Quick sanity check to ensure utility function properly removed
         # certificates from the built-in stores
         Log-Info "Ensuring that certs are not yet imported"
-        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new([System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
-        $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed)
-        foreach ($thumbPrint in $certData.ThumbPrints)
-        {
-            Log-Info "Ensuring cert with thumb print of $thumbPrint is not imported yet"
-            $found = $certStore.Certificates.Find('FindByThumbprint', $thumbPrint, $false)
-            $found.Count | Should -Be -ExpectedValue 0
-            Log-Info "Confirmed that cert with thumb print of $thumbPrint has not been imported yet"
-        }
+        check-thumbprints -shouldExist $false -thumbs $certData.ThumbPrints
 
         $checkSum = $certData.Checksum
         Add-Content -Path install-certs-test.ps1 -Value "`$env:CATTLE_CA_CHECKSUM = `"$checkSum`""
         Add-Content -Path install-certs-test.ps1 -Value "Invoke-WinsInstaller"
 
-        Log-Info "Starting mock Rancher API"
-        $job = Start-Job -ScriptBlock $StartMockRancherHandler -ArgumentList $certData.FinalCertBlocks
-        Start-Sleep 1
-        if ($job.State -ne "Running") {
-            # display job output to help debug job failure
-            Log-Error "Mock Rancher server failed to start"
-            $job | Receive-Job
-            $job.State | Should -Be -ExpectedValue "Running"
-        }
-
-        Log-Info "Invoking install script function"
-        .\install-certs-test.ps1
-        $installScriptExitCode = $LASTEXITCODE
-
-        Log-Info "Stopping mock server"
-        curl.exe -sS http://localhost:8080/kill
-        Remove-Job -Id $job.Id -Force
-
-        Log-Info "Install script exited with code $installScriptExitCode"
-        $installScriptExitCode | Should -Be -ExpectedValue 0
+        invoke-installScript
 
         Log-Info "Confirming that certs have been properly imported..."
-        foreach ($thumbPrint in $certData.ThumbPrints)
-        {
-            Log-Info "Checking cert with thumb print of $thumbPrint"
-            $found = $certStore.Certificates.Find('FindByThumbprint', $thumbPrint, $false)
-            if ($found.Count -ne 1)
-            {
-                Log-Error "Could not find cert with thumbprint of $thumbPrint"
-                $found.Count | Should -Be -ExpectedValue 1
-            }
-            Log-Info "Found $thumbPrint"
-        }
+        check-thumbprints -shouldExist $true -thumbs $certData.ThumbPrints
 
-        $certStore.Close()
         Log-Info "Properly imported $expectedCertificates certificates"
     }
 
@@ -135,55 +97,81 @@ Describe "Install script certificate tests" {
         # Quick sanity check to ensure utility function properly removed
         # certificates from the built-in stores
         Log-Info "Ensuring that certs are not yet imported"
-
-        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new([System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
-        $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed)
-        foreach ($thumbPrint in $certData.ThumbPrints)
-        {
-            Log-Info "Ensuring cert with thumb print of $thumbPrint is not imported yet"
-            $found = $certStore.Certificates.Find('FindByThumbprint', $thumbPrint, $false)
-            $found.Count | Should -Be -ExpectedValue 0
-        }
+        check-thumbprints -shouldExist $false -thumbs $certData.ThumbPrints
 
         $checkSum = $certData.Checksum
         Add-Content -Path install-certs-test.ps1 -Value "`$env:CATTLE_CA_CHECKSUM = `"$checkSum`""
         Add-Content -Path install-certs-test.ps1 -Value "Invoke-WinsInstaller"
 
-        Log-Info "Starting mock Rancher API"
-        $job = Start-Job -ScriptBlock $StartMockRancherHandler -ArgumentList $certData.FinalCertBlocks
-        Start-Sleep 1
-        if ($job.State -ne "Running") {
-            # display job output to help debug job failure
-            Log-Error "Mock Rancher server failed to start"
-            $job | Receive-Job
-            $job.State | Should -Be -ExpectedValue "Running"
-        }
-
-        Log-Info "Invoking install script"
-        .\install-certs-test.ps1
-        $installScriptExitCode = $LASTEXITCODE
-
-        Log-Info "Stopping mock server"
-        curl.exe -sS http://localhost:8080/kill
-        Remove-Job -Id $job.Id -Force
-
-        Log-Info "Install script exited with code $installScriptExitCode"
-        $installScriptExitCode | Should -Be -ExpectedValue 0
+        invoke-installScript
 
         Log-Info "Confirming that certs have been properly imported..."
-        foreach ($thumbPrint in $certData.ThumbPrints)
-        {
-            Log-Info "Confirming that cert with thumb print of $thumbPrint has been imported"
-            $found = $certStore.Certificates.Find('FindByThumbprint', $thumbPrint, $false)
-            if ($found.Count -ne 1)
-            {
-                Log-Error "Did not find cert with thumb print of: $thumbPrint"
-                $found.Count | Should -Be -ExpectedValue 1
+        check-thumbprints -shouldExist $true -thumbs $certData.ThumbPrints
+
+        Log-Info "Properly imported $expectedCertificates certificates"
+    }
+
+    # utility functions only useful for this set of tests
+    BeforeAll {
+        function invoke-installScript() {
+            param (
+                [Parameter()]
+                [String]
+                $certs
+            )
+
+            Log-Info "Starting mock Rancher API"
+            $job = Start-Job -ScriptBlock $StartMockRancherHandler -ArgumentList $certData.FinalCertBlocks
+            Start-Sleep 1
+            if ($job.State -ne "Running") {
+                # display job output to help debug job failure
+                Log-Error "Mock Rancher server failed to start"
+                $job | Receive-Job
+                $job.State | Should -Be -ExpectedValue "Running"
             }
-            Log-Info "Cert with thumbprint of $thumbPrint was properly imported"
+
+            Log-Info "Invoking install script"
+            .\install-certs-test.ps1
+            $installScriptExitCode = $LASTEXITCODE
+
+            Log-Info "Stopping mock server"
+            curl.exe -sS http://localhost:8080/kill
+            Remove-Job -Id $job.Id -Force
+
+            Log-Info "Install script exited with code $installScriptExitCode"
+            $installScriptExitCode | Should -Be -ExpectedValue 0
         }
 
-        $certStore.Close()
-        Log-Info "Properly imported $expectedCertificates certificates"
+        function check-thumbprints() {
+            param (
+                [Parameter()]
+                [Boolean]
+                $shouldExist,
+
+                [Parameter()]
+                [String[]]
+                $thumbs
+            )
+
+            $expect = 1
+            if (-Not $shouldExist) {
+                $expect = 0
+            }
+            $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new([System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
+            $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed)
+            foreach ($thumbPrint in $thumbs)
+            {
+                Log-Info "Checking $thumbPrint, expecting $expect instances to exist"
+                $found = $certStore.Certificates.Find('FindByThumbprint', $thumbPrint, $false)
+                $count = $found.Count
+                if ($count -ne $expect)
+                {
+                    Log-Error "Found unexpected count of cert with thumb print of $thumbPrint, expected $expect, found $count"
+                    $found.Count | Should -Be -ExpectedValue $expect
+                }
+                Log-Info "Found expected number of entries for cert with thumbprint $thumbPrint"
+            }
+            $certStore.Close()
+        }
     }
 }
