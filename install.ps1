@@ -393,13 +393,13 @@ function Invoke-WinsInstaller {
 
         curl.exe --insecure -sfL $env:CATTLE_SERVER/$caCertsPath -o $env:RANCHER_CERT
         if (-Not(Test-Path -Path $env:RANCHER_CERT)) {
-            Write-Error "The environment variable CATTLE_CA_CHECKSUM is set but there is no CA certificate configured at $( $env:CATTLE_SERVER )/$( $caCertsPath )) "
+            Write-LogError "The environment variable CATTLE_CA_CHECKSUM is set but there is no CA certificate configured at $( $env:CATTLE_SERVER )/$( $caCertsPath )) "
             exit 1
         }
 
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Value from $( $env:CATTLE_SERVER )/$( $caCertsPath ) does not look like an x509 certificate, exited with $( $LASTEXITCODE ) "
-            Write-Error "Retrieved cacerts:"
+            Write-LogError "Value from $( $env:CATTLE_SERVER )/$( $caCertsPath ) does not look like an x509 certificate, exited with $( $LASTEXITCODE ) "
+            Write-LogError "Retrieved cacerts:"
             Get-Content $env:RANCHER_CERT
             exit 1
         }
@@ -413,7 +413,45 @@ function Invoke-WinsInstaller {
             Write-LogError "Please check if the correct certificate is configured at $( $env:CATTLE_SERVER )/$( $caCertsPath ) ."
             exit 1
         }
-        Import-Certificate -FilePath $env:RANCHER_CERT -CertStoreLocation Cert:\LocalMachine\Root | Out-Null        
+
+        Import-Certificates
+    }
+
+    # Import-Certificates imports one or more
+    # certificates stored in the file specified by $ENV:RANCHER_CERT.
+    # In the event that $env:RANCHER_CERT contains multiple certificate
+    # blocks, a regular expression is used to iterate across all blocks
+    # and import them individually.
+    function Import-Certificates() {
+        $rawCerts = Get-Content $env:RANCHER_CERT -Raw
+        # splits blocks, handles
+        # CLRF line endings if present
+        $pattern  = "(?<=-\r?\n)(?=-+)"
+        $allCerts = $rawCerts -split $pattern
+
+        if ($allCerts.Length -eq 0) {
+            Write-LogWarn "No Certs found in certs file, check that $env:RANCHER_CERT exists and that the correct certificate is configured at $( $env:CATTLE_SERVER )/cacerts."
+            return
+        }
+
+        if ($allCerts.Length -eq 1) {
+            Write-LogInfo "Detected single certificate"
+            Import-Certificate -FilePath $env:RANCHER_CERT -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
+            return
+        }
+
+        # Import-Certificate does not automatically handle chains included in a single file,
+        # so we need to manually extract and import each certificate into the Root store.
+        Write-LogInfo "Detected certificate chain"
+        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new([System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
+        $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed)
+        ForEach($cert in $allCerts) {
+            Write-LogInfo "Importing a certificate entry from the provided chain..."
+            $encodedCert = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($cert))
+            $x509 = [X509Certificate]::new([convert]::FromBase64String($encodedCert))
+            $certStore.Add($x509)
+        }
+        $certStore.Close()
     }
 
     function Test-RancherConnection {
@@ -450,13 +488,17 @@ function Invoke-WinsInstaller {
             while ($retries -lt 6) {
                 curl.exe --connect-timeout 60 --max-time 60 -sfL "$env:CATTLE_SERVER/healthz"
                 switch ($LASTEXITCODE) {
+                    # Succesful exit code
                     0 {
                         Write-LogInfo "Determined CA is not necessary to connect to Rancher." 
                         $env:CATTLE_CA_CHECKSUM = ""
                         $retries = 99
                         break
-                    }                    
-                    { $_ -in 60, 77 } {
+                    }
+                    # 60: Peer certificate cannot be verified with known CA certificates
+                    # 77: Could not read SSL CA cert
+                    # 35: SSL Handshake Error
+                    { $_ -in 60, 77, 35 } {
                         Write-LogInfo "Determined CA is necessary to connect to Rancher."
                         $env:CA_REQUIRED = $true
                         $retries = 99
