@@ -138,7 +138,7 @@ func (p *Proxy) download() error {
 	// as long as the req does not match an entry in no_proxy env var
 	transport := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, Proxy: http.ProxyFromEnvironment}
 
-	if p.tlsCfg != nil && !*p.tlsCfg.Insecure && p.tlsCfg.CertFilePath != "" {
+	if p.tlsCfg != nil && p.tlsCfg.Insecure != nil && !*p.tlsCfg.Insecure && p.tlsCfg.CertFilePath != "" {
 		transport.TLSClientConfig.InsecureSkipVerify = false
 	}
 
