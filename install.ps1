@@ -540,7 +540,7 @@ function Invoke-WinsInstaller {
 
     function Set-WinsConfig() {
         $winsConfig =
-        @"
+@"
 white_list:
   processPaths:
     - $($env:CATTLE_AGENT_CONFIG_DIR)/powershell.exe
@@ -553,7 +553,7 @@ white_list:
         Set-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $winsConfig
 
         $agentConfig = 
-        @"
+@"
 agentStrictTLSMode: $(($env:STRICT_VERIFY).ToString().ToLower())
 systemagent:
   workDirectory: $($env:CATTLE_AGENT_VAR_DIR)/work
@@ -568,9 +568,9 @@ systemagent:
         }
         if ((Test-Path -Path $env:RANCHER_CERT) -and ($env:CA_REQUIRED -eq "true")) {
             $tlsConfig =
-            @"
-            tls-config:
-                certFilePath: $($($env:RANCHER_CERT).Replace("\\","/"))
+@"
+tls-config:
+  certFilePath: $($($env:RANCHER_CERT).Replace("\\","/"))
 "@
             Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $tlsConfig
         }
@@ -579,7 +579,7 @@ systemagent:
 
     function Set-CsiProxyConfig() {
         $proxyConfig = 
-        @"
+@"
 csi-proxy:
   url: $($env:CSI_PROXY_URL)
   version: $($env:CSI_PROXY_VERSION)
