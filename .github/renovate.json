@@ -2,9 +2,11 @@
   "extends": [
     "github>rancher/renovate-config#release"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "main"
   ],
   "prHourlyLimit": 2,
-  "reviewers": ["HarrisonWAffel"]
+  "reviewers": [
+    "HarrisonWAffel"
+  ]
 }
