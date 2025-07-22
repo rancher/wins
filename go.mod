@@ -60,7 +60,7 @@ require (
 	github.com/magefile/mage v1.15.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/remotedialer v0.4.5-rc.2
+	github.com/rancher/remotedialer v0.5.0
 	github.com/rancher/system-agent v0.3.13-rc.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.5
@@ -127,10 +127,10 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/rancher/lasso v0.2.3-rc1 // indirect
+	github.com/rancher/lasso v0.2.3 // indirect
 	github.com/rancher/permissions v0.0.0-20240924180251-69b0dcb34065 // indirect
 	github.com/rancher/wharfie v0.7.0 // indirect
-	github.com/rancher/wrangler/v3 v3.2.2-rc.1 // indirect
+	github.com/rancher/wrangler/v3 v3.2.2 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/cobra v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
