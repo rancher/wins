@@ -1,24 +1,55 @@
 {
+  "formatters": {
+    "enable": [
+      "gofmt"
+    ],
+    "exclusions": {
+      "generated": "lax",
+      "paths": [
+        "/zz_generated_",
+        "docs",
+        "tests",
+        "scripts",
+        "charts",
+        "package",
+        "pkg/powershell/powershell.go",
+        "suc/pkg/host/embed.go",
+        "third_party$",
+        "builtin$",
+        "examples$"
+      ]
+    }
+  },
   "linters": {
-    "disable-all": true,
+    "default": "none",
     "enable": [
       "govet",
-      "revive",
-      "misspell",
       "ineffassign",
-      "gofmt"
-    ]
+      "misspell",
+      "revive"
+    ],
+    "exclusions": {
+      "generated": "lax",
+      "paths": [
+        "/zz_generated_",
+        "docs",
+        "tests",
+        "scripts",
+        "charts",
+        "package",
+        "pkg/powershell/powershell.go",
+        "suc/pkg/host/embed.go",
+        "third_party$",
+        "builtin$",
+        "examples$"
+      ],
+      "presets": [
+        "comments",
+        "common-false-positives",
+        "legacy",
+        "std-error-handling"
+      ]
+    }
   },
-  "issues": {
-    "exclude-files": [
-      "/zz_generated_",
-      "docs",
-      "tests",
-      "scripts",
-      "charts",
-      "package",
-      "pkg/powershell/powershell.go",
-      "suc/pkg/host/embed.go"
-    ]
-  }
+  "version": "2"
 }
