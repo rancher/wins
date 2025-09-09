@@ -8,7 +8,7 @@ replace (
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.58.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.33.0
-	golang.org/x/oauth2 => golang.org/x/oauth2 v0.27.0
+	golang.org/x/oauth2 => golang.org/x/oauth2 v0.31.0
 	golang.org/x/sync => golang.org/x/sync v0.12.0
 	golang.org/x/sys => golang.org/x/sys v0.31.0
 )
