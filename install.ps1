@@ -443,14 +443,18 @@ function Invoke-WinsInstaller {
         # Import-Certificate does not automatically handle chains included in a single file,
         # so we need to manually extract and import each certificate into the Root store.
         Write-LogInfo "Detected certificate chain"
+
+        $collection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
+        ForEach($cert in $allCerts) {
+            Write-LogInfo "Adding a certificate entry from the provided chain to the collection..."
+            $x5092 = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Text.Encoding]::UTF8.GetBytes($cert))
+            $collection.Add($x5092)
+        }
+
         $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new([System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
         $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed)
-        ForEach($cert in $allCerts) {
-            Write-LogInfo "Importing a certificate entry from the provided chain..."
-            $encodedCert = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($cert))
-            $x509 = [X509Certificate]::new([convert]::FromBase64String($encodedCert))
-            $certStore.Add($x509)
-        }
+        Write-LogInfo "Adding collection to certificate store"
+        $certStore.AddRange($collection)
         $certStore.Close()
     }
 
