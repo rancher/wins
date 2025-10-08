@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func BoolAddr(b bool) *bool {
