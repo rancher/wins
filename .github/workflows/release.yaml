@@ -7,7 +7,7 @@ on:
 
 jobs:
   create-push-image-windows-2022:
-    runs-on: windows-2022
+    runs-on: windows-2025
     env:
       REPO: rancher
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -110,7 +110,7 @@ jobs:
 
   create-github-release:
     needs: [ create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
-    runs-on: windows-2022
+    runs-on: windows-2025
     permissions:
       contents: write # required for writing release artifacts
     env:
