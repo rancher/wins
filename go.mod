@@ -14,7 +14,7 @@ replace (
 )
 
 replace (
-	github.com/docker/cli => github.com/docker/cli v28.4.0+incompatible
+	github.com/docker/cli => github.com/docker/cli v28.5.1+incompatible
 	github.com/docker/docker => github.com/docker/docker v28.4.0+incompatible
 	inet.af/tcpproxy => github.com/inetaf/tcpproxy v0.0.0-20240214030015-3ce58045626c
 	k8s.io/api => k8s.io/api v0.33.5
