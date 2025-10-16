@@ -14,8 +14,8 @@ replace (
 )
 
 replace (
-	github.com/docker/cli => github.com/docker/cli v28.4.0+incompatible
-	github.com/docker/docker => github.com/docker/docker v28.4.0+incompatible
+	github.com/docker/cli => github.com/docker/cli v28.5.1+incompatible
+	github.com/docker/docker => github.com/docker/docker v28.5.0+incompatible
 	inet.af/tcpproxy => github.com/inetaf/tcpproxy v0.0.0-20240214030015-3ce58045626c
 	k8s.io/api => k8s.io/api v0.34.1
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.34.1
@@ -68,7 +68,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/sync v0.17.0
 	golang.org/x/sys v0.36.0
-	google.golang.org/grpc v1.75.0
+	google.golang.org/grpc v1.76.0
 	inet.af/tcpproxy v0.0.0-20240214030015-3ce58045626c // replaced to github.com/inetaf/tcpproxy
 	k8s.io/api v0.34.1
 )
