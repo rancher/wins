@@ -10,7 +10,7 @@ replace (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.38.0
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.30.0
 	golang.org/x/sync => golang.org/x/sync v0.17.0
-	golang.org/x/sys => golang.org/x/sys v0.36.0
+	golang.org/x/sys => golang.org/x/sys v0.37.0
 )
 
 replace (
@@ -67,7 +67,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/sync v0.17.0
-	golang.org/x/sys v0.36.0
+	golang.org/x/sys v0.37.0
 	google.golang.org/grpc v1.76.0
 	inet.af/tcpproxy v0.0.0-20240214030015-3ce58045626c // replaced to github.com/inetaf/tcpproxy
 	k8s.io/api v0.34.1
