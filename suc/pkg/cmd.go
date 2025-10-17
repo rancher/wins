@@ -10,7 +10,7 @@ import (
 	"github.com/rancher/wins/suc/pkg/service/config"
 	"github.com/rancher/wins/suc/pkg/state"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func Run(_ *cli.Context) error {

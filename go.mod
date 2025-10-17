@@ -65,7 +65,7 @@ require (
 	github.com/rancher/remotedialer v0.5.0
 	github.com/rancher/system-agent v0.3.14-rc.4
 	github.com/sirupsen/logrus v1.9.3
-	github.com/urfave/cli/v2 v2.27.5
+	github.com/urfave/cli/v3 v3.4.1
 	golang.org/x/sync v0.17.0
 	golang.org/x/sys v0.36.0
 	google.golang.org/grpc v1.76.0
@@ -88,7 +88,6 @@ require (
 	github.com/containerd/typeurl/v2 v2.2.2 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v27.1.1+incompatible // indirect
@@ -137,13 +136,11 @@ require (
 	github.com/rancher/permissions v0.0.0-20240924180251-69b0dcb34065 // indirect
 	github.com/rancher/wharfie v0.7.1-0.20251014190711-8cfe84a9efaa // indirect
 	github.com/rancher/wrangler/v3 v3.3.1 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/cobra v1.9.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
 	github.com/vbatts/tar-split v0.11.3 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	go.etcd.io/etcd/api/v3 v3.6.4 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.6.4 // indirect
 	go.etcd.io/etcd/client/v3 v3.6.4 // indirect

@@ -7,7 +7,7 @@ import (
 	"github.com/rancher/wins/cmd/cmds"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/npipes"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
