@@ -18,7 +18,7 @@ import (
 	"github.com/rancher/wins/pkg/paths"
 	"github.com/rancher/wins/pkg/types"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var _runFlags = internal.NewGRPCClientConn(
