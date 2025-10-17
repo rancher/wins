@@ -65,7 +65,7 @@ require (
 	github.com/rancher/remotedialer v0.5.0
 	github.com/rancher/system-agent v0.3.14-rc.4
 	github.com/sirupsen/logrus v1.9.3
-	github.com/urfave/cli/v2 v2.27.5
+	github.com/urfave/cli/v2 v2.27.7
 	golang.org/x/sync v0.17.0
 	golang.org/x/sys v0.36.0
 	google.golang.org/grpc v1.76.0
@@ -88,7 +88,7 @@ require (
 	github.com/containerd/typeurl/v2 v2.2.2 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v27.1.1+incompatible // indirect
