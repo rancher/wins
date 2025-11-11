@@ -617,14 +617,20 @@ csi-proxy:
         if (-Not $env:CATTLE_ID) {
             Write-LogInfo "Generating Cattle ID"
 
-            if (Test-Path -Path "$($env:CATTLE_AGENT_CONFIG_DIR)/cattle-id") {
-                $env:CATTLE_ID = Get-Content -Path "$($env:CATTLE_AGENT_CONFIG_DIR)/cattle-id"
-                Write-LogInfo "Cattle ID was already detected as $($env:CATTLE_ID). Not generating a new one."
+            if (Test-Path -Path "$($env:CATTLE_AGENT_CONFIG_DIR)/cattle-id")
+            {
+                $env:CATTLE_ID = Get-Content -Path "$( $env:CATTLE_AGENT_CONFIG_DIR )/cattle-id"
+                Write-LogInfo "Cattle ID was already detected as $( $env:CATTLE_ID ). Not generating a new one."
                 return
             }
-            $stream = [IO.MemoryStream]::new([Text.Encoding]::UTF8.GetBytes($env:COMPUTERNAME))
+
+            # equivilant to "dd if=/dev/urandom count=1 bs=512 2>/dev/null | sha256sum | awk '{print $1}'"
+            $bytes = New-Object byte[] 512
+            [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+            $stream = [IO.MemoryStream]::new($bytes)
             $env:CATTLE_ID = (Get-FileHash -InputStream $stream -Algorithm SHA256).Hash.ToLower().Substring(0, 62)
             Set-Content -Path "$($env:CATTLE_AGENT_CONFIG_DIR)/cattle-id" -Value $env:CATTLE_ID
+
             return
         }
         Write-LogInfo "Not generating Cattle ID"
