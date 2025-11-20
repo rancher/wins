@@ -52,6 +52,7 @@ replace (
 require (
 	github.com/Microsoft/go-winio v0.6.2
 	github.com/Microsoft/hcsshim v0.13.0
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/buger/jsonparser v1.1.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
@@ -71,6 +72,7 @@ require (
 	google.golang.org/grpc v1.76.0
 	inet.af/tcpproxy v0.0.0-20240214030015-3ce58045626c // replaced to github.com/inetaf/tcpproxy
 	k8s.io/api v0.34.1
+	sigs.k8s.io/cli-utils v0.37.2
 )
 
 require (
