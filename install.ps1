@@ -624,7 +624,7 @@ csi-proxy:
                 return
             }
 
-            # equivilant to "dd if=/dev/urandom count=1 bs=512 2>/dev/null | sha256sum | awk '{print $1}'"
+            # equivalent to "dd if=/dev/urandom count=1 bs=512 2>/dev/null | sha256sum | awk '{print $1}'"
             $bytes = New-Object byte[] 512
             [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
             $stream = [IO.MemoryStream]::new($bytes)
