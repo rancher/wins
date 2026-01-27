@@ -32,3 +32,48 @@ func GetCommit() (string, error) {
 	}
 	return strings.TrimSpace(result), nil
 }
+
+func ParseModFile(file string) map[string]string {
+	split := strings.Split(file, "\n")
+	modFileMap := make(map[string]string)
+	invalidKeyWords := []string{
+		"go", "replace", "module", ")", "(", "//", "require",
+	}
+
+	for _, entry := range split {
+		entry = strings.TrimSpace(strings.Trim(entry, "\t\n"))
+		shouldSkip := false
+		for _, e := range invalidKeyWords {
+			if strings.HasPrefix(entry, e) {
+				shouldSkip = true
+				break
+			}
+		}
+
+		if shouldSkip {
+			continue
+		}
+
+		if strings.HasSuffix(entry, "indirect") {
+			continue
+		}
+
+		var name, ver string
+		split := strings.Split(entry, " ")
+		if len(split) == 4 {
+			// replace statement
+			name = split[0]
+			ver = split[3]
+		} else if len(split) == 2 {
+			// standard dep
+			name = split[0]
+			ver = split[1]
+		} else {
+			continue
+		}
+
+		modFileMap[name] = ver
+	}
+
+	return modFileMap
+}

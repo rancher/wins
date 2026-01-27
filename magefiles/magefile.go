@@ -6,8 +6,10 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
+	"github.com/blang/semver"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +17,7 @@ import (
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 	"github.com/rancher/wins/magetools"
+	"sigs.k8s.io/cli-utils/pkg/multierror"
 )
 
 var Default = BuildAll
@@ -233,6 +236,63 @@ func TestAll() error {
 
 func CI() {
 	mg.Deps(TestAll)
+}
+
+func EnsureSystemAgentDependencies() error {
+	mod, err := os.ReadFile("./go.mod")
+	if err != nil {
+		return fmt.Errorf("failed to read local go.mod file: %v", err)
+	}
+
+	winsModFileMap := magetools.ParseModFile(string(mod))
+	systemAgentVersion := ""
+	for name, ver := range winsModFileMap {
+		if name == "github.com/rancher/system-agent" {
+			systemAgentVersion = ver
+			break
+		}
+	}
+
+	url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/system-agent/refs/tags/%s/go.mod", systemAgentVersion)
+	resp, err := http.DefaultClient.Get(url)
+	if err != nil {
+		return fmt.Errorf("failed to download system-agent go.mod file: %v", err)
+	}
+
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read system-agent go.mod file: %v", err)
+	}
+
+	systemAgentModFileMap := magetools.ParseModFile(string(b))
+	errs := multierror.New()
+	for k, v := range winsModFileMap {
+		if sv, ok := systemAgentModFileMap[k]; ok {
+			// Allow wins to use more recent versions of dependencies, even if system-agent hasn't
+			// upgraded to them yet. This allows us to potentially address windows specific issues in our
+			// dependencies without having to wait on new system-agent versions.
+			systemAgentSemver := semver.MustParse(strings.TrimPrefix(sv, "v"))
+			winsAgentSemver := semver.MustParse(strings.TrimPrefix(v, "v"))
+			if sv != v {
+				if winsAgentSemver.LT(systemAgentSemver) {
+					errs.Causes = append(errs.Causes, fmt.Errorf("[FAIL] system-agent defines dependency '%s' at version '%s', given mod files uses version '%s'", k, sv, v))
+					continue
+				}
+				fmt.Println(fmt.Errorf("[WARN] system-agent defines dependency '%s' at version '%s', given mod file uses newer version '%s'", k, sv, v))
+			} else {
+				fmt.Println(fmt.Errorf("[OK] system-agent defines dependency '%s' at version '%s', given mod file matches version '%s'", k, sv, v))
+			}
+		}
+	}
+
+	if len(errs.Causes) == 0 {
+		return nil
+	}
+
+	errs.Causes = append(errs.Causes, fmt.Errorf("One or more dependencies used in system-agent version %s differ from the given go.mod file. Ensure that dependency versions used in rancher-wins match what is used in the system-agent to prevent CVE's and other unexpected behavior.", systemAgentVersion))
+
+	return errs
 }
 
 func flags(version string, commit string) string {
