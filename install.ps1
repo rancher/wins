@@ -21,12 +21,15 @@
       - CATTLE_TAINTS
       Advanced Environment Variables
       - CATTLE_AGENT_BINARY_URL (default: latest GitHub release)
+      - CATTLE_AGENT_UNINSTALL_URL (default: latest GitHub release)
       - CATTLE_PRESERVE_WORKDIR (default: false)
       - CATTLE_REMOTE_ENABLED (default: true)
       - CATTLE_LOCAL_ENABLED (default: false)
       - CATTLE_ID (default: autogenerate)
       - CATTLE_AGENT_BINARY_LOCAL (default: false)
       - CATTLE_AGENT_BINARY_LOCAL_LOCATION (default: )
+      - CATTLE_AGENT_UNINSTALL_LOCAL (default: false)
+      - CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION (default: )
       - CSI_PROXY_URL (default: )
       - CSI_PROXY_VERSION (default: )
       - CSI_PROXY_KUBELET_PATH (default: )
@@ -289,6 +292,45 @@ function Invoke-WinsInstaller {
             }
         }
 
+        if ($env:CATTLE_AGENT_UNINSTALL_LOCAL -eq "true") {
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION) {
+                Write-LogFatal "No local uninstall location was specified"
+            }
+            $env:UNINSTALL_SOURCE = "local"
+        }
+        else {
+            $env:UNINSTALL_SOURCE = "remote"
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_URL -and $env:CATTLE_AGENT_BINARY_BASE_URL) {
+                $env:CATTLE_AGENT_UNINSTALL_URL = "$env:CATTLE_AGENT_BINARY_BASE_URL/wins-agent-uninstall.ps1"
+            }
+
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_URL) {
+                if ($env:VERSION) {
+                    Write-LogInfo "Version $env:VERSION used for downloading the wins binary, will reuse for uninstall script"
+                }
+                else {
+                    $rateLimit = $(curl.exe --connect-timeout 60 --max-time 300 $env:CURL_CAFLAG -sfL "https://api.github.com/rate_limit") | ConvertFrom-Json
+
+                    if ($rateLimit.rate.remaining -eq 0) {
+                        Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
+                        $env:VERSION = $FALLBACK
+                    }
+                    else {
+                        try {
+                            $env:VERSION = $(curl.exe --connect-timeout 60 $env:CURL_CAFLAG -sfL "https://api.github.com/repos/rancher/wins/releases/latest" | ConvertFrom-Json).tag_name
+                        }
+                        catch {
+                            Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
+                            $env:VERSION = $FALLBACK
+                        }
+                    }
+                }
+
+                $env:CATTLE_AGENT_UNINSTALL_URL = "https://raw.githubusercontent.com/rancher/wins/refs/tags/$env:VERSION/uninstall.ps1"
+                $env:UNINSTALL_SOURCE = "upstream"
+            }
+        }
+
         if ($env:CATTLE_REMOTE_ENABLED -eq "true") {
             if (-Not $env:CATTLE_TOKEN) {
                 Write-LogFatal "Environment variable CATTLE_TOKEN was not set. Will not retrieve a remote connection configuration from Rancher2"
@@ -381,6 +423,48 @@ function Invoke-WinsInstaller {
         }
         if (-Not (Test-Path "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe")) {
             Write-LogFatal "Wins.exe doesn't appear to have been installed."
+        }
+    }
+
+    function Invoke-WinsUninstallScriptDownload() {
+        if (-Not (Test-Path "$env:CATTLE_AGENT_BIN_PREFIX/bin")) {
+            New-Item -Path "$env:CATTLE_AGENT_BIN_PREFIX/bin" -ItemType Directory -Force | Out-Null
+        }
+
+        if ($env:CATTLE_AGENT_UNINSTALL_LOCAL -eq "true") {
+            Write-LogInfo "Using local uninstall script from $($env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION)"
+            Copy-Item -Path $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION -Destination "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins-agent-uninstall.ps1"
+        }
+        else {
+            Write-LogInfo "Downloading uninstall script from $($env:CATTLE_AGENT_UNINSTALL_URL)"
+            if ($env:UNINSTALL_SOURCE -ne "upstream") {
+                $env:CURL_BIN_CAFLAG = $env:CURL_CAFLAG
+            }
+            else {
+                $env:CURL_BIN_CAFLAG = ""
+            }
+
+            $retries = 0
+            while ($retries -lt 6) {
+                $responseCode = $(curl.exe --connect-timeout 60 --max-time 300 --write-out "%{http_code}\n" $env:CURL_BIN_CAFLAG -sfL "$($env:CATTLE_AGENT_UNINSTALL_URL)" -o "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins-agent-uninstall.ps1")
+
+                switch ( $responseCode ) {
+                    { "ok200", 200 } {
+                        Write-LogInfo "Successfully downloaded the uninstall script."
+                        $retries = 99
+                        break
+                    }
+                    default {
+                        Write-LogError "$responseCode received while downloading the uninstall script. Sleeping for 5 seconds and trying again."
+                        Start-Sleep -Seconds 5
+                        $retries++
+                        continue
+                    }
+                }
+            }
+        }
+        if (-Not (Test-Path "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins-agent-uninstall.ps1")) {
+            Write-LogFatal "wins-agent-uninstall.ps1 doesn't appear to have been installed."
         }
     }
 
@@ -786,6 +870,7 @@ csi-proxy:
         Test-RancherConnection
         Stop-Agent -ServiceName $serviceName
         Invoke-WinsAgentDownload
+        Invoke-WinsUninstallScriptDownload
         Copy-WinsForCharts
         Set-WinsConfig
 

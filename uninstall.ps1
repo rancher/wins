@@ -87,11 +87,11 @@ function Invoke-WinsUninstaller {
     # Uninstalling while RKE2 is active risks leaving the node in a broken state.
     function Assert-Rke2NotRunning {
         Write-LogInfo "Checking if RKE2 is running"
-        $rke2Service = Get-Service -Name "rke2-agent" -ErrorAction SilentlyContinue
+        $rke2Service = Get-Service -Name "rke2" -ErrorAction SilentlyContinue
         if ($rke2Service -and $rke2Service.Status -eq 'Running') {
             Write-LogFatal "RKE2 service is currently running. Stop RKE2 before uninstalling Wins to avoid leaving the node in an inconsistent state."
         }
-        $rke2Process = Get-Process -Name "rke2-agent" -ErrorAction SilentlyContinue
+        $rke2Process = Get-Process -Name "rke2" -ErrorAction SilentlyContinue
         if ($rke2Process) {
             Write-LogFatal "RKE2 process is currently running. Stop RKE2 before uninstalling Wins to avoid leaving the node in an inconsistent state."
         }
@@ -130,21 +130,20 @@ function Invoke-WinsUninstaller {
         }
     }
 
-    # Explicitly stops the csi-proxy process by name before attempting service removal.
-    # The service deletion can fail on first run if the process is still running after
-    # Stop-Service returns, since the process may take a moment to fully exit.
-    function Stop-CsiProxyProcess() {
-        Write-LogInfo "Checking if csi-proxy process is running"
-        $csiProxyProcess = Get-Process -Name "csi-proxy" -ErrorAction SilentlyContinue
-        if ($csiProxyProcess) {
-            Write-LogInfo "csi-proxy process found (PID $($csiProxyProcess.Id)), stopping now"
-            Stop-Process -Name "csi-proxy" -Force
-            # Wait for the process to fully exit before proceeding with service deletion
-            $csiProxyProcess.WaitForExit(30000) | Out-Null
-            Write-LogInfo "csi-proxy process stopped"
-        }
-        else {
-            Write-LogInfo "csi-proxy process is not running, continuing"
+    function Stop-Processes () {
+        $ProcessNames = @('csi-proxy', "wins")
+        foreach ($ProcessName in $ProcessNames) {
+            Write-LogInfo "Checking if $ProcessName process exists"
+            if ((Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)) {
+                Write-LogInfo "$ProcessName process found, stopping now"
+                Stop-Process -Name $ProcessName
+                while (-Not(Get-Process -Name $ProcessName).HasExited) {
+                    Write-LogInfo "Waiting for $ProcessName process to stop"
+                    Start-Sleep -s 5
+                }
+            } else {
+                Write-LogInfo "$ProcessName process not found"
+            }
         }
     }
 
@@ -163,13 +162,13 @@ function Invoke-WinsUninstaller {
 
         Assert-Rke2NotRunning
 
-        Stop-Agent -ServiceName $serviceName
         Stop-Agent -ServiceName $csiProxyServiceName
-        Stop-CsiProxyProcess
+        Stop-Agent -ServiceName $serviceName
+        Stop-Processes
         Remove-WinsForCharts
         Remove-WinsConfig
-        sc.exe delete $serviceName
         sc.exe delete $csiProxyServiceName
+        sc.exe delete $serviceName
     }
 
     Invoke-WinsAgentUninstall
