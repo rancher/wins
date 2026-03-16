@@ -229,8 +229,8 @@ github.com/rancher/permissions v0.0.0-20240924180251-69b0dcb34065 h1:nJPrW/DdnSY
 github.com/rancher/permissions v0.0.0-20240924180251-69b0dcb34065/go.mod h1:PDAb+l6/i6cbSokQ2CuNCgGOT/BHQY2WgZATwPXEyU4=
 github.com/rancher/remotedialer v0.5.0 h1:4H1o9ZBdA1nboaMPBvy03EQlFWXXzwcdMAXLmafop54=
 github.com/rancher/remotedialer v0.5.0/go.mod h1:hpx8oaoxXyy8yHMWH5Iv8GcdVlYEYYzgVNjeXZrhv8E=
-github.com/rancher/system-agent v0.3.15-rc.3 h1:NhGm6ZG7vdgYP8XCjb5bop8SIDJsuAfW2SO8A69IBj0=
-github.com/rancher/system-agent v0.3.15-rc.3/go.mod h1:X61xvJI/wvto0IpoxnTtTVBs7U4IIO3fJ7iLsc3/HTs=
+github.com/rancher/system-agent v0.3.15 h1:vXb4a9KycJ4+CzqpGPYQZJsBx7SU2psZtsVZrNUeh6Y=
+github.com/rancher/system-agent v0.3.15/go.mod h1:X61xvJI/wvto0IpoxnTtTVBs7U4IIO3fJ7iLsc3/HTs=
 github.com/rancher/wharfie v0.7.1-0.20251014190711-8cfe84a9efaa h1:X6eESTv2OD3IG6tLTXf77wk/bvjlRUtTBT9SL4FnAoY=
 github.com/rancher/wharfie v0.7.1-0.20251014190711-8cfe84a9efaa/go.mod h1:E+Lm0Mv/CkOsaP3NJf3nqXUVuCCMGwow0D2XFZYBQ/8=
 github.com/rancher/wrangler/v3 v3.4.0 h1:pEZ9wIM3k5EZkVXU2TbD6mWVfw5mtdv1v0PRJ7fPQxw=
