@@ -75,7 +75,7 @@ param (
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$FALLBACK = "v0.4.15"
+$FALLBACK = "v0.5.4"
 
 function Invoke-WinsInstaller {
     [CmdletBinding()]
@@ -432,16 +432,14 @@ function Invoke-WinsInstaller {
         }
 
         if ($env:CATTLE_AGENT_UNINSTALL_LOCAL -eq "true") {
-            Write-LogInfo "Using local uninstall script from $($env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION)"
+            Write-LogInfo "Using local uninstall script from $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION"
             Copy-Item -Path $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION -Destination "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins-agent-uninstall.ps1"
         }
         else {
             Write-LogInfo "Downloading uninstall script from $($env:CATTLE_AGENT_UNINSTALL_URL)"
+            $env:CURL_BIN_CAFLAG = ""
             if ($env:UNINSTALL_SOURCE -ne "upstream") {
                 $env:CURL_BIN_CAFLAG = $env:CURL_CAFLAG
-            }
-            else {
-                $env:CURL_BIN_CAFLAG = ""
             }
 
             $retries = 0
