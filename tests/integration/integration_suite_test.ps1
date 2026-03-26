@@ -18,14 +18,20 @@ if ($SERVERCORE_VERSION -eq "2025") {
     exit 0
 }
 
-
 Write-Host "Server core version: $SERVERCORE_VERSION"
 
 $NGINX_URL = 'https://nginx.org/download/nginx-1.21.3.zip';
-Write-Host ('Downloading Nginx from {0}...'  -f $NGINX_URL);
+$NGINX_SUM = "5828f2d4626fa1ae2ffb424851fb607013d6ae99d91034d29557fc0d03538d82"
+$response = Invoke-WebRequest -UseBasicParsing -Uri $NGINX_URL
+$bytes = $response.Content
 
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
-Invoke-WebRequest -UseBasicParsing -OutFile $PSScriptRoot\bin\nginx.zip -Uri $NGINX_URL;
+$sha256 = [System.Security.Cryptography.SHA256]::Create()
+$computedHash = ([BitConverter]::ToString($sha256.ComputeHash($bytes)) -replace '-', '').ToLower()
+if ($computedHash -ne $NGINX_SUM.ToLower()) {
+    throw "[WARNING] Hash mismatch for nginx.zip! Expected $NGINX_SUM but got $computedHash"
+}
+# Only written to disk if hash passed
+[System.IO.File]::WriteAllBytes("$PSScriptRoot\bin\nginx.zip", $bytes)
 
 Get-ChildItem -Path $PSScriptRoot\docker -Name Dockerfile.* | ForEach-Object {
     $dockerfile = $_

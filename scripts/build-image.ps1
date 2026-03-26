@@ -27,10 +27,20 @@ param (
     $Tag
 )
 
-if (($NanoServerVersion -eq "") -or
-        (($NanoServerVersion -ne "ltsc2022") -and ($NanoServerVersion -ne "ltsc2019"))) {
-    Write-Host "-NanoServerVersion must be provided. Accepted values are 'ltsc2019' and 'ltsc2022'"
+# Get the pinned sha digests from build.json. These are updated periodically by renovate, and should be
+# updated before any release.
+$buildConfig = Get-Content -Path "$PSScriptRoot\..\build.json" -Raw | ConvertFrom-Json
+
+$versionKey = $NanoServerVersion -replace 'ltsc', ''
+$entry = $buildConfig.$versionKey
+
+if ($null -eq $entry) {
+    Write-Host "-NanoServerVersion must be provided. Accepted values are: $(($buildConfig.PSObject.Properties.Name | ForEach-Object { "ltsc$_" }) -join ', ')"
+    exit 1
 }
+
+$NanoServerVersionTag = $entry.sha
+Write-Host "Using pinned NanoServer version for $NanoServerVersion`: $NanoServerVersionTag"
 
 if ($Repo -eq "") {
     Write-Host "Repo paramter is empty, defaulting to 'rancher'"
@@ -43,4 +53,4 @@ if ($Tag -eq "") {
 }
 
 # Don't run this command from the scripts directory, always use the parent directory (i.e ./scripts/build-image)
-docker build -f Dockerfile --build-arg NANOSERVER_VERSION=$NanoServerVersion --build-arg ARCH=amd64 --build-arg MAINTAINERS="harrison.affel@suse.com" --build-arg REPO=https://github.com/rancher/wins -t $Repo/wins:$Tag-windows-$NanoServerVersion .
+docker build -f Dockerfile --build-arg NANOSERVER_VERSION=$NanoServerVersionTag --build-arg ARCH=amd64 --build-arg MAINTAINERS="harrison.affel@suse.com" --build-arg REPO=https://github.com/rancher/wins -t $Repo/wins:$Tag-windows-$NanoServerVersion .
