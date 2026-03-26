@@ -137,7 +137,7 @@ function Invoke-WinsUninstaller {
             if (Get-Process -Name $ProcessName -ErrorAction SilentlyContinue) {
                 Write-LogInfo "$ProcessName process found, stopping now"
                 Stop-Process -Name $ProcessName
-                while (-Not(Get-Process -Name $ProcessName).HasExited) {
+                while (-Not (Get-Process -Name $ProcessName).HasExited) {
                     Write-LogInfo "Waiting for $ProcessName process to stop"
                     Start-Sleep -s 5
                 }
