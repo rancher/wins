@@ -102,10 +102,10 @@ function Invoke-WinsUninstaller {
         Remove-Item -Path $env:CATTLE_AGENT_CONFIG_DIR -Recurse -Force
         Remove-Item -Path $env:CATTLE_AGENT_VAR_DIR -Recurse -Force
         if (Test-Path "C:/etc/windows-exporter") {
-            Remove-Item -Path "C:/etc/wmi-exporter" -Recurse -Force
+            Remove-Item -Path "C:/etc/windows-exporter" -Recurse -Force
         }
         if (Test-Path "C:/etc/wmi-exporter") {
-            Remove-Item -Path "C:/etc/windows-exporter" -Recurse -Force
+            Remove-Item -Path "C:/etc/wmi-exporter" -Recurse -Force
         }
     }
 
@@ -147,6 +147,20 @@ function Invoke-WinsUninstaller {
         }
     }
 
+    function Remove-Service () {
+        param (
+            [Parameter()]
+            [string]
+            $ServiceName
+        )
+        
+        if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
+            Write-LogInfo "$ServiceName service found, deleting now"
+            sc.exe delete $ServiceName
+            Write-LogInfo "$ServiceName service deleted"
+        }
+    }
+
     function Remove-WinsForCharts() {
         $winsForChartsPath = "c:/windows"
         if (Test-Path "$winsForChartsPath/wins.exe") {
@@ -167,8 +181,8 @@ function Invoke-WinsUninstaller {
         Stop-Processes
         Remove-WinsForCharts
         Remove-WinsConfig
-        sc.exe delete $csiProxyServiceName
-        sc.exe delete $serviceName
+        Remove-Service -ServiceName $csiProxyServiceName
+        Remove-Service -ServiceName $serviceName
     }
 
     Invoke-WinsAgentUninstall
