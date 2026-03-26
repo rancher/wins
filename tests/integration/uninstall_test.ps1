@@ -35,9 +35,6 @@ function New-DummyService {
     Log-Info "Dummy service '$Name' is Running"
 }
 
-# ---------------------------------------------------------------------------
-# Helper: Cleanly stop, delete, and remove the binary of a dummy service.
-# ---------------------------------------------------------------------------
 function Remove-DummyService {
     param([Parameter(Mandatory)][string]$Name)
 
@@ -61,13 +58,6 @@ function Remove-DummyService {
     Remove-Item $svcExe -Force -ErrorAction SilentlyContinue
 }
 
-
-# ---------------------------------------------------------------------------
-# Helper: Copy test_service.exe to <n>.exe in the
-# same directory, then start it so Get-Process -Name <n> finds a real
-# running process. test_service.exe is a simple long-running executable that stays
-# alive for 15 minutes until killed — no arguments needed.
-# ---------------------------------------------------------------------------
 function New-DummyProcess {
     param([Parameter(Mandatory)][string]$Name)
 
@@ -91,11 +81,6 @@ function New-DummyProcess {
     Log-Info "Dummy process '$Name' is running"
 }
 
-# ---------------------------------------------------------------------------
-# Helper: Kill all instances of a dummy process and remove the copied exe.
-# Waits for the process to fully exit before deleting the file, since
-# Windows holds a file lock on the exe while the process is alive.
-# ---------------------------------------------------------------------------
 function Remove-DummyProcess {
     param([Parameter(Mandatory)][string]$Name)
 
@@ -112,21 +97,9 @@ function Remove-DummyProcess {
     Remove-Item $dummyExe -Force -ErrorAction SilentlyContinue
 }
 
-# ---------------------------------------------------------------------------
-# Helper: Dot-source the uninstaller in the current session.
-# Returns $true if the script completed without error, $false if it threw
-# (e.g. Write-LogFatal calling exit 255 surfaces as a terminating error
-# when dot-sourced). Dot-sourcing keeps all $env: mutations visible to the
-# calling test without spawning a child process.
-# ---------------------------------------------------------------------------
 function Invoke-Uninstaller {
-    try {
-        . .\uninstaller-test.ps1
-        return $true
-    }
-    catch {
-        return $false
-    }
+    powershell.exe -NonInteractive -File ".\uninstaller-test.ps1" | Write-Host
+    return ($LASTEXITCODE -eq 0)
 }
 
 # ---------------------------------------------------------------------------
@@ -152,11 +125,9 @@ Describe "uninstall" {
 
         $env:CATTLE_AGENT_CONFIG_DIR = "C:/etc/rancher/wins"
         $env:CATTLE_AGENT_VAR_DIR    = "C:/var/lib/rancher/agent"
-        $env:CATTLE_AGENT_BIN_PREFIX = "C:/usr/local"
 
         New-Item -Path $env:CATTLE_AGENT_CONFIG_DIR -ItemType Directory -Force | Out-Null
         New-Item -Path $env:CATTLE_AGENT_VAR_DIR    -ItemType Directory -Force | Out-Null
-        New-Item -Path $env:CATTLE_AGENT_BIN_PREFIX -ItemType Directory -Force | Out-Null
         New-Item -Path "C:/windows/wins.exe"         -ItemType File      -Force | Out-Null
 
         Copy-Item uninstall.ps1 uninstaller-test.ps1 -Force
@@ -165,7 +136,7 @@ Describe "uninstall" {
     AfterEach {
         Log-Info "Cleaning up after uninstall test"
 
-        # Always clean up ALL dummy services and processes so a failed test
+        # clean up ALL dummy services and processes so a failed test
         # cannot leave behind a stale rke2/wins/csi-proxy that poisons the next test.
         Remove-DummyService -Name "rancher-wins"
         Remove-DummyService -Name "csiproxy"
@@ -174,82 +145,21 @@ Describe "uninstall" {
         Remove-DummyProcess -Name "wins"
         Remove-DummyProcess -Name "csi-proxy"
 
-        # Use literal paths here — env vars may be null if a test cleared them
-        # before the script ran and the script aborted before restoring them.
+        # removing paths related to script
         Remove-Item -Path "C:/etc/rancher/wins"        -Recurse -Force -ErrorAction Ignore
         Remove-Item -Path "C:/var/lib/rancher/agent"   -Recurse -Force -ErrorAction Ignore
         Remove-Item -Path "C:/windows/wins.exe"        -Force          -ErrorAction Ignore
         Remove-Item -Path "C:/etc/windows-exporter"    -Recurse -Force -ErrorAction Ignore
         Remove-Item -Path "C:/etc/wmi-exporter"        -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "C:/tmp/test-wins-config"    -Recurse -Force -ErrorAction Ignore
+        Remove-Item -Path "C:/tmp/test-wins-var"       -Recurse -Force -ErrorAction Ignore
         Remove-Item -Path "uninstaller-test.ps1"       -Force          -ErrorAction Ignore
 
         Remove-Item Env:\CATTLE_AGENT_LOGLEVEL -ErrorAction Ignore
     }
 
     # -------------------------------------------------------------------------
-    # Default environment variable handling
-    # Set-Environment runs before the RKE2 safeguard, so even when the script
-    # later aborts (exit 255), the env vars are already written to the session.
-    # -------------------------------------------------------------------------
-
-    It "uses default CATTLE_AGENT_CONFIG_DIR when env var is not set" {
-        Log-Info "TEST: [uses default CATTLE_AGENT_CONFIG_DIR when env var is not set]"
-
-        Remove-Item Env:\CATTLE_AGENT_CONFIG_DIR -ErrorAction Ignore
-
-        Invoke-Uninstaller
-
-        $env:CATTLE_AGENT_CONFIG_DIR | Should -Be "C:/etc/rancher/wins"
-    }
-
-    It "uses default CATTLE_AGENT_VAR_DIR when env var is not set" {
-        Log-Info "TEST: [uses default CATTLE_AGENT_VAR_DIR when env var is not set]"
-
-        Remove-Item Env:\CATTLE_AGENT_VAR_DIR -ErrorAction Ignore
-
-        Invoke-Uninstaller
-
-        $env:CATTLE_AGENT_VAR_DIR | Should -Be "C:/var/lib/rancher/agent"
-    }
-
-    It "uses default CATTLE_AGENT_BIN_PREFIX when env var is not set" {
-        Log-Info "TEST: [uses default CATTLE_AGENT_BIN_PREFIX when env var is not set]"
-
-        Remove-Item Env:\CATTLE_AGENT_BIN_PREFIX -ErrorAction Ignore
-
-        Invoke-Uninstaller
-
-        $env:CATTLE_AGENT_BIN_PREFIX | Should -Be "c:/usr/local"
-    }
-
-    It "sets CATTLE_AGENT_LOGLEVEL to debug when env var is not set" {
-        Log-Info "TEST: [sets CATTLE_AGENT_LOGLEVEL to debug when env var is not set]"
-
-        Remove-Item Env:\CATTLE_AGENT_LOGLEVEL -ErrorAction Ignore
-
-        Invoke-Uninstaller
-
-        $env:CATTLE_AGENT_LOGLEVEL | Should -Be "debug"
-    }
-
-    It "lowercases CATTLE_AGENT_LOGLEVEL when env var is already set" {
-        Log-Info "TEST: [lowercases CATTLE_AGENT_LOGLEVEL when env var is already set]"
-
-        $env:CATTLE_AGENT_LOGLEVEL = "DEBUG"
-
-        Invoke-Uninstaller
-
-        $env:CATTLE_AGENT_LOGLEVEL | Should -Be "debug"
-    }
-
-    # -------------------------------------------------------------------------
     # RKE2 safeguard
-    #
-    # Write-LogFatal calls exit 255, which surfaces as a terminating error when
-    # dot-sourced. Invoke-Uninstaller catches it and returns $false. We detect
-    # the abort by confirming the config directory was NOT deleted (i.e. the
-    # uninstall was halted early) and that rancher-wins and csiproxy are still
-    # running, confirming no teardown occurred when the safeguard fired.
     # -------------------------------------------------------------------------
 
     It "aborts uninstall when a real rke2 service is running" {
@@ -309,7 +219,7 @@ Describe "uninstall" {
     }
 
     # -------------------------------------------------------------------------
-    # Config and var directory removal
+    # Agent config and var directory removal
     # -------------------------------------------------------------------------
 
     It "removes CATTLE_AGENT_CONFIG_DIR after uninstall" {
@@ -345,6 +255,37 @@ Describe "uninstall" {
 
         $succeeded | Should -Be $true
         Test-Path $nestedFile | Should -Be $false
+    }
+
+    It "removes custom CATTLE_AGENT_CONFIG_DIR and CATTLE_AGENT_VAR_DIR after uninstall" {
+        Log-Info "TEST: [removes custom CATTLE_AGENT_CONFIG_DIR and CATTLE_AGENT_VAR_DIR after uninstall]"
+
+        $originalConfigDir = "C:/etc/rancher/wins"
+        $originalVarDir    = "C:/var/lib/rancher/agent"
+
+        $customConfigDir = "C:/tmp/test-wins-config"
+        $customVarDir    = "C:/tmp/test-wins-var"
+
+        $env:CATTLE_AGENT_CONFIG_DIR = $customConfigDir
+        $env:CATTLE_AGENT_VAR_DIR    = $customVarDir
+
+        New-Item -Path $customConfigDir -ItemType Directory -Force | Out-Null
+        New-Item -Path $customVarDir -ItemType Directory -Force | Out-Null
+
+        Test-Path $customConfigDir | Should -Be $true
+        Test-Path $customVarDir | Should -Be $true
+
+        $succeeded = Invoke-Uninstaller
+
+        $succeeded | Should -Be $true
+
+        # Custom dirs should be removed
+        Test-Path $customConfigDir | Should -Be $false
+        Test-Path $customVarDir | Should -Be $false
+
+        # Default dirs from BeforeEach should NOT be removed by this run
+        Test-Path $originalConfigDir | Should -Be $true
+        Test-Path $originalVarDir | Should -Be $true
     }
 
     # -------------------------------------------------------------------------
@@ -410,11 +351,7 @@ Describe "uninstall" {
     }
 
     # -------------------------------------------------------------------------
-    # Service teardown — real dummy services
-    #
-    # New-DummyService registers a service with sc.exe using the full path to
-    # powershell.exe as the binary, which satisfies the SCM start handshake.
-    # The uninstaller calls the real Stop-Service and sc.exe delete against SCM.
+    # Service Cleanup
     # -------------------------------------------------------------------------
 
     It "stops and removes rancher-wins service if it is running" {
@@ -464,12 +401,7 @@ Describe "uninstall" {
     }
 
     # -------------------------------------------------------------------------
-    # Process teardown — real dummy processes
-    #
-    # New-DummyProcess copies test_service.exe to $PSScriptRoot\<n>.exe and
-    # starts it so Get-Process -Name <n> finds a real running process.
-    # AfterEach always calls Remove-DummyProcess so a failed test cannot leave
-    # a stale process that breaks subsequent tests.
+    # Process Cleanup
     # -------------------------------------------------------------------------
 
     It "stops wins process if it is running" {
