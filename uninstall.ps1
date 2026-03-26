@@ -102,10 +102,10 @@ function Invoke-WinsUninstaller {
         Remove-Item -Path $env:CATTLE_AGENT_CONFIG_DIR -Recurse -Force
         Remove-Item -Path $env:CATTLE_AGENT_VAR_DIR -Recurse -Force
         if (Test-Path "C:/etc/windows-exporter") {
-            Remove-Item -Path "C:/etc/wmi-exporter" -Recurse -Force
+            Remove-Item -Path "C:/etc/windows-exporter" -Recurse -Force
         }
         if (Test-Path "C:/etc/wmi-exporter") {
-            Remove-Item -Path "C:/etc/windows-exporter" -Recurse -Force
+            Remove-Item -Path "C:/etc/wmi-exporter" -Recurse -Force
         }
     }
 
