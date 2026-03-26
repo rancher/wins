@@ -301,7 +301,6 @@ function Invoke-WinsInstaller {
             if (-Not $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION) {
                 Write-LogFatal "No local uninstall location was specified"
             }
-            Write-LogInfo "Using local uninstall script from $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION"
             $env:UNINSTALL_SOURCE = "local"
         }
         else {
