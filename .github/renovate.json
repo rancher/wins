@@ -8,5 +8,15 @@
   "prHourlyLimit": 2,
   "reviewers": [
     "HarrisonWAffel"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^build\\.json$"],
+      "matchStrings": [
+        "\"repo\":\\s*\"(?<depName>[^\"]+)\",\\s*\"tag\":\\s*\"(?<currentValue>[^\"]+)\",\\s*\"sha\":\\s*\"(?<currentDigest>sha256:[a-f0-9]+)\""
+      ],
+      "datasourceTemplate": "docker"
+    }
   ]
 }

@@ -1,5 +1,5 @@
 ARG NANOSERVER_VERSION
-FROM mcr.microsoft.com/windows/nanoserver:${NANOSERVER_VERSION} as wins
+FROM mcr.microsoft.com/windows/nanoserver@${NANOSERVER_VERSION} as wins
 ARG VERSION
 ARG MAINTAINERS
 ARG REPO
