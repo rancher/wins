@@ -12,7 +12,9 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^build\\.json$"],
+      "managerFilePatterns": [
+        "/^build\\.json$/"
+      ],
       "matchStrings": [
         "\"repo\":\\s*\"(?<depName>[^\"]+)\",\\s*\"tag\":\\s*\"(?<currentValue>[^\"]+)\",\\s*\"sha\":\\s*\"(?<currentDigest>sha256:[a-f0-9]+)\""
       ],
