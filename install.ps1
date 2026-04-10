@@ -20,13 +20,14 @@
       - CATTLE_LABELS
       - CATTLE_TAINTS
       Advanced Environment Variables
-      - CATTLE_AGENT_BINARY_URL (default: latest GitHub release)
+      - CATTLE_AGENT_BINARY_URL (default: pinned GitHub release)
       - CATTLE_PRESERVE_WORKDIR (default: false)
       - CATTLE_REMOTE_ENABLED (default: true)
       - CATTLE_LOCAL_ENABLED (default: false)
       - CATTLE_ID (default: autogenerate)
       - CATTLE_AGENT_BINARY_LOCAL (default: false)
       - CATTLE_AGENT_BINARY_LOCAL_LOCATION (default: )
+      - CATTLE_AGENT_BINARY_CHECKSUM (default: hardcoded fallback checksum)
       - CSI_PROXY_URL (default: )
       - CSI_PROXY_VERSION (default: )
       - CSI_PROXY_KUBELET_PATH (default: )
@@ -73,6 +74,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $FALLBACK = "v0.4.15"
+$FALLBACK_BINARY_SUM = "8bb68f9e3d92ac08be66cb5fbe6d1dce5c4460b26e0b033e58fece21ce9a8680"
 
 function Invoke-WinsInstaller {
     [CmdletBinding()]
@@ -139,6 +141,19 @@ function Invoke-WinsInstaller {
         $writer.Flush()
         $stringAsStream.Position = 0
         return (Get-FileHash -InputStream $stringAsStream -Algorithm SHA256).Hash.ToLower()
+    }
+
+    function Set-FallbackVersion {
+        param (
+            [Parameter(Mandatory=$true)]
+            [string]
+            $Reason
+        )
+        Write-LogInfo $Reason
+        $env:VERSION = $FALLBACK
+        if (-Not $env:CATTLE_AGENT_BINARY_CHECKSUM) {
+            $env:CATTLE_AGENT_BINARY_CHECKSUM = $FALLBACK_BINARY_SUM
+        }
     }
 
     function Get-Args {
@@ -268,22 +283,7 @@ function Invoke-WinsInstaller {
             }
 
             if (-Not $env:CATTLE_AGENT_BINARY_URL) {
-                $rateLimit = $(curl.exe --connect-timeout 60 --max-time 300 $env:CURL_CAFLAG -sfL "https://api.github.com/rate_limit") | ConvertFrom-Json
-               
-                if ($rateLimit.rate.remaining -eq 0) {
-                    Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
-                    $env:VERSION = $FALLBACK
-                }
-                else {
-                    try {
-                        $env:VERSION = $(curl.exe --connect-timeout 60 $env:CURL_CAFLAG -sfL "https://api.github.com/repos/rancher/wins/releases/latest" | ConvertFrom-Json).tag_name
-                    }
-                    catch {
-                        Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
-                        $env:VERSION = $FALLBACK
-                    }
-                }
-
+                Set-FallbackVersion "Using pinned fallback version ${FALLBACK} for the default upstream agent binary"
                 $env:CATTLE_AGENT_BINARY_URL = "https://github.com/rancher/wins/releases/download/$env:VERSION/wins.exe"
                 $env:BINARY_SOURCE = "upstream"
             }
@@ -381,6 +381,15 @@ function Invoke-WinsInstaller {
         }
         if (-Not (Test-Path "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe")) {
             Write-LogFatal "Wins.exe doesn't appear to have been installed."
+        }
+
+        if ($env:CATTLE_AGENT_BINARY_CHECKSUM) {
+            Write-LogInfo "Verifying checksum for wins.exe"
+            $actual = (Get-FileHash -Path "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe" -Algorithm SHA256).Hash.ToLower()
+            if ($actual -ne $env:CATTLE_AGENT_BINARY_CHECKSUM.ToLower()) {
+                Write-LogFatal "Checksum validation failed for wins.exe.`n  Expected: $($env:CATTLE_AGENT_BINARY_CHECKSUM)`n  Got:      $actual"
+            }
+            Write-LogInfo "Checksum verification passed for wins.exe"
         }
     }
 
