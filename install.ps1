@@ -78,7 +78,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $FALLBACK = "v0.5.4"
-$FALLBACK_BINARY_SUM = "sha256:8fab9744af8f089a3cd7bea4fd3c70ec71842da80d8e1994f843a884026fd710"
+$FALLBACK_BINARY_SUM = "8fab9744af8f089a3cd7bea4fd3c70ec71842da80d8e1994f843a884026fd710"
 $FALLBACK_UNINSTALL_SUM  = "bcc0f990176079f7dc69e668907230ac785d4676e037eef5b70cf3316e614adc"
 
 function Invoke-WinsInstaller {
@@ -417,20 +417,15 @@ function Invoke-WinsInstaller {
 
             $retries = 0
             while ($retries -lt 6) {
-                $responseCode = $(curl.exe --connect-timeout 60 --max-time 300 --write-out "%{http_code}\n" $env:CURL_BIN_CAFLAG -sfL $Url -o $DestinationPath)
+                $responseCode = curl.exe --connect-timeout 60 --max-time 300 --write-out "%{http_code}" $env:CURL_BIN_CAFLAG -sL $Url -o $DestinationPath
 
-                switch ($responseCode) {
-                    { $_ -in "ok200", 200 } {
-                        Write-LogInfo "Successfully downloaded $Name."
-                        $retries = 99
-                        break
-                    }
-                    default {
-                        Write-LogError "$responseCode received while downloading $Name. Sleeping for 5 seconds and trying again."
-                        Start-Sleep -Seconds 5
-                        $retries++
-                        continue
-                    }
+                if ($responseCode -eq "200") {
+                    Write-LogInfo "Successfully downloaded $Name."
+                    break
+                } else {
+                    Write-LogError "$responseCode received while downloading $Name. Sleeping for 5 seconds and trying again."
+                    Start-Sleep -Seconds 5
+                    $retries++
                 }
             }
         }
