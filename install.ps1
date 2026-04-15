@@ -438,7 +438,7 @@ function Invoke-WinsInstaller {
             Write-LogInfo "Verifying checksum for $Name"
             $actual = (Get-FileHash -Path $DestinationPath -Algorithm SHA256).Hash.ToLower()
             if ($actual -ne $Checksum.ToLower()) {
-                Write-LogFatal "Checksum validation failed for $Name.`n  Expected: $Checksum`n  Got:      $actual"
+                Write-LogFatal "Checksum validation failed for $Name"
             }
             Write-LogInfo "Checksum verification passed for $Name"
         }
