@@ -24,7 +24,7 @@ var commit string
 var artifactOutput = filepath.Join("artifacts")
 var integrationBin = filepath.Join("tests/integration/bin")
 
-const requiredFilesCount = 4
+const requiredFilesCount = 5
 
 func Clean() error {
 	if err := sh.Rm(artifactOutput); err != nil {
@@ -125,31 +125,41 @@ func Build() error {
 		return err
 	}
 
+	if err := sh.Copy(filepath.Join(artifactOutput, "uninstall.ps1"), "uninstall.ps1"); err != nil {
+		return err
+	}
+
 	if err := sh.Copy(filepath.Join(artifactOutput, "wins.exe"), winsOutput); err != nil {
 		return err
 	}
 
-	// create sha256 and sha512 artifacts for wins.exe
-	exe, err := os.Open(filepath.Join(artifactOutput, "wins.exe"))
-	if err != nil {
+	artifactsToHash := []string{"wins.exe", "install.ps1", "uninstall.ps1"}
+	var sha256Content, sha512Content strings.Builder
+
+	for _, artifact := range artifactsToHash {
+		f, err := os.Open(filepath.Join(artifactOutput, artifact))
+		if err != nil {
+			return err
+		}
+
+		h256 := sha256.New()
+		h512 := sha512.New()
+		mw := io.MultiWriter(h256, h512)
+		if _, err = io.Copy(mw, f); err != nil {
+			f.Close()
+			return err
+		}
+		f.Close()
+
+		sha256Content.WriteString(fmt.Sprintf("%x  %s\n", h256.Sum(nil), artifact))
+		sha512Content.WriteString(fmt.Sprintf("%x  %s\n", h512.Sum(nil), artifact))
+	}
+
+	if err := os.WriteFile(filepath.Join(artifactOutput, "sha256.txt"), []byte(sha256Content.String()), os.ModePerm); err != nil {
 		return err
 	}
 
-	h256 := sha256.New()
-	h512 := sha512.New()
-	if _, err = io.Copy(h256, exe); err != nil {
-		return err
-	}
-
-	if _, err = io.Copy(h512, exe); err != nil {
-		return err
-	}
-
-	if err = os.WriteFile(filepath.Join(artifactOutput, "sha256.txt"), h256.Sum(nil), os.ModePerm); err != nil {
-		return err
-	}
-
-	if err = os.WriteFile(filepath.Join(artifactOutput, "sha512.txt"), h512.Sum(nil), os.ModePerm); err != nil {
+	if err := os.WriteFile(filepath.Join(artifactOutput, "sha512.txt"), []byte(sha512Content.String()), os.ModePerm); err != nil {
 		return err
 	}
 

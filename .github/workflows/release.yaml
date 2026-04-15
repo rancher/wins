@@ -157,6 +157,8 @@ jobs:
             artifacts/wins.exe
             artifacts/sha256.txt
             artifacts/sha512.txt
+            artifacts/install.ps1
+            artifacts/uninstall.ps1
             LICENSE
           if-no-files-found: error
 
