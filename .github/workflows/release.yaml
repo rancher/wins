@@ -6,7 +6,20 @@ on:
       - '*'
 
 jobs:
+  create-draft:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create -R "${GITHUB_REPOSITORY}" --draft --generate-notes "${GITHUB_REF_NAME}"
+
   create-push-image-windows-2022:
+    needs: [ create-draft ]
     runs-on: windows-2022
     env:
       REPO: rancher
@@ -57,6 +70,7 @@ jobs:
           docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022
 
   create-push-image-windows-2019-using-2025:
+    needs: [ create-draft ]
     runs-on: windows-2025
     env:
       REPO: rancher
@@ -109,7 +123,7 @@ jobs:
           docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2019
 
   create-github-release:
-    needs: [ create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
+    needs: [ create-draft, create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
     runs-on: windows-2022
     permissions:
       contents: write # required for writing release artifacts
@@ -134,8 +148,16 @@ jobs:
         run: |
           set PSModulePath=&&powershell -command "mage ci"
 
-      - name: Create GH Release
-        run: gh release create ${{ env.TAG }} --verify-tag --generate-notes .\artifacts\wins.exe .\artifacts\sha256.txt .\artifacts\sha512.txt LICENSE
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-artifacts
+          path: |
+            artifacts/wins.exe
+            artifacts/sha256.txt
+            artifacts/sha512.txt
+            LICENSE
+          if-no-files-found: error
 
   create-manifest:
     needs: [ create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
@@ -163,3 +185,32 @@ jobs:
         run: |
           docker manifest create ${{ env.REPO }}/wins:${{ env.TAG }} ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022 ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2019
           docker manifest push ${{ env.REPO }}/wins:${{ env.TAG }}
+
+  finalize:
+    name: Publish GitHub release
+    needs: [ create-github-release, create-manifest ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-artifacts
+          path: /tmp/assets
+
+      - name: Upload assets to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload -R "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" /tmp/assets/*
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FLAGS="--draft=false"
+          if [[ "${GITHUB_REF_NAME}" == *"-rc"* ]]; then
+            FLAGS="${FLAGS} --prerelease"
+          fi
+          gh release edit -R "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" ${FLAGS}
