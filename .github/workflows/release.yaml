@@ -204,7 +204,7 @@ jobs:
       - name: Upload assets to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload -R "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" /tmp/assets/*
+        run: gh release upload -R "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" /tmp/assets/artifacts/* /tmp/assets/LICENSE
 
       - name: Publish the release
         env:
