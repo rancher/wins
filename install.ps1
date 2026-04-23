@@ -20,13 +20,18 @@
       - CATTLE_LABELS
       - CATTLE_TAINTS
       Advanced Environment Variables
-      - CATTLE_AGENT_BINARY_URL (default: latest GitHub release)
+      - CATTLE_AGENT_BINARY_URL (default: pinned GitHub release)
+      - CATTLE_AGENT_UNINSTALL_URL (default: pinned GitHub release)
       - CATTLE_PRESERVE_WORKDIR (default: false)
       - CATTLE_REMOTE_ENABLED (default: true)
       - CATTLE_LOCAL_ENABLED (default: false)
       - CATTLE_ID (default: autogenerate)
       - CATTLE_AGENT_BINARY_LOCAL (default: false)
       - CATTLE_AGENT_BINARY_LOCAL_LOCATION (default: )
+      - CATTLE_AGENT_BINARY_CHECKSUM (default: hardcoded fallback checksum)
+      - CATTLE_AGENT_UNINSTALL_LOCAL (default: false)
+      - CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION (default: )
+      - CATTLE_AGENT_UNINSTALL_CHECKSUM (default: hardcoded fallback checksum)
       - CSI_PROXY_URL (default: )
       - CSI_PROXY_VERSION (default: )
       - CSI_PROXY_KUBELET_PATH (default: )
@@ -72,7 +77,9 @@ param (
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$FALLBACK = "v0.4.15"
+$FALLBACK = "v0.5.4"
+$FALLBACK_BINARY_SUM = "8fab9744af8f089a3cd7bea4fd3c70ec71842da80d8e1994f843a884026fd710"
+$FALLBACK_UNINSTALL_SUM  = "bcc0f990176079f7dc69e668907230ac785d4676e037eef5b70cf3316e614adc"
 
 function Invoke-WinsInstaller {
     [CmdletBinding()]
@@ -139,6 +146,22 @@ function Invoke-WinsInstaller {
         $writer.Flush()
         $stringAsStream.Position = 0
         return (Get-FileHash -InputStream $stringAsStream -Algorithm SHA256).Hash.ToLower()
+    }
+
+    function Set-FallbackVersion {
+        param (
+            [Parameter(Mandatory=$true)]
+            [string]
+            $Reason
+        )
+        Write-LogInfo $Reason
+        $env:VERSION = $FALLBACK
+        if (-Not $env:CATTLE_AGENT_BINARY_CHECKSUM) {
+            $env:CATTLE_AGENT_BINARY_CHECKSUM = $FALLBACK_BINARY_SUM
+        }
+        if (-Not $env:CATTLE_AGENT_UNINSTALL_CHECKSUM) {
+            $env:CATTLE_AGENT_UNINSTALL_CHECKSUM = $FALLBACK_UNINSTALL_SUM
+        }
     }
 
     function Get-Args {
@@ -268,24 +291,31 @@ function Invoke-WinsInstaller {
             }
 
             if (-Not $env:CATTLE_AGENT_BINARY_URL) {
-                $rateLimit = $(curl.exe --connect-timeout 60 --max-time 300 $env:CURL_CAFLAG -sfL "https://api.github.com/rate_limit") | ConvertFrom-Json
-               
-                if ($rateLimit.rate.remaining -eq 0) {
-                    Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
-                    $env:VERSION = $FALLBACK
-                }
-                else {
-                    try {
-                        $env:VERSION = $(curl.exe --connect-timeout 60 $env:CURL_CAFLAG -sfL "https://api.github.com/repos/rancher/wins/releases/latest" | ConvertFrom-Json).tag_name
-                    }
-                    catch {
-                        Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
-                        $env:VERSION = $FALLBACK
-                    }
-                }
-
+                Set-FallbackVersion "Using pinned fallback version ${FALLBACK} for the default upstream agent binary"
                 $env:CATTLE_AGENT_BINARY_URL = "https://github.com/rancher/wins/releases/download/$env:VERSION/wins.exe"
                 $env:BINARY_SOURCE = "upstream"
+            }
+        }
+
+        if ($env:CATTLE_AGENT_UNINSTALL_LOCAL -eq "true") {
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION) {
+                Write-LogFatal "No local uninstall location was specified"
+            }
+            $env:UNINSTALL_SOURCE = "local"
+        }
+        else {
+            $env:UNINSTALL_SOURCE = "remote"
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_URL -and $env:CATTLE_AGENT_BINARY_BASE_URL) {
+                $env:CATTLE_AGENT_UNINSTALL_URL = "$env:CATTLE_AGENT_BINARY_BASE_URL/wins-agent-uninstall.ps1"
+            }
+
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_URL) {
+                if ($env:VERSION) {
+                    Write-LogInfo "Version $env:VERSION used for downloading the wins binary, will reuse for uninstall script"
+                }
+                Set-FallbackVersion "Using pinned fallback version ${FALLBACK} for the default upstream agent uninstall script."
+                $env:CATTLE_AGENT_UNINSTALL_URL = "https://raw.githubusercontent.com/rancher/wins/refs/tags/$env:VERSION/uninstall.ps1"
+                $env:UNINSTALL_SOURCE = "upstream"
             }
         }
 
@@ -342,46 +372,96 @@ function Invoke-WinsInstaller {
         }
     }
 
-    function Invoke-WinsAgentDownload() {
-        if (-Not (Test-Path "$env:CATTLE_AGENT_BIN_PREFIX/bin")) {
-            New-Item -Path "$env:CATTLE_AGENT_BIN_PREFIX/bin" -ItemType Directory -Force | Out-Null
+    function Invoke-RancherFileDownload {
+        [CmdletBinding()]
+        param (
+            [Parameter(Mandatory=$true)]
+            [string]
+            $Name,            # human-readable name for log messages, e.g. "wins binary"
+
+            [Parameter(Mandatory=$true)]
+            [string]
+            $DestinationPath, # full destination file path
+
+            [Parameter(Mandatory=$true)]
+            [string]
+            $Source,          # "local", "remote", or "upstream"
+
+            [Parameter(Mandatory=$false)]
+            [string]
+            $Url,             # download URL (required when Source != "local")
+
+            [Parameter(Mandatory=$false)]
+            [string]
+            $LocalPath,       # source path (required when Source == "local")
+
+            [Parameter(Mandatory=$false)]
+            [string]
+            $Checksum         # expected SHA256 (optional; always verified when provided)
+        )
+
+        if (-Not (Test-Path (Split-Path $DestinationPath))) {
+            New-Item -Path (Split-Path $DestinationPath) -ItemType Directory -Force | Out-Null
         }
-        
-        if ($env:CATTLE_AGENT_BINARY_LOCAL -eq "true") {
-            Write-LogInfo "Using local Wins installer from $($env:CATTLE_AGENT_BINARY_LOCAL_LOCATION)"
-            Copy-Item -Path $env:CATTLE_AGENT_BINARY_LOCAL_LOCATION -Destination "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe"
+
+        if ($Source -eq "local") {
+            Write-LogInfo "Using local $Name from $LocalPath"
+            Copy-Item -Path $LocalPath -Destination $DestinationPath -Force
         }
         else {
-            Write-LogInfo "Downloading Wins from $($env:CATTLE_AGENT_BINARY_URL)"
+            Write-LogInfo "Downloading $Name from $Url"
+            $env:CURL_BIN_CAFLAG = ""
             if ($env:BINARY_SOURCE -ne "upstream") {
                 $env:CURL_BIN_CAFLAG = $env:CURL_CAFLAG
             }
-            else {
-                $env:CURL_BIN_CAFLAG = ""
-            }
 
-            $retries = 0  
+            $retries = 0
             while ($retries -lt 6) {
-                $responseCode = $(curl.exe --connect-timeout 60 --max-time 300 --write-out "%{http_code}\n" $env:CURL_BIN_CAFLAG -sfL "$($env:CATTLE_AGENT_BINARY_URL)" -o "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe")
-                
-                switch ( $responseCode ) {
-                    { "ok200", 200 } {
-                        Write-LogInfo "Successfully downloaded the wins binary." 
-                        $retries = 99
-                        break
-                    }
-                    default {
-                        Write-LogError "$responseCode received while downloading the wins binary. Sleeping for 5 seconds and trying again." 
-                        Start-Sleep -Seconds 5
-                        $retries++
-                        continue
-                    }
+                $responseCode = curl.exe --connect-timeout 60 --max-time 300 --write-out "%{http_code}" $env:CURL_BIN_CAFLAG -sL $Url -o $DestinationPath
+
+                if ($responseCode -eq "200") {
+                    Write-LogInfo "Successfully downloaded $Name."
+                    break
+                } else {
+                    Write-LogError "$responseCode received while downloading $Name. Sleeping for 5 seconds and trying again."
+                    Start-Sleep -Seconds 5
+                    $retries++
                 }
             }
         }
-        if (-Not (Test-Path "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe")) {
-            Write-LogFatal "Wins.exe doesn't appear to have been installed."
+
+        if (-Not (Test-Path $DestinationPath)) {
+            Write-LogFatal "$Name doesn't appear to have been installed at $DestinationPath"
         }
+
+        if ($Checksum) {
+            Write-LogInfo "Verifying checksum for $Name"
+            $actual = (Get-FileHash -Path $DestinationPath -Algorithm SHA256).Hash.ToLower()
+            if ($actual -ne $Checksum.ToLower()) {
+                Write-LogFatal "Checksum validation failed for $Name"
+            }
+            Write-LogInfo "Checksum verification passed for $Name"
+        }
+    }
+
+    function Invoke-WinsAgentDownload {
+        Invoke-RancherFileDownload `
+            -Name            "wins binary" `
+            -DestinationPath "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe" `
+            -Source          $env:BINARY_SOURCE `
+            -Url             $env:CATTLE_AGENT_BINARY_URL `
+            -LocalPath       $env:CATTLE_AGENT_BINARY_LOCAL_LOCATION `
+            -Checksum        $env:CATTLE_AGENT_BINARY_CHECKSUM
+    }
+
+    function Invoke-WinsUninstallScriptDownload {
+        Invoke-RancherFileDownload `
+            -Name            "uninstall script" `
+            -DestinationPath "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins-agent-uninstall.ps1" `
+            -Source          $env:UNINSTALL_SOURCE `
+            -Url             $env:CATTLE_AGENT_UNINSTALL_URL `
+            -LocalPath       $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION `
+            -Checksum        $env:CATTLE_AGENT_UNINSTALL_CHECKSUM
     }
 
     function Test-CaCheckSum() {
@@ -786,6 +866,7 @@ csi-proxy:
         Test-RancherConnection
         Stop-Agent -ServiceName $serviceName
         Invoke-WinsAgentDownload
+        Invoke-WinsUninstallScriptDownload
         Copy-WinsForCharts
         Set-WinsConfig
 
