@@ -148,13 +148,6 @@ function Set-WinsConfig {
     # Note: The csi proxy config is intentionally omitted
     $winsConfig =
     @"
-white_list:
-  processPaths:
-    - C:/etc/rancher/wins/powershell.exe
-    - C:/etc/wmi-exporter/wmi-exporter.exe
-    - C:/etc/windows-exporter/windows-exporter.exe
-  proxyPorts:
-    - 9796
 agentStrictTLSMode: false
 debug: false
 systemagent:

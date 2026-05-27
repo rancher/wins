@@ -34,8 +34,7 @@ DESCRIPTION:
 
 COMMANDS:
    srv, server
-   cli, client
-   up, upgrade  Manage Rancher Wins Application
+   stackdump
    help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
@@ -63,36 +62,11 @@ OPTIONS:
    --help, -h  show help
 ```
 
-#### Client (run inside Windows container)
-
-```
-> wins.exe cli -h
-NAME:
-   rancher-wins cli - The client side commands of Rancher Wins
-
-USAGE:
-   rancher-wins cli command [command options] [arguments...]
-
-COMMANDS:
-     hns               Manage Host Networking Service
-     hst, host         Manage Host
-     net, network      Manage Network Adapter
-     prc, process      Manage Processes
-     route             Manage Routes
-     app, application  Manage Rancher Wins Application
-
-OPTIONS:
-   --help, -h  show help
-```
-
 ### Examples
 
 ``` powershell
 # [host] start the wins server
-> wins.exe --debug srv app run --listen rancher_wins
-
-# [host] verify the created npipe
-> Get-ChildItem //./pipe/ | Where-Object Name -eq "rancher_wins"
+> wins.exe --debug srv app run
 ```
 
 ### Developer Documentation
@@ -119,50 +93,6 @@ Set-Service -Name "rancher-wins" -Status Running -PassThru # restart the service
 
 # change the startup type of rancher-wins from automatic to manual
 Set-Service -Name "rancher-wins" -StartupType Manual
-```
-
-#### Query the host network adapter
-
-``` powershell
-# [host] start a container
-> $WINS_BIN_PATH=<...>; docker run --rm -it -v //./pipe/rancher_wins://./pipe/rancher_wins -v "$($WINS_BIN_PATH):c:\host\wins" -w c:\host\wins --entrypoint powershell mcr.microsoft.com/windows/servercore:ltsc2019
-
-# [inside container] query the host network adapter
->> .\wins.exe cli network get
-{"InterfaceIndex":"7","GatewayAddress":"10.170.0.1","SubnetCIDR":"10.170.0.0/20","HostName":"frank-wins-dev","AddressCIDR":"10.170.15.229/32"}
-```
-
-#### Enabling Process and Port Access
-
-To configure wins properly to break out of a container you need to configure a list of processes and ports which are 
-granted permission for wins to use. This is done with the `white_list` configuration options.
-
-```
-white_list:
-  processPaths:
-   - c:\path\to\my.exe
-  proxyPorts
-   - 8888
-```
-
-#### Start a process on the host
-
-``` powershell
-# [host] download nginx 
-> Invoke-WebRequest -UseBasicParsing -OutFile nginx.zip -Uri http://nginx.org/download/nginx-1.21.3.zip
-
-# [host] expand nginx in the current directory
-> Expand-Archive -Force -Path nginx.zip -Destination c:\nginx
-
-# [host] start a container
-> $WINS_BIN_PATH=<...>; echo "`$NGINX_BIND_DIR=$NGINX_BIND_DIR"; docker run --rm -it -v //./pipe/rancher_wins://./pipe/rancher_wins -v "$($WINS_BIN_PATH):c:\host\wins" -v "c:\nginx:c:\nginx" -w c:\host\wins --entrypoint powershell mcr.microsoft.com/windows/servercore:ltsc2019
-
-# [inside container] start nginx and receive the running output
->> .\wins.exe cli app run --path c:\nginx\nginx-1.21.3\nginx.exe --exposes TCP:80
-
-# [host] verify the process
-> Get-Process rancher-wins-*
-> curl.exe 127.0.0.1
 ```
 
 #### Enabling System Agent functionality
