@@ -9,7 +9,6 @@ import (
 	"github.com/rancher/wins/cmd/stackdump"
 
 	"github.com/mattn/go-colorable"
-	"github.com/rancher/wins/cmd/client"
 	"github.com/rancher/wins/cmd/server"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/panics"
@@ -64,7 +63,6 @@ func main() {
 
 	app.Commands = []*cli.Command{
 		server.NewCommand(),
-		client.NewCommand(),
 		stackdump.NewCommand(),
 	}
 

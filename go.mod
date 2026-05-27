@@ -52,25 +52,18 @@ replace (
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
-	github.com/Microsoft/hcsshim v0.14.1
-	github.com/buger/jsonparser v1.2.0
-	github.com/fsnotify/fsnotify v1.9.0
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
-	github.com/gogo/protobuf v1.3.2
-	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
-	github.com/hashicorp/go-multierror v1.1.1
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/magefile/mage v1.16.0
 	github.com/mattn/go-colorable v0.1.15
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/remotedialer v0.6.1
 	github.com/rancher/system-agent v0.15.0-rc.4
 	github.com/sirupsen/logrus v1.9.4
 	github.com/urfave/cli/v2 v2.27.6
-	golang.org/x/sync v0.20.0
+	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0
-	google.golang.org/grpc v1.81.1
-	inet.af/tcpproxy v0.0.0-20240214030015-3ce58045626c // replaced to github.com/inetaf/tcpproxy
+	google.golang.org/grpc v1.81.1 // indirect
 	k8s.io/api v0.36.1
 )
 
@@ -82,11 +75,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/containerd/cgroups/v3 v3.0.5 // indirect
-	github.com/containerd/errdefs v1.0.0 // indirect
-	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
-	github.com/containerd/typeurl/v2 v2.2.3 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.7.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
@@ -104,7 +93,6 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
-	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/cel-go v0.26.0 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
@@ -113,7 +101,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
-	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -149,7 +136,6 @@ require (
 	go.etcd.io/etcd/api/v3 v3.6.8 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.6.8 // indirect
 	go.etcd.io/etcd/client/v3 v3.6.8 // indirect
-	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.65.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.65.0 // indirect
