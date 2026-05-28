@@ -14,8 +14,8 @@ replace (
 )
 
 replace (
-	github.com/docker/cli => github.com/docker/cli v28.5.1+incompatible
-	github.com/docker/docker => github.com/docker/docker v28.5.0+incompatible
+	github.com/docker/cli => github.com/docker/cli v29.2.0+incompatible
+	github.com/docker/docker => github.com/docker/docker v28.5.2+incompatible
 	k8s.io/api => k8s.io/api v0.35.1
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.35.1
 	k8s.io/apimachinery => k8s.io/apimachinery v0.35.1
@@ -50,9 +50,9 @@ replace (
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
-	github.com/ghodss/yaml v1.0.0
+	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
 	github.com/magefile/mage v1.17.2
-	github.com/mattn/go-colorable v0.1.13
+	github.com/mattn/go-colorable v0.1.14
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/system-agent v0.3.16
 	github.com/sirupsen/logrus v1.9.3
