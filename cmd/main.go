@@ -22,8 +22,8 @@ func main() {
 	app := cli.NewApp()
 	app.Version = defaults.AppVersion
 	app.Name = defaults.WindowsServiceName
-	app.Usage = "A way to operate the Windows host inside the Windows container"
-	app.Description = fmt.Sprintf(`%s Component (%s)`, defaults.WindowsServiceDisplayName, defaults.AppCommit)
+	app.Usage = "Embedded system-agent and CSI proxy manager for Windows nodes"
+	app.Description = fmt.Sprintf("Embedded system-agent and CSI proxy service manager (%s)", defaults.AppCommit)
 	app.Writer = colorable.NewColorableStdout()
 	app.ErrWriter = colorable.NewColorableStderr()
 	app.CommandNotFound = func(cliCtx *cli.Context, s string) {
