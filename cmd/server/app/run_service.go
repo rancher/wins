@@ -9,7 +9,6 @@ import (
 	"unsafe"
 
 	"github.com/pkg/errors"
-	"github.com/rancher/wins/pkg/apis"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/logs"
 	"github.com/rancher/wins/pkg/paths"
@@ -167,7 +166,7 @@ func unregisterService() error {
 	return nil
 }
 
-func runService(ctx context.Context, server *apis.Server, agent *systemagent.Agent) error {
+func runService(ctx context.Context, agent *systemagent.Agent) error {
 	// If the process is not currently executing as a Windows service, assume that this is an interactive session.
 	// debug.Run runs the binary that the service points to directly on the user's console and reacts to user actions
 	// e.g. clicking on Ctrl-C
@@ -212,7 +211,6 @@ func runService(ctx context.Context, server *apis.Server, agent *systemagent.Age
 		ctx:   ctx,
 		doneC: make(chan struct{}),
 		errC:  make(chan error),
-		srv:   server,
 		agent: agent,
 	}
 	go func() {
@@ -235,19 +233,14 @@ type serviceHandler struct {
 	ctx   context.Context
 	doneC chan struct{}
 	errC  chan error
-	srv   *apis.Server
 	agent *systemagent.Agent
 }
 
 func (h *serviceHandler) Execute(_ []string, r <-chan svc.ChangeRequest, s chan<- svc.Status) (bool, uint32) {
 	s <- svc.Status{State: svc.StartPending, Accepts: 0}
 
-	// start wins server
 	ctx, cancel := context.WithCancel(h.ctx)
 	defer cancel()
-	go func() {
-		h.errC <- h.srv.Serve(ctx)
-	}()
 
 	// start system agent
 	go func() {
@@ -268,8 +261,6 @@ Loop:
 		case svc.Stop, svc.Shutdown:
 			// Cleanup before finishing execution
 			s <- svc.Status{State: svc.StopPending, Accepts: 0}
-			// stop wins server
-			h.srv.Close()
 			break Loop
 		}
 	}

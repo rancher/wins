@@ -545,13 +545,6 @@ function Invoke-WinsInstaller {
     function Set-WinsConfig() {
         $winsConfig =
 @"
-white_list:
-  processPaths:
-    - $($env:CATTLE_AGENT_CONFIG_DIR)/powershell.exe
-    - C:/etc/wmi-exporter/wmi-exporter.exe
-    - C:/etc/windows-exporter/windows-exporter.exe
-  proxyPorts:
-    - 9796
 "@
         # Overwrite the existing contents of the file using 'Set-Content'
         Set-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $winsConfig
