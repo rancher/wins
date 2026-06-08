@@ -7,7 +7,7 @@
   "2022": {
     "repo": "mcr.microsoft.com/windows/nanoserver",
     "tag": "ltsc2022",
-    "sha": "sha256:8407a5f12291f1b6adc8600d78574c6a77746d8b253018da17a7933acd8caa06"
+    "sha": "sha256:33a88d0a3359267ff4d2b85f1b6cd4b6eafd69b81218f5ccb849229cd7e560f9"
   },
   "2025": {
     "repo": "mcr.microsoft.com/windows/nanoserver",
