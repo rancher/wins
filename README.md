@@ -7,10 +7,15 @@
 
 ## Release Lines
 
++ `main`, `release/v2.15`, `v0.15.x`
+  + Currently accepting new features, intended for use by Rancher versions v2.15.x
++ `release/v2.14`, `v0.14.x`
+  + Currently accepting new features, intended for use by Rancher versions v2.14.x
++ `release/v0.5`, `v0.5.x`
+  + Currently in maintenance mode, intended for use by Rancher versions >=2.10.x and <= 2.14.3
 + `release/v0.4.x`, `v0.4.x` 
   + Currently in maintenance mode, intended for use by Rancher versions <= 2.9.x
-+ `main`, `v0.5.x`
-  + Currently accepting new features, intended for use by Rancher versions >= v2.10.x
+
 
 While Rancher versions <= v2.9.x are supported, CVEs must be addressed in both rancher-wins release lines and bumped in the relevant Rancher branches.   
 
