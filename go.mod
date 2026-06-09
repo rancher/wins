@@ -62,7 +62,7 @@ require (
 	github.com/magefile/mage v1.15.0
 	github.com/mattn/go-colorable v0.1.14
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/remotedialer v0.5.0
+	github.com/rancher/remotedialer v0.6.1
 	github.com/rancher/system-agent v0.15.0-rc.2
 	github.com/sirupsen/logrus v1.9.4
 	github.com/urfave/cli/v2 v2.27.6
