@@ -11,7 +11,7 @@ import (
 	"github.com/rancher/wins/cmd/client/proxy"
 	"github.com/rancher/wins/cmd/client/route"
 	"github.com/rancher/wins/pkg/defaults"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func NewCommand() *cli.Command {
