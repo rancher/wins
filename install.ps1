@@ -492,7 +492,7 @@ function Invoke-WinsInstaller {
             while ($retries -lt 6) {
                 curl.exe --connect-timeout 60 --max-time 60 -sfL "$env:CATTLE_SERVER/healthz"
                 switch ($LASTEXITCODE) {
-                    # Succesful exit code
+                    # Successful exit code
                     0 {
                         Write-LogInfo "Determined CA is not necessary to connect to Rancher." 
                         $env:CATTLE_CA_CHECKSUM = ""
