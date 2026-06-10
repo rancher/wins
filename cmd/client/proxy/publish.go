@@ -15,7 +15,7 @@ import (
 	"github.com/rancher/wins/pkg/npipes"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/proxy"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var _proxyFlags = []cli.Flag{

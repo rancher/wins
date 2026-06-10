@@ -8,7 +8,7 @@ import (
 	"github.com/rancher/wins/cmd/outputs"
 	"github.com/rancher/wins/pkg/panics"
 	"github.com/rancher/wins/pkg/types"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var _getFlags = internal.NewGRPCClientConn(

@@ -3,7 +3,7 @@ package flags
 import (
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type ListValue string
