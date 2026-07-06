@@ -2,16 +2,16 @@
   "2019": {
     "repo": "mcr.microsoft.com/windows/nanoserver",
     "tag": "ltsc2019",
-    "sha": "sha256:3ddf52ff0e66ff9630d79af572aeadd5762d3b2006426aa1105677874890aa9e"
+    "sha": "sha256:61081491d101bf57f3127f4d75c8b265b973325d454fea07b8e8b3c36b809c56"
   },
   "2022": {
     "repo": "mcr.microsoft.com/windows/nanoserver",
     "tag": "ltsc2022",
-    "sha": "sha256:33a88d0a3359267ff4d2b85f1b6cd4b6eafd69b81218f5ccb849229cd7e560f9"
+    "sha": "sha256:132929c393e0d188628033604fe7a6ec4a5fc446546d90c2226bb56ce48d4c9a"
   },
   "2025": {
     "repo": "mcr.microsoft.com/windows/nanoserver",
     "tag": "ltsc2025",
-    "sha": "sha256:4d60fd27581d94a2866c7b54b3ade605de37a74e11aa8314a963fb3272a67667"
+    "sha": "sha256:9b09228b8de5c20e955bee6dc5d13f9c7f8c2b06b18a141f780a29fbf75a3dc5"
   }
 }
