@@ -1,6 +1,6 @@
 module github.com/rancher/wins
 
-go 1.26.2
+go 1.26.4
 
 // replacements to match embedded system-agent
 replace (
@@ -10,7 +10,7 @@ replace (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.43.0
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.35.0
 	golang.org/x/sync => golang.org/x/sync v0.20.0
-	golang.org/x/sys => golang.org/x/sys v0.43.0
+	golang.org/x/sys => golang.org/x/sys v0.45.0
 )
 
 replace (
@@ -31,6 +31,7 @@ replace (
 	k8s.io/controller-manager => k8s.io/controller-manager v0.36.1
 	k8s.io/cri-api => k8s.io/cri-api v0.36.1
 	k8s.io/cri-client => k8s.io/cri-client v0.36.1
+	k8s.io/cri-streaming => k8s.io/cri-streaming v0.36.1
 	k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.36.1
 	k8s.io/dynamic-resource-allocation => k8s.io/dynamic-resource-allocation v0.36.1
 	k8s.io/endpointslice => k8s.io/endpointslice v0.36.1
@@ -52,23 +53,23 @@ replace (
 require (
 	github.com/Microsoft/go-winio v0.6.2
 	github.com/Microsoft/hcsshim v0.14.1
-	github.com/buger/jsonparser v1.1.2
+	github.com/buger/jsonparser v1.2.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
 	github.com/gogo/protobuf v1.3.2
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
-	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/magefile/mage v1.15.0
-	github.com/mattn/go-colorable v0.1.14
+	github.com/magefile/mage v1.16.0
+	github.com/mattn/go-colorable v0.1.15
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/remotedialer v0.5.0
-	github.com/rancher/system-agent v0.15.0-rc.2
+	github.com/rancher/remotedialer v0.6.1
+	github.com/rancher/system-agent v0.15.0-rc.4
 	github.com/sirupsen/logrus v1.9.4
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/sync v0.20.0
-	golang.org/x/sys v0.43.0
-	google.golang.org/grpc v1.80.0
+	golang.org/x/sys v0.45.0
+	google.golang.org/grpc v1.81.1
 	inet.af/tcpproxy v0.0.0-20240214030015-3ce58045626c // replaced to github.com/inetaf/tcpproxy
 	k8s.io/api v0.36.1
 )
@@ -163,12 +164,12 @@ require (
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.50.0 // indirect
+	golang.org/x/crypto v0.51.0 // indirect
 	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93 // indirect
-	golang.org/x/net v0.53.0 // indirect
-	golang.org/x/oauth2 v0.35.0 // indirect
-	golang.org/x/term v0.42.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/oauth2 v0.36.0 // indirect
+	golang.org/x/term v0.43.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260406210006-6f92a3bedf2d // indirect

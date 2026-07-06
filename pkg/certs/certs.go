@@ -6,9 +6,9 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"io/ioutil"
 	"math"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -113,9 +113,9 @@ func EncodeCertPEM(cert *x509.Certificate) []byte {
 }
 
 func WritePrivateKeyPEM(path string, key *rsa.PrivateKey) error {
-	return ioutil.WriteFile(path, EncodePrivateKeyPEM(key), 0600)
+	return os.WriteFile(path, EncodePrivateKeyPEM(key), 0600)
 }
 
 func WriteCertPEM(path string, cert *x509.Certificate) error {
-	return ioutil.WriteFile(path, EncodeCertPEM(cert), 0600)
+	return os.WriteFile(path, EncodeCertPEM(cert), 0600)
 }
