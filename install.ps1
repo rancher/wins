@@ -686,7 +686,49 @@ csi-proxy:
         Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $proxyConfig
     }
 
-    function Stop-Agent() { 
+    function Start-Agent() {
+        [CmdletBinding()]
+        param (
+            [Parameter()]
+            [string]
+            $ServiceName
+        )
+        if (-Not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
+            Write-LogInfo "$ServiceName service not found, registering now."
+            Push-Location c:\usr\local\bin
+            try {
+                if ($env:CATTLE_ENABLE_WINS_DELAYED_START -eq "true") {
+                    wins.exe srv app run --register --delayed-start
+                } else {
+                    wins.exe srv app run --register
+                }
+            } catch {
+                Write-LogFatal "Failed to execute wins.exe: $($_.Exception.Message)"
+            }
+            Pop-Location
+            Start-Sleep -s 5
+        }
+
+        Write-LogInfo "Starting $ServiceName service."
+        try {
+            Start-Service -Name $ServiceName
+        } catch {
+            Write-LogFatal "$ServiceName failed to start: $($_.Exception.Message)"
+        }
+
+        $timeout = 120
+        $elapsed = 0
+        while ((Get-Service $ServiceName).Status -ne 'Running') {
+            if ($elapsed -ge $timeout) {
+                Write-LogFatal "$ServiceName did not reach 'Running' state within $timeout seconds."
+            }
+            Write-LogInfo "Waiting for $ServiceName service to start (${elapsed}s elapsed)."
+            Start-Sleep -s 5
+            $elapsed += 5
+        }
+    }
+
+    function Stop-Agent() {
         [CmdletBinding()]
         param (
             [Parameter()]
@@ -911,35 +953,7 @@ csi-proxy:
             }
         }
                 
-        try {
-            Write-LogInfo "Checking if $serviceName service exists."
-            Get-Service -Name $serviceName
-        }
-        catch {
-            Write-LogInfo "$serviceName service not found, enabling agent service."
-            Push-Location c:\usr\local\bin
-            if ($env:CATTLE_ENABLE_WINS_DELAYED_START -eq "true") {
-                wins.exe srv app run --register --delayed-start
-            } else {
-                wins.exe srv app run --register
-            }
-            Pop-Location
-            Start-Sleep -s 5
-        }
-
-        try
-        {
-            Write-LogInfo "Starting $serviceName service."
-            Start-Service -Name $serviceName
-        } catch {
-            Write-LogInfo "$serviceName failed to start. Check the $serviceName logs for more information"
-            Write-LogInfo "Command: Get-WinEvent -ProviderName $serviceName | select-object TimeCreated,Message | Format-Table -wrap"
-            exit 1
-        }
-        while ((Get-Service $serviceName).Status -ne 'Running') {
-            Write-LogInfo "Waiting for $serviceName service to start."
-            Start-Sleep -s 5
-        }
+        Start-Agent -ServiceName $serviceName
     }
 
     Confirm-WindowsFeatures -RequiredFeatures @("Containers")
