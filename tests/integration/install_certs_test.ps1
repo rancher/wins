@@ -111,17 +111,66 @@ Describe "Install script certificate tests" {
         Log-Info "Properly imported $expectedCertificates certificates"
     }
 
+    It "Imports certs from a file with extra blank lines between blocks" {
+        Log-Info "TEST: [Imports certs from a file with extra blank lines between blocks]"
+        $certData = Setup-CertFiles -length 2
+        $mutated  = Add-ExtraNewlines $certData.FinalCertBlocks
+        $checkSum = Get-StringChecksum $mutated
+
+        check-thumbprints -shouldExist $false -thumbs $certData.ThumbPrints
+        Add-Content -Path install-certs-test.ps1 -Value "`$env:CATTLE_CA_CHECKSUM = `"$checkSum`""
+        Add-Content -Path install-certs-test.ps1 -Value "Invoke-WinsInstaller"
+
+        invoke-installScript -CertBlocks $mutated
+
+        Log-Info "Confirming that certs have been properly imported..."
+        check-thumbprints -shouldExist $true -thumbs $certData.ThumbPrints
+    }
+
+    It "Imports certs from a file that contains a non-certificate PEM entry" {
+        Log-Info "TEST: [Imports certs from a file that contains a non-certificate PEM entry]"
+        $certData = Setup-CertFiles -length 2
+        $mutated  = Add-FakePemEntry $certData.FinalCertBlocks
+        $checkSum = Get-StringChecksum $mutated
+
+        check-thumbprints -shouldExist $false -thumbs $certData.ThumbPrints
+        Add-Content -Path install-certs-test.ps1 -Value "`$env:CATTLE_CA_CHECKSUM = `"$checkSum`""
+        Add-Content -Path install-certs-test.ps1 -Value "Invoke-WinsInstaller"
+
+        invoke-installScript -CertBlocks $mutated
+
+        Log-Info "Confirming that certs have been properly imported..."
+        check-thumbprints -shouldExist $true -thumbs $certData.ThumbPrints
+    }
+
+    It "Imports valid certs from a file with a truncated final block" {
+        Log-Info "TEST: [Imports valid certs from a file with a truncated final block]"
+        $certData = Setup-CertFiles -length 2
+        $mutated  = Remove-LastCertEnd $certData.FinalCertBlocks
+        $checkSum = Get-StringChecksum $mutated
+
+        check-thumbprints -shouldExist $false -thumbs $certData.ThumbPrints
+        Add-Content -Path install-certs-test.ps1 -Value "`$env:CATTLE_CA_CHECKSUM = `"$checkSum`""
+        Add-Content -Path install-certs-test.ps1 -Value "Invoke-WinsInstaller"
+
+        invoke-installScript -CertBlocks $mutated
+
+        Log-Info "Confirming import results: root cert should be imported, truncated leaf cert should not"
+        check-thumbprints -shouldExist $true  -thumbs @($certData.ThumbPrints[0])
+        check-thumbprints -shouldExist $false -thumbs @($certData.ThumbPrints[1])
+    }
+
     # utility functions only useful for this set of tests
     BeforeAll {
         function invoke-installScript() {
             param (
                 [Parameter()]
                 [String]
-                $certs
+                $CertBlocks = $certData.FinalCertBlocks
             )
 
             Log-Info "Starting mock Rancher API"
-            $job = Start-Job -ScriptBlock $StartMockRancherHandler -ArgumentList $certData.FinalCertBlocks
+            $job = Start-Job -ScriptBlock $StartMockRancherHandler -ArgumentList $CertBlocks
             Start-Sleep 1
             if ($job.State -ne "Running") {
                 # display job output to help debug job failure

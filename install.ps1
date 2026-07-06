@@ -500,42 +500,56 @@ function Invoke-WinsInstaller {
     # Import-Certificates imports one or more
     # certificates stored in the file specified by $ENV:RANCHER_CERT.
     # In the event that $env:RANCHER_CERT contains multiple certificate
-    # blocks, a regular expression is used to iterate across all blocks
-    # and import them individually.
+    # blocks, a regular expression is used to iterate across all valid x509 blocks
+    # and import them individually. Errant non-certificate blocks and any lingering
+    #  whitespace are ignored.
     function Import-Certificates() {
-        $rawCerts = Get-Content $env:RANCHER_CERT -Raw
-        # splits blocks, handles
-        # CLRF line endings if present
-        $pattern  = "(?<=-\r?\n)(?=-+)"
-        $allCerts = $rawCerts -split $pattern
-
-        if ($allCerts.Length -eq 0) {
-            Write-LogWarn "No Certs found in certs file, check that $env:RANCHER_CERT exists and that the correct certificate is configured at $( $env:CATTLE_SERVER )/cacerts."
+        if (-Not (Test-Path $env:RANCHER_CERT)) {
+            Write-LogWarn "Certificate file not found at $env:RANCHER_CERT. Check that CATTLE_CA_CHECKSUM is correct and $($env:CATTLE_SERVER)/cacerts is reachable."
             return
         }
 
-        if ($allCerts.Length -eq 1) {
-            Write-LogInfo "Detected single certificate"
-            Import-Certificate -FilePath $env:RANCHER_CERT -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
+        $certBlocks = [regex]::Matches(
+            (Get-Content $env:RANCHER_CERT -Raw),
+            '-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----'
+        )
+
+        if ($certBlocks.Count -eq 0) {
+            Write-LogWarn "No valid certificate blocks found in $env:RANCHER_CERT. Check that the correct certificate is configured at $($env:CATTLE_SERVER)/cacerts."
             return
         }
 
-        # Import-Certificate does not automatically handle chains included in a single file,
-        # so we need to manually extract and import each certificate into the Root store.
-        Write-LogInfo "Detected certificate chain"
+        Write-LogInfo "Found $($certBlocks.Count) certificate(s) in $env:RANCHER_CERT"
 
-        $collection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
-        ForEach($cert in $allCerts) {
-            Write-LogInfo "Adding a certificate entry from the provided chain to the collection..."
-            $x5092 = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Text.Encoding]::UTF8.GetBytes($cert))
-            $collection.Add($x5092)
-        }
-
-        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new([System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
+        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new(
+            [System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
         $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed)
-        Write-LogInfo "Adding collection to certificate store"
-        $certStore.AddRange($collection)
-        $certStore.Close()
+
+        try {
+            $imported = 0
+            foreach ($block in $certBlocks) {
+                try {
+                    $x509 = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
+                        [System.Text.Encoding]::UTF8.GetBytes($block.Value))
+                    Write-LogInfo "Importing certificate: ThumbPrint='$($x509.Thumbprint)'"
+                    $certStore.Add($x509)
+                    $imported++
+                }
+                catch {
+                    Write-LogWarn "Failed to import a certificate block. Error: $($_.Exception.Message)"
+                }
+            }
+
+            if ($imported -eq 0) {
+                Write-LogWarn "No certificates were successfully imported from $env:RANCHER_CERT"
+            }
+            else {
+                Write-LogInfo "Successfully imported $imported of $($certBlocks.Count) certificate(s) into the Root store"
+            }
+        }
+        finally {
+            $certStore.Close()
+        }
     }
 
     function Test-RancherConnection {

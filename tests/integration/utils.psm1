@@ -479,6 +479,35 @@ function newCert() {
     return $null
 }
 
+function Add-ExtraNewlines {
+    param([string]$CertData)
+    return $CertData -replace '-----END CERTIFICATE-----', "-----END CERTIFICATE-----`n`n"
+}
+
+function Add-FakePemEntry {
+    param([string]$CertData, [string]$EntryType = "PRIVATE KEY")
+    $fake = "-----BEGIN $EntryType-----`nZmFrZWRhdGE=`n-----END $EntryType-----"
+    return $fake + "`n" + $CertData
+}
+
+# Removes the last END CERTIFICATE marker, leaving the final block truncated
+function Remove-LastCertEnd {
+    param([string]$CertData)
+    $idx = $CertData.LastIndexOf("-----END CERTIFICATE-----")
+    if ($idx -ge 0) { return $CertData.Substring(0, $idx) }
+    return $CertData
+}
+
+# Hashes an in-memory string the same way Test-CaCheckSum hashes the downloaded file
+function Get-StringChecksum {
+    param([string]$Data)
+    $tmp = New-TemporaryFile
+    Set-Content -NoNewline -Path $tmp.FullName -Value $Data
+    $hash = (Get-FileHash -Path $tmp.FullName -Algorithm SHA256).Hash.ToLower()
+    Remove-Item $tmp.FullName -Force
+    return $hash
+}
+
 Export-ModuleMember -Function Setup-CertFiles
 Export-ModuleMember -Function Cleanup-CertFile
 Export-ModuleMember -Function Log-Info
@@ -498,3 +527,7 @@ Export-ModuleMember -Function Get-Permissions
 Export-ModuleMember -Function Test-Permissions
 Export-ModuleMember -Function Ensure-DependencyExistsForService
 Export-ModuleMember -Function Get-LatestCommitOrTag
+Export-ModuleMember -Function Add-ExtraNewlines
+Export-ModuleMember -Function Add-FakePemEntry
+Export-ModuleMember -Function Remove-LastCertEnd
+Export-ModuleMember -Function Get-StringChecksum
