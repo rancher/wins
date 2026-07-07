@@ -77,8 +77,8 @@ param (
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$FALLBACK = "v0.5.4"
-$FALLBACK_BINARY_SUM = "8fab9744af8f089a3cd7bea4fd3c70ec71842da80d8e1994f843a884026fd710"
+$FALLBACK = "v0.5.5"
+$FALLBACK_BINARY_SUM = "cb42373cad3260d3b628de3d18cad13c0825577337499e4b9a05dc8926300512"
 $FALLBACK_UNINSTALL_SUM  = "bcc0f990176079f7dc69e668907230ac785d4676e037eef5b70cf3316e614adc"
 
 function Invoke-WinsInstaller {
