@@ -490,6 +490,15 @@ function Add-FakePemEntry {
     return $fake + "`n" + $CertData
 }
 
+# Unlike Add-FakePemEntry, this wraps garbage base64 in a genuine
+# CERTIFICATE marker so it passes the regex match in Import-Certificates
+# but fails to parse as an X509Certificate2, exercising the per-block catch.
+function Add-CorruptCertBlock {
+    param([string]$CertData)
+    $corrupt = "-----BEGIN CERTIFICATE-----`nVGhpcyBpcyBub3QgYSB2YWxpZCBjZXJ0aWZpY2F0ZQ==`n-----END CERTIFICATE-----"
+    return $corrupt + "`n" + $CertData
+}
+
 # Removes the last END CERTIFICATE marker, leaving the final block truncated
 function Remove-LastCertEnd {
     param([string]$CertData)
@@ -529,5 +538,6 @@ Export-ModuleMember -Function Ensure-DependencyExistsForService
 Export-ModuleMember -Function Get-LatestCommitOrTag
 Export-ModuleMember -Function Add-ExtraNewlines
 Export-ModuleMember -Function Add-FakePemEntry
+Export-ModuleMember -Function Add-CorruptCertBlock
 Export-ModuleMember -Function Remove-LastCertEnd
 Export-ModuleMember -Function Get-StringChecksum

@@ -143,6 +143,22 @@ Describe "Install script certificate tests" {
         check-thumbprints -shouldExist $true -thumbs $certData.ThumbPrints
     }
 
+    It "Imports valid certs from a file that contains a corrupted certificate block" {
+        Log-Info "TEST: [Imports valid certs from a file that contains a corrupted certificate block]"
+        $certData = Setup-CertFiles -length 2
+        $mutated  = Add-CorruptCertBlock $certData.FinalCertBlocks
+        $checkSum = Get-StringChecksum $mutated
+
+        check-thumbprints -shouldExist $false -thumbs $certData.ThumbPrints
+        Add-Content -Path install-certs-test.ps1 -Value "`$env:CATTLE_CA_CHECKSUM = `"$checkSum`""
+        Add-Content -Path install-certs-test.ps1 -Value "Invoke-WinsInstaller"
+
+        invoke-installScript -CertBlocks $mutated
+
+        Log-Info "Confirming that valid certs were still imported despite the corrupted block..."
+        check-thumbprints -shouldExist $true -thumbs $certData.ThumbPrints
+    }
+
     It "Imports valid certs from a file with a truncated final block" {
         Log-Info "TEST: [Imports valid certs from a file with a truncated final block]"
         $certData = Setup-CertFiles -length 2
@@ -171,24 +187,30 @@ Describe "Install script certificate tests" {
 
             Log-Info "Starting mock Rancher API"
             $job = Start-Job -ScriptBlock $StartMockRancherHandler -ArgumentList $CertBlocks
-            Start-Sleep 1
-            if ($job.State -ne "Running") {
-                # display job output to help debug job failure
-                Log-Error "Mock Rancher server failed to start"
-                $job | Receive-Job
-                $job.State | Should -Be -ExpectedValue "Running"
+            try {
+                Start-Sleep 1
+                if ($job.State -ne "Running") {
+                    # display job output to help debug job failure
+                    Log-Error "Mock Rancher server failed to start"
+                    $job | Receive-Job
+                    $job.State | Should -Be -ExpectedValue "Running"
+                }
+
+                Log-Info "Invoking install script"
+                .\install-certs-test.ps1
+                $installScriptExitCode = $LASTEXITCODE
+
+                Log-Info "Install script exited with code $installScriptExitCode"
+                $installScriptExitCode | Should -Be -ExpectedValue 0
             }
-
-            Log-Info "Invoking install script"
-            .\install-certs-test.ps1
-            $installScriptExitCode = $LASTEXITCODE
-
-            Log-Info "Stopping mock server"
-            curl.exe -sS http://localhost:8080/kill
-            Remove-Job -Id $job.Id -Force
-
-            Log-Info "Install script exited with code $installScriptExitCode"
-            $installScriptExitCode | Should -Be -ExpectedValue 0
+            finally {
+                # Always tear down the mock server, even if it never came up or an
+                # assertion above threw, so a single failure can't leak port 8080
+                # and cascade into every other test in this file.
+                Log-Info "Stopping mock server"
+                curl.exe -sS --max-time 5 http://localhost:8080/kill 2>&1 | Out-Null
+                Remove-Job -Id $job.Id -Force -ErrorAction SilentlyContinue
+            }
         }
 
         function check-thumbprints() {
