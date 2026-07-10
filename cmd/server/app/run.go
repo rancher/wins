@@ -108,6 +108,10 @@ func _runAction(cliCtx *cli.Context) error {
 		}
 	}
 
+	if cfg.Debug {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+
 	err = runService(ctx, agent)
 	if err != nil {
 		return errors.Wrap(err, "failed to run service")
