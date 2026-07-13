@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-2019, windows-latest]
+        platform: [windows-2022]
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -40,4 +40,4 @@ jobs:
       run: |
         Install-Module -Name DockerMsftProvider -Force
         Import-Module -Name HostNetworkingService
-        set PSModulePath=&&powershell -command "mage TestAll"
+        set PSModulePath=&&powershell -command "mage ci"
