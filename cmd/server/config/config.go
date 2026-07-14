@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -106,7 +105,7 @@ func SaveConfig(path string, v *Config) error {
 }
 
 func DecodeConfig(path string, v *Config) error {
-	bs, err := ioutil.ReadFile(path)
+	bs, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
