@@ -16,31 +16,31 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: retrieve dockerhub credentials
-        uses: rancher-eio/read-vault-secrets@main
+        uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
         with:
           secrets: |
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version: 'stable'
           cache: 'false'
 
       - name: Install Dependencies
         run: |
-          go install github.com/magefile/mage@v1.15.0
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.4.0
+          go install github.com/magefile/mage@69e6f824732575e57977f68f8f3dd78313d666e5 # v1.16
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@c0d3ddc9cf3faa61a4e378e879ece580256d76e5 # v2.12.2
 
       - name: build-binary
         run: |
@@ -66,17 +66,17 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: retrieve dockerhub credentials
-        uses: rancher-eio/read-vault-secrets@main
+        uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
         with:
           secrets: |
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
@@ -84,15 +84,15 @@ jobs:
       # This step is required otherwise the 'mage'
       # command cannot be used in subsequent steps
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version: 'stable'
           cache: 'false'
 
       - name: Install Dependencies
         run: |
-          go install github.com/magefile/mage@v1.15.0
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.4.0
+          go install github.com/magefile/mage@69e6f824732575e57977f68f8f3dd78313d666e5 # v1.16
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@c0d3ddc9cf3faa61a4e378e879ece580256d76e5 # v2.12.2
 
       - name: build-binary
         run: |
@@ -108,8 +108,23 @@ jobs:
         run: |
           docker push ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2019
 
-  create-github-release:
-    needs: [ create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
+  create-draft:
+    runs-on: ubuntu-latest
+    needs:
+    - create-push-image-windows-2022
+    - create-push-image-windows-2019-using-2025
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create -R "${GITHUB_REPOSITORY}" --draft --generate-notes "${GITHUB_REF_NAME}"
+
+  build-binaries:
+    needs: [ create-draft, create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
     runs-on: windows-2022
     permissions:
       contents: write # required for writing release artifacts
@@ -118,24 +133,34 @@ jobs:
       TAG: ${{ github.ref_name }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version: 'stable'
 
       - name: Install Dependencies
         run: |
-          go install github.com/magefile/mage@v1.15.0
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.4.0
+          go install github.com/magefile/mage@69e6f824732575e57977f68f8f3dd78313d666e5 # v1.16
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@c0d3ddc9cf3faa61a4e378e879ece580256d76e5 # v2.12.2
 
       - name: build-binary
         run: |
-          set PSModulePath=&&powershell -command "mage ci"
+          set PSModulePath=&&powershell -command "mage buildAll"
 
-      - name: Create GH Release
-        run: gh release create ${{ env.TAG }} --verify-tag --generate-notes .\artifacts\wins.exe .\artifacts\sha256.txt .\artifacts\sha512.txt LICENSE
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-artifacts
+          path: |
+            artifacts/wins.exe
+            artifacts/sha256.txt
+            artifacts/sha512.txt
+            artifacts/install.ps1
+            artifacts/uninstall.ps1
+            LICENSE
+          if-no-files-found: error
 
   create-manifest:
     needs: [ create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
@@ -147,14 +172,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: retrieve dockerhub credentials
-        uses: rancher-eio/read-vault-secrets@main
+        uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
         with:
           secrets: |
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials username | DOCKER_USERNAME ;
             secret/data/github/repo/${{ github.repository }}/dockerhub/rancher/credentials password | DOCKER_PASSWORD
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
@@ -163,3 +188,32 @@ jobs:
         run: |
           docker manifest create ${{ env.REPO }}/wins:${{ env.TAG }} ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2022 ${{ env.REPO }}/wins:${{ env.TAG }}-windows-ltsc2019
           docker manifest push ${{ env.REPO }}/wins:${{ env.TAG }}
+
+  finalize-github-release:
+    name: Publish GitHub release
+    needs: [ build-binaries, create-manifest ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-artifacts
+          path: /tmp/assets
+
+      - name: Upload assets to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload -R "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" /tmp/assets/artifacts/* /tmp/assets/LICENSE
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FLAGS="--draft=false"
+          if [[ "${GITHUB_REF_NAME}" == *"-rc"* ]]; then
+            FLAGS="${FLAGS} --prerelease"
+          fi
+          gh release edit -R "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" ${FLAGS}
