@@ -4,6 +4,9 @@
   ],
   "baseBranchPatterns": [
     "main",
+    "release/v2.11",
+    "release/v2.12",
+    "release/v2.13",
     "release/v2.14",
     "release/v2.15"
   ],
