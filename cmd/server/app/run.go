@@ -2,11 +2,9 @@ package app
 
 import (
 	"context"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rancher/wins/cmd/server/config"
-	"github.com/rancher/wins/pkg/apis"
 	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
 	"github.com/rancher/wins/pkg/panics"
@@ -14,7 +12,6 @@ import (
 	"github.com/rancher/wins/pkg/systemagent"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	"google.golang.org/grpc"
 )
 
 var _runFlags = []cli.Flag{
@@ -93,21 +90,6 @@ func _runAction(cliCtx *cli.Context) error {
 		return errors.Wrapf(err, "failed to load config from %s", cfgPath)
 	}
 
-	serverOptions := []grpc.ServerOption{
-		grpc.ConnectionTimeout(5 * time.Second),
-	}
-
-	serverOptions, err = setupGRPCServerOptions(serverOptions, cfg)
-	if err != nil {
-		return errors.Wrap(err, "failed to setup grpc middlewares")
-	}
-
-	logrus.Debugf("Proxy port whitelist: %v", cfg.WhiteList.ProxyPorts)
-	server, err := apis.NewServer(cfg.Listen, serverOptions, cfg.Proxy, cfg.WhiteList.ProxyPorts)
-	if err != nil {
-		return errors.Wrap(err, "failed to create server")
-	}
-
 	// adding system agent
 	agent := systemagent.New(cfg.SystemAgent)
 
@@ -126,9 +108,13 @@ func _runAction(cliCtx *cli.Context) error {
 		}
 	}
 
-	err = runService(ctx, server, agent)
+	if cfg.Debug {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+
+	err = runService(ctx, agent)
 	if err != nil {
-		return errors.Wrap(err, "failed to run server")
+		return errors.Wrap(err, "failed to run service")
 	}
 
 	return nil

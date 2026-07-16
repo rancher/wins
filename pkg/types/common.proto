@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package wins;
-
-option go_package = "types";
-
-message Void {
-}
