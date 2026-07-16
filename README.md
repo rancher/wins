@@ -7,17 +7,19 @@
 
 ## Release Lines
 
-+ `main`, `release/v2.15`, `v0.15.x`
-  + Currently accepting new features, intended for use by Rancher versions v2.15.x
++ `main`
+  + Intended for the _next_ minor release of Rancher. 
+  + For example, when a new Rancher branch for `v2.16.0` is created, a new `release/v2.16` is created in wins and `main` begins to track work targeted for `v2.17.0`.      
++ `release/v2.15`, `v0.15.x`
+  + Intended for use by Rancher versions v2.15.x
 + `release/v2.14`, `v0.14.x`
-  + Currently accepting new features, intended for use by Rancher versions v2.14.x
-+ `release/v0.5`, `v0.5.x`
-  + Currently in maintenance mode, intended for use by Rancher versions >=2.10.x and <= 2.14.3
-+ `release/v0.4.x`, `v0.4.x` 
-  + Currently in maintenance mode, intended for use by Rancher versions <= 2.9.x
-
-
-While Rancher versions <= v2.9.x are supported, CVEs must be addressed in both rancher-wins release lines and bumped in the relevant Rancher branches.   
+  + Intended for use by Rancher versions v2.14.x
++ `release/v2.13`, `v0.13.x`
+  + Intended for use by Rancher versions v2.13.x
++ `release/v2.12`, `v0.12.x` 
+  + Intended for use by Rancher versions v2.12.x
++ `release/v2.11`, `v0.11.x`
+  + Intended for use by Rancher versions v2.11.x
 
 ## How to use
 

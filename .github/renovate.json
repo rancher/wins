@@ -4,6 +4,9 @@
   ],
   "baseBranchPatterns": [
     "main",
+    "release/v2.11",
+    "release/v2.12",
+    "release/v2.13",
     "release/v2.14",
     "release/v2.15"
   ],
@@ -21,6 +24,48 @@
         "\"repo\":\\s*\"(?<depName>[^\"]+)\",\\s*\"tag\":\\s*\"(?<currentValue>[^\"]+)\",\\s*\"sha\":\\s*\"(?<currentDigest>sha256:[a-f0-9]+)\""
       ],
       "datasourceTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchBaseBranches": [
+        "release/v2.11"
+      ],
+      "extends": [
+        "github>rancher/renovate-config//rancher-2.11#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v2.12"
+      ],
+      "extends": [
+        "github>rancher/renovate-config//rancher-2.12#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v2.13"
+      ],
+      "extends": [
+        "github>rancher/renovate-config//rancher-2.13#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v2.14"
+      ],
+      "extends": [
+        "github>rancher/renovate-config//rancher-2.14#release"
+      ]
+    },
+    {
+      "matchBaseBranches": [
+        "release/v2.15"
+      ],
+      "extends": [
+        "github>rancher/renovate-config//rancher-2.15#release"
+      ]
     }
   ]
 }
