@@ -159,6 +159,22 @@ Describe "Install script certificate tests" {
         check-thumbprints -shouldExist $true -thumbs $certData.ThumbPrints
     }
 
+    It "Imports certs from a chain carrying PKCS#12 bundle metadata between blocks" {
+        Log-Info "TEST: [Imports certs from a chain carrying PKCS#12 bundle metadata between blocks]"
+        $certData = Setup-CertFiles -length 3
+        $mutated  = Add-PKCSBundleMetadata $certData.FinalCertBlocks
+        $checkSum = Get-StringChecksum $mutated
+
+        check-thumbprints -shouldExist $false -thumbs $certData.ThumbPrints
+        Add-Content -Path install-certs-test.ps1 -Value "`$env:CATTLE_CA_CHECKSUM = `"$checkSum`""
+        Add-Content -Path install-certs-test.ps1 -Value "Invoke-WinsInstaller"
+
+        invoke-installScript -CertBlocks $mutated
+
+        Log-Info "Confirming that all certs were imported despite the interleaved bag/subject/issuer metadata..."
+        check-thumbprints -shouldExist $true -thumbs $certData.ThumbPrints
+    }
+
     It "Imports valid certs from a file with a truncated final block" {
         Log-Info "TEST: [Imports valid certs from a file with a truncated final block]"
         $certData = Setup-CertFiles -length 2
