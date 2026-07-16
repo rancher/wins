@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
@@ -121,11 +122,22 @@ func Build() error {
 		return err
 	}
 
-	if err := sh.Copy(filepath.Join(artifactOutput, "install.ps1"), "install.ps1"); err != nil {
+	installScriptOutputPath := filepath.Join(artifactOutput, "install.ps1")
+	uninstallScriptOutputPath := filepath.Join(artifactOutput, "uninstall.ps1")
+
+	if err := sh.Copy(installScriptOutputPath, "install.ps1"); err != nil {
 		return err
 	}
 
-	if err := sh.Copy(filepath.Join(artifactOutput, "uninstall.ps1"), "uninstall.ps1"); err != nil {
+	if err := normalizeFileLineEndingsToLF(installScriptOutputPath); err != nil {
+		return err
+	}
+
+	if err := sh.Copy(uninstallScriptOutputPath, "uninstall.ps1"); err != nil {
+		return err
+	}
+
+	if err := normalizeFileLineEndingsToLF(uninstallScriptOutputPath); err != nil {
 		return err
 	}
 
@@ -247,4 +259,20 @@ func CI() {
 
 func flags(version string, commit string) string {
 	return fmt.Sprintf(`-s -w -X github.com/rancher/wins/pkg/defaults.AppVersion=%s -X github.com/rancher/wins/pkg/defaults.AppCommit=%s -extldflags "-static"`, version, commit)
+}
+
+func normalizeFileLineEndingsToLF(path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	// Convert CRLF -> LF
+	normalized := bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))
+
+	if bytes.Equal(data, normalized) {
+		return nil
+	}
+
+	return os.WriteFile(path, normalized, 0644)
 }
