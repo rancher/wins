@@ -472,6 +472,78 @@ function newCert() {
     return $null
 }
 
+function Add-ExtraNewlines {
+    param([string]$CertData)
+    return $CertData -replace '-----END CERTIFICATE-----', "-----END CERTIFICATE-----`n`n"
+}
+
+function Add-FakePemEntry {
+    param([string]$CertData, [string]$EntryType = "PRIVATE KEY")
+    $fake = "-----BEGIN $EntryType-----`nZmFrZWRhdGE=`n-----END $EntryType-----"
+    return $fake + "`n" + $CertData
+}
+
+# Unlike Add-FakePemEntry, this wraps garbage base64 in a genuine
+# CERTIFICATE marker so it passes the regex match in Import-Certificates
+# but fails to parse as an X509Certificate2, exercising the per-block catch.
+function Add-CorruptCertBlock {
+    param([string]$CertData)
+    $corrupt = "-----BEGIN CERTIFICATE-----`nVGhpcyBpcyBub3QgYSB2YWxpZCBjZXJ0aWZpY2F0ZQ==`n-----END CERTIFICATE-----"
+    return $corrupt + "`n" + $CertData
+}
+
+# Removes the last END CERTIFICATE marker, leaving the final block truncated
+function Remove-LastCertEnd {
+    param([string]$CertData)
+    $idx = $CertData.LastIndexOf("-----END CERTIFICATE-----")
+    if ($idx -ge 0) { return $CertData.Substring(0, $idx) }
+    return $CertData
+}
+
+# Add-PKCSBundleMetadata rebuilds the chain so that each certificate block is
+# preceded by the human-readable metadata that
+# `openssl pkcs12 -in bundle.pfx -nokeys -out chain.pem` emits when a PKCS#12
+# bundle is extracted into a plain cacert chain. openssl writes a "Bag
+# Attributes" section plus subject=/issuer= lines ahead of every block, which
+# places errant metadata both before the first cert and between every
+# subsequent block.
+function Add-PKCSBundleMetadata {
+    param([string]$CertData)
+
+    $blocks = [regex]::Matches($CertData, '-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----')
+    $sb = [System.Text.StringBuilder]::new()
+    for ($j = 0; $j -lt $blocks.Count; $j++) {
+        if ($j -eq 0) {
+            $meta = @"
+Bag Attributes
+    localKeyID: 01 A2 B3 C4 D5 E6 F7 08 19 2A 3B 4C 5D 6E 7F 80
+    friendlyName: rancher
+subject=CN = wins-test-leaf-cert
+issuer=CN = wins-test-intermediate-cert
+"@
+        } else {
+            $meta = @"
+Bag Attributes: <No Attributes>
+subject=CN = wins-test-ca-cert
+issuer=CN = wins-test-root-CA
+"@
+        }
+        [void]$sb.AppendLine($meta)
+        [void]$sb.AppendLine($blocks[$j].Value)
+    }
+    return $sb.ToString()
+}
+
+# Hashes an in-memory string the same way Test-CaCheckSum hashes the downloaded file
+function Get-StringChecksum {
+    param([string]$Data)
+    $tmp = New-TemporaryFile
+    Set-Content -NoNewline -Path $tmp.FullName -Value $Data
+    $hash = (Get-FileHash -Path $tmp.FullName -Algorithm SHA256).Hash.ToLower()
+    Remove-Item $tmp.FullName -Force
+    return $hash
+}
+
 Export-ModuleMember -Function Setup-CertFiles
 Export-ModuleMember -Function Cleanup-CertFile
 Export-ModuleMember -Function Log-Info
@@ -491,3 +563,9 @@ Export-ModuleMember -Function Get-Permissions
 Export-ModuleMember -Function Test-Permissions
 Export-ModuleMember -Function Ensure-DependencyExistsForService
 Export-ModuleMember -Function Get-LatestCommitOrTag
+Export-ModuleMember -Function Add-ExtraNewlines
+Export-ModuleMember -Function Add-FakePemEntry
+Export-ModuleMember -Function Add-CorruptCertBlock
+Export-ModuleMember -Function Remove-LastCertEnd
+Export-ModuleMember -Function Add-PKCSBundleMetadata
+Export-ModuleMember -Function Get-StringChecksum

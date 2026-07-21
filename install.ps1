@@ -77,8 +77,8 @@ param (
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$FALLBACK = "v0.5.4"
-$FALLBACK_BINARY_SUM = "8fab9744af8f089a3cd7bea4fd3c70ec71842da80d8e1994f843a884026fd710"
+$FALLBACK = "v0.5.5"
+$FALLBACK_BINARY_SUM = "cb42373cad3260d3b628de3d18cad13c0825577337499e4b9a05dc8926300512"
 $FALLBACK_UNINSTALL_SUM  = "bcc0f990176079f7dc69e668907230ac785d4676e037eef5b70cf3316e614adc"
 
 function Invoke-WinsInstaller {
@@ -500,42 +500,61 @@ function Invoke-WinsInstaller {
     # Import-Certificates imports one or more
     # certificates stored in the file specified by $ENV:RANCHER_CERT.
     # In the event that $env:RANCHER_CERT contains multiple certificate
-    # blocks, a regular expression is used to iterate across all blocks
-    # and import them individually.
+    # blocks, a regular expression is used to iterate across all valid x509 blocks
+    # and import them individually. Errant non-certificate blocks and any lingering
+    #  whitespace are ignored.
     function Import-Certificates() {
-        $rawCerts = Get-Content $env:RANCHER_CERT -Raw
-        # splits blocks, handles
-        # CLRF line endings if present
-        $pattern  = "(?<=-\r?\n)(?=-+)"
-        $allCerts = $rawCerts -split $pattern
-
-        if ($allCerts.Length -eq 0) {
-            Write-LogWarn "No Certs found in certs file, check that $env:RANCHER_CERT exists and that the correct certificate is configured at $( $env:CATTLE_SERVER )/cacerts."
+        if (-Not (Test-Path $env:RANCHER_CERT)) {
+            Write-LogWarn "Certificate file not found at $env:RANCHER_CERT. Check that CATTLE_CA_CHECKSUM is correct and $($env:CATTLE_SERVER)/cacerts is reachable."
             return
         }
 
-        if ($allCerts.Length -eq 1) {
-            Write-LogInfo "Detected single certificate"
-            Import-Certificate -FilePath $env:RANCHER_CERT -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
+        $certBlocks = [regex]::Matches(
+            (Get-Content $env:RANCHER_CERT -Raw),
+            '-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----'
+        )
+
+        if ($certBlocks.Count -eq 0) {
+            Write-LogWarn "No valid certificate blocks found in $env:RANCHER_CERT. Check that the correct certificate is configured at $($env:CATTLE_SERVER)/cacerts."
             return
         }
 
-        # Import-Certificate does not automatically handle chains included in a single file,
-        # so we need to manually extract and import each certificate into the Root store.
-        Write-LogInfo "Detected certificate chain"
+        Write-LogInfo "Found $($certBlocks.Count) certificate(s) in $env:RANCHER_CERT"
 
-        $collection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
-        ForEach($cert in $allCerts) {
-            Write-LogInfo "Adding a certificate entry from the provided chain to the collection..."
-            $x5092 = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Text.Encoding]::UTF8.GetBytes($cert))
-            $collection.Add($x5092)
-        }
-
-        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new([System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
+        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new(
+            [System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
         $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed)
-        Write-LogInfo "Adding collection to certificate store"
-        $certStore.AddRange($collection)
-        $certStore.Close()
+
+        try {
+            $imported = 0
+            foreach ($block in $certBlocks) {
+                $x509 = $null
+                try {
+                    $x509 = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
+                        [System.Text.Encoding]::UTF8.GetBytes($block.Value))
+                    Write-LogInfo "Importing certificate: ThumbPrint='$($x509.Thumbprint)'"
+                    $certStore.Add($x509)
+                    $imported++
+                }
+                catch {
+                    Write-LogWarn "Failed to import a certificate block. Error: $($_.Exception.Message)"
+                } finally {
+                    if ($null -ne $x509) {
+                        $x509.Dispose()
+                    }
+                }
+            }
+
+            if ($imported -eq 0) {
+                Write-LogWarn "No certificates were successfully imported from $env:RANCHER_CERT"
+            }
+            else {
+                Write-LogInfo "Successfully imported $imported of $($certBlocks.Count) certificate(s) into the Root store"
+            }
+        }
+        finally {
+            $certStore.Close()
+        }
     }
 
     function Test-RancherConnection {
@@ -665,7 +684,49 @@ csi-proxy:
         Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $proxyConfig
     }
 
-    function Stop-Agent() { 
+    function Start-Agent() {
+        [CmdletBinding()]
+        param (
+            [Parameter()]
+            [string]
+            $ServiceName
+        )
+        if (-Not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
+            Write-LogInfo "$ServiceName service not found, registering now."
+            Push-Location c:\usr\local\bin
+            try {
+                if ($env:CATTLE_ENABLE_WINS_DELAYED_START -eq "true") {
+                    wins.exe srv app run --register --delayed-start
+                } else {
+                    wins.exe srv app run --register
+                }
+            } catch {
+                Write-LogFatal "Failed to execute wins.exe: $($_.Exception.Message)"
+            }
+            Pop-Location
+            Start-Sleep -s 5
+        }
+
+        Write-LogInfo "Starting $ServiceName service."
+        try {
+            Start-Service -Name $ServiceName
+        } catch {
+            Write-LogFatal "$ServiceName failed to start: $($_.Exception.Message)"
+        }
+
+        $timeout = 120
+        $elapsed = 0
+        while ((Get-Service $ServiceName).Status -ne 'Running') {
+            if ($elapsed -ge $timeout) {
+                Write-LogFatal "$ServiceName did not reach 'Running' state within $timeout seconds."
+            }
+            Write-LogInfo "Waiting for $ServiceName service to start (${elapsed}s elapsed)."
+            Start-Sleep -s 5
+            $elapsed += 5
+        }
+    }
+
+    function Stop-Agent() {
         [CmdletBinding()]
         param (
             [Parameter()]
@@ -890,35 +951,7 @@ csi-proxy:
             }
         }
                 
-        try {
-            Write-LogInfo "Checking if $serviceName service exists."
-            Get-Service -Name $serviceName
-        }
-        catch {
-            Write-LogInfo "$serviceName service not found, enabling agent service."
-            Push-Location c:\usr\local\bin
-            if ($env:CATTLE_ENABLE_WINS_DELAYED_START -eq "true") {
-                wins.exe srv app run --register --delayed-start
-            } else {
-                wins.exe srv app run --register
-            }
-            Pop-Location
-            Start-Sleep -s 5
-        }
-
-        try
-        {
-            Write-LogInfo "Starting $serviceName service."
-            Start-Service -Name $serviceName
-        } catch {
-            Write-LogInfo "$serviceName failed to start. Check the $serviceName logs for more information"
-            Write-LogInfo "Command: Get-WinEvent -ProviderName $serviceName | select-object TimeCreated,Message | Format-Table -wrap"
-            exit 1
-        }
-        while ((Get-Service $serviceName).Status -ne 'Running') {
-            Write-LogInfo "Waiting for $serviceName service to start."
-            Start-Sleep -s 5
-        }
+        Start-Agent -ServiceName $serviceName
     }
 
     Confirm-WindowsFeatures -RequiredFeatures @("Containers")
