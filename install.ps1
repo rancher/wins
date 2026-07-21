@@ -528,6 +528,7 @@ function Invoke-WinsInstaller {
         try {
             $imported = 0
             foreach ($block in $certBlocks) {
+                $x509 = $null
                 try {
                     $x509 = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
                         [System.Text.Encoding]::UTF8.GetBytes($block.Value))
@@ -537,6 +538,10 @@ function Invoke-WinsInstaller {
                 }
                 catch {
                     Write-LogWarn "Failed to import a certificate block. Error: $($_.Exception.Message)"
+                } finally {
+                    if ($null -ne $x509) {
+                        $x509.Dispose()
+                    }
                 }
             }
 
