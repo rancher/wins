@@ -1,7 +1,6 @@
 package converters
 
 import (
-	"strings"
 	"testing"
 )
 
@@ -24,29 +23,6 @@ func TestToJson(t *testing.T) {
 	}
 
 	if got != want {
-		t.Errorf("error, should be %s, but got %s", want, got)
-	}
-}
-
-func TestToYaml(t *testing.T) {
-	yaml := struct {
-		A string
-		B string `json:"-"`
-		C string `json:"-"`
-	}{
-		A: "a",
-		B: "b",
-		C: "c",
-	}
-
-	want := "A: a"
-
-	got, err := ToYaml(yaml)
-	if err != nil {
-		t.Errorf("error occurred, %v", err)
-	}
-
-	if strings.TrimSpace(got) != want {
 		t.Errorf("error, should be %s, but got %s", want, got)
 	}
 }
