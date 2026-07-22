@@ -5,12 +5,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/config"
 	"github.com/rancher/wins/pkg/csiproxy"
 	"github.com/rancher/wins/pkg/defaults"
 	wintls "github.com/rancher/wins/pkg/tls"
+	"sigs.k8s.io/yaml"
 )
 
 func DefaultConfig() *Config {
