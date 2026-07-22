@@ -56,7 +56,6 @@ require (
 	github.com/Microsoft/hcsshim v0.13.0
 	github.com/buger/jsonparser v1.1.2
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/ghodss/yaml v1.0.1-0.20220118164431-d8423dcdf344
 	github.com/gogo/protobuf v1.3.2
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
@@ -73,6 +72,7 @@ require (
 	google.golang.org/grpc v1.79.3
 	inet.af/tcpproxy v0.0.0-20240214030015-3ce58045626c // replaced to github.com/inetaf/tcpproxy
 	k8s.io/api v0.34.9
+	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
@@ -199,5 +199,4 @@ require (
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
-	sigs.k8s.io/yaml v1.6.0 // indirect
 )
