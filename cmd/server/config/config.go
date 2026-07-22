@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/rancher/system-agent/pkg/config"
 	"github.com/rancher/wins/pkg/csiproxy"
 	wintls "github.com/rancher/wins/pkg/tls"
+	"sigs.k8s.io/yaml"
 )
 
 func DefaultConfig() *Config {
