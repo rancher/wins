@@ -104,7 +104,7 @@ func (p *Proxy) Enable() error {
 			}
 		}
 		logrus.Infof("CSI Proxy is being downloaded.")
-		if err := p.download(); err != nil {
+		if err := p.Download(p.binaryPath); err != nil {
 			return err
 		}
 		logrus.Infof("CSI Proxy is being started.")
@@ -115,9 +115,9 @@ func (p *Proxy) Enable() error {
 	return nil
 }
 
-// download retrieves the CSI Proxy executable from the config settings.
-func (p *Proxy) download() error {
-	file, err := os.Create(p.binaryPath)
+// Download retrieves the CSI Proxy executable from the config settings to the specified path.
+func (p *Proxy) Download(destPath string) error {
+	file, err := os.Create(destPath)
 	if err != nil {
 		return err
 	}
