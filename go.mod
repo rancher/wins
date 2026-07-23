@@ -12,7 +12,7 @@ replace (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.38.0
 	golang.org/x/oauth2 => golang.org/x/oauth2 v0.30.0
 	golang.org/x/sync => golang.org/x/sync v0.17.0
-	golang.org/x/sys => golang.org/x/sys v0.36.0
+	golang.org/x/sys => golang.org/x/sys v0.44.0
 )
 
 replace (
