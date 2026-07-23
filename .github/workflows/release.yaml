@@ -7,7 +7,7 @@ on:
 
 jobs:
   create-push-image-windows-2022:
-    runs-on: windows-2022
+    runs-on: windows-2025
     env:
       REPO: rancher
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,7 +32,7 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Install Go
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 'stable'
           cache: 'false'
@@ -84,7 +84,7 @@ jobs:
       # This step is required otherwise the 'mage'
       # command cannot be used in subsequent steps
       - name: Install Go
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 'stable'
           cache: 'false'
@@ -125,7 +125,7 @@ jobs:
 
   build-binaries:
     needs: [ create-draft, create-push-image-windows-2019-using-2025, create-push-image-windows-2022 ]
-    runs-on: windows-2022
+    runs-on: windows-2025
     permissions:
       contents: write # required for writing release artifacts
     env:
@@ -136,7 +136,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
       - name: Install Go
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 'stable'
 
@@ -150,7 +150,7 @@ jobs:
           set PSModulePath=&&powershell -command "mage buildAll"
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: release-artifacts
           path: |
@@ -198,7 +198,7 @@ jobs:
       id-token: write
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: release-artifacts
           path: /tmp/assets
