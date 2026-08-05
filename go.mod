@@ -57,7 +57,7 @@ require (
 	github.com/magefile/mage v1.16.0
 	github.com/mattn/go-colorable v0.1.15
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/system-agent v0.15.0-rc.5
+	github.com/rancher/system-agent v0.15.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/urfave/cli/v2 v2.27.6
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
