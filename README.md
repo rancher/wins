@@ -1,25 +1,26 @@
 # Rancher Wins
 
-[![Build Status](https://drone-publish.rancher.io/api/badges/rancher/wins/status.svg?ref=refs/heads/main)](https://drone-pr.rancher.io/rancher/wins)
-[![Go Report Card](https://goreportcard.com/badge/github.com/rancher/wins)](https://goreportcard.com/report/github.com/rancher/wins)
-
 `wins` embeds Rancher system-agent and manages CSI Proxy service lifecycle on Windows nodes.
 
-## Release Lines
+## Branching and Versioning
 
-+ `main`
-  + Intended for the _next_ minor release of Rancher. 
-  + For example, when a new Rancher branch for `v2.16.0` is created, a new `release/v2.16` is created in wins and `main` begins to track work targeted for `v2.17.0`.      
-+ `release/v2.15`, `v0.15.x`
-  + Intended for use by Rancher versions v2.15.x
-+ `release/v2.14`, `v0.14.x`
-  + Intended for use by Rancher versions v2.14.x
-+ `release/v2.13`, `v0.13.x`
-  + Intended for use by Rancher versions v2.13.x
-+ `release/v2.12`, `v0.12.x` 
-  + Intended for use by Rancher versions v2.12.x
-+ `release/v2.11`, `v0.11.x`
-  + Intended for use by Rancher versions v2.11.x
+* `main` is the primary development branch and contains the latest changes for the next Rancher minor release.
+  * For example, when the Rancher `v2.16` release branch is created, a corresponding `release/v2.16` branch is created in `wins`, and `main` moves on to development for the next minor release (`v2.17`).
+* Each Rancher release line has a corresponding `release/vX.Y` branch created from `main`.
+* Release branches only receive bug fixes and security patches.
+* Release branch tags increment only the patch suffix (`.x`).
+* Release candidates (RCs) may be created from release branches before a stable release.
+* Release candidates (RCs) tags use the format `vX.Y.Z-rc.M`, where `M` increments for each new RC.
+
+| Wins Branch     | Rancher Release Line | Tag Format |
+|-----------------|----------------------|------------|
+| `main`          | `main`               | `vX.Y.Z`   |
+| `release/v2.16` | `v2.16`              | `v0.16.x`  |
+| `release/v2.15` | `v2.15`              | `v0.15.x`  |
+| `release/v2.14` | `v2.14`              | `v0.14.x`  |
+| `release/v2.13` | `v2.13`              | `v0.13.x`  |
+| `release/v2.12` | `v2.12`              | `v0.12.x`  |
+| `release/v2.11` | `v2.11`              | `v0.11.x`  |
 
 ## How to use
 
@@ -201,7 +202,7 @@ If want both of them, please run the below command in `PowerShell`:
 
 ## License
 
-Copyright (c) 2014-2023 [Rancher Labs, Inc.](http://rancher.com)
+Copyright (c) 2014-2026 [Rancher Labs, Inc.](http://rancher.com)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
 License. You may obtain a copy of the License at
