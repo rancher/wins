@@ -20,25 +20,6 @@ if ($SERVERCORE_VERSION -eq "2025") {
 
 Write-Host "Server core version: $SERVERCORE_VERSION"
 
-# Wait for the Docker daemon to be ready. On some runners the docker service can still be
-# starting up when this script kicks off, which causes `docker build` to fail with:
-# "failed to connect to the docker API at npipe:////./pipe/docker_engine ... daemon is running"
-$dockerReady = $false
-$maxAttempts = 30
-for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
-    docker info *> $null
-    if ($LASTEXITCODE -eq 0) {
-        $dockerReady = $true
-        break
-    }
-    Write-Host "Waiting for Docker daemon to be ready (attempt $attempt/$maxAttempts)..."
-    Start-Sleep -Seconds 2
-}
-if (-not $dockerReady) {
-    Log-Fatal "Docker daemon did not become ready in time"
-    exit 1
-}
-
 $NGINX_URL = 'https://nginx.org/download/nginx-1.21.3.zip';
 $NGINX_SUM = "5828f2d4626fa1ae2ffb424851fb607013d6ae99d91034d29557fc0d03538d82"
 $response = Invoke-WebRequest -UseBasicParsing -Uri $NGINX_URL
