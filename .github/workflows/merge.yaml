@@ -38,9 +38,17 @@ jobs:
       run: |
         set PSModulePath=&&powershell -command "mage BuildAll"
 
+    # added a start docker service step to ensure that the docker service is running before running the e2e tests
+    - name: Start Docker Service
+      id: start-docker-service
+      run: |
+        $dockerSvc = Get-Service -Name "docker"
+        if ($dockerSvc.Status -ne "Running") {
+          Start-Service -Name "docker"
+        }
+
     - name: Run E2E tests
       shell: pwsh
       run: |
-        Install-Module -Name DockerMsftProvider -Force
         Import-Module -Name HostNetworkingService
         set PSModulePath=&&powershell -command "mage ci"
