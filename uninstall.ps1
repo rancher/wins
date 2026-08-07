@@ -19,6 +19,8 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+$RANCHER_SCRIPTS_PATH = "C:/rancher-scripts"
+
 function Invoke-WinsUninstaller {
     [CmdletBinding()]
     param ()
@@ -136,8 +138,8 @@ function Invoke-WinsUninstaller {
             Write-LogInfo "Checking if $ProcessName process exists"
             if (Get-Process -Name $ProcessName -ErrorAction SilentlyContinue) {
                 Write-LogInfo "$ProcessName process found, stopping now"
-                Stop-Process -Name $ProcessName
-                while (-Not (Get-Process -Name $ProcessName).HasExited) {
+                Stop-Process -Name $ProcessName -Force -Confirm:$false
+                while (Get-Process -Name $ProcessName -ErrorAction SilentlyContinue) {
                     Write-LogInfo "Waiting for $ProcessName process to stop"
                     Start-Sleep -s 5
                 }
@@ -168,6 +170,30 @@ function Invoke-WinsUninstaller {
         }
     }
 
+    function Remove-UninstallScript() {
+        $rancherScriptsPath = $RANCHER_SCRIPTS_PATH
+        $uninstallScriptPath = "$rancherScriptsPath/wins-agent-uninstall.ps1"
+        if (Test-Path $uninstallScriptPath) {
+            Write-LogInfo "Removing uninstall script at $uninstallScriptPath"
+            try {
+                Remove-Item -Path $uninstallScriptPath -Force
+            }
+            catch {
+                Write-LogWarn "Failed to remove uninstall script at $uninstallScriptPath : $_"
+            }
+        }
+
+        if ((Test-Path $rancherScriptsPath) -and (-Not (Get-ChildItem -Path $rancherScriptsPath -Force))) {
+            Write-LogInfo "$rancherScriptsPath is empty, removing it"
+            try {
+                Remove-Item -Path $rancherScriptsPath -Force
+            }
+            catch {
+                Write-LogWarn "Failed to remove $rancherScriptsPath : $_"
+            }
+        }
+    }
+
     function Invoke-WinsAgentUninstall() {
         $serviceName = "rancher-wins"
         $csiProxyServiceName = "csiproxy"
@@ -183,6 +209,7 @@ function Invoke-WinsUninstaller {
         Remove-WinsConfig
         Remove-Service -ServiceName $csiProxyServiceName
         Remove-Service -ServiceName $serviceName
+        Remove-UninstallScript
     }
 
     Invoke-WinsAgentUninstall
