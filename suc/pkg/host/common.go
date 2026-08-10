@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	sucConfig "github.com/rancher/wins/suc/pkg/service/config"
 	"github.com/sirupsen/logrus"
 )
 
@@ -22,6 +23,12 @@ const (
 	// This is primarily used in CI, to allow for test cases to run without having to completely
 	// install rancher-wins.
 	skipBinaryUpgradeEnvVar = "CATTLE_WINS_SKIP_BINARY_UPGRADE"
+	// syncCSIProxy
+	syncCSIProxyBinary = "CATTLE_SYNC_CSI_PROXY_BINARY"
+	// syncCSIProxyBinaryURL
+	csiProxyBinaryURL = "CATTLE_CSI_PROXY_URL"
+	// syncCSIProxyVersion
+	csiProxyVersion = "CATTLE_CSI_PROXY_VERSION"
 )
 
 // getRancherWinsVersionFromBinary executes the wins.exe binary located at 'path' and passes the '--version'
@@ -159,4 +166,26 @@ func getWinsUsrLocalBinBinary() string {
 		return fmt.Sprintf("%s\\bin\\wins.exe", customPath)
 	}
 	return defaultWinsUsrLocalBinPath
+}
+
+func confirmPathExist(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+func getCSIProxyVersion(path string) (string, error) {
+	cfg, err := sucConfig.LoadConfig(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to load wins config: %w", err)
+	}
+	if cfg.CSIProxy == nil {
+		return "", fmt.Errorf("csi-proxy is not configured in wins config")
+	}
+	return cfg.CSIProxy.Version, nil
 }
