@@ -80,6 +80,7 @@ Set-StrictMode -Version Latest
 $FALLBACK = "v0.5.5"
 $FALLBACK_BINARY_SUM = "cb42373cad3260d3b628de3d18cad13c0825577337499e4b9a05dc8926300512"
 $FALLBACK_UNINSTALL_SUM  = "bcc0f990176079f7dc69e668907230ac785d4676e037eef5b70cf3316e614adc"
+$RANCHER_SCRIPTS_PATH = "C:/rancher-scripts"
 
 function Invoke-WinsInstaller {
     [CmdletBinding()]
@@ -457,7 +458,7 @@ function Invoke-WinsInstaller {
     function Invoke-WinsUninstallScriptDownload {
         Invoke-RancherFileDownload `
             -Name            "uninstall script" `
-            -DestinationPath "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins-agent-uninstall.ps1" `
+            -DestinationPath "$RANCHER_SCRIPTS_PATH/wins-agent-uninstall.ps1" `
             -Source          $env:UNINSTALL_SOURCE `
             -Url             $env:CATTLE_AGENT_UNINSTALL_URL `
             -LocalPath       $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION `

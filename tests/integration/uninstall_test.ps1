@@ -154,6 +154,7 @@ Describe "uninstall" {
         Remove-Item -Path "C:/tmp/test-wins-config"    -Recurse -Force -ErrorAction Ignore
         Remove-Item -Path "C:/tmp/test-wins-var"       -Recurse -Force -ErrorAction Ignore
         Remove-Item -Path "uninstaller-test.ps1"       -Force          -ErrorAction Ignore
+        Remove-Item -Path "C:/rancher-scripts"         -Recurse -Force -ErrorAction Ignore
 
         Remove-Item Env:\CATTLE_AGENT_LOGLEVEL -ErrorAction Ignore
     }
@@ -344,6 +345,61 @@ Describe "uninstall" {
 
         Remove-Item "C:/etc/windows-exporter" -Recurse -Force -ErrorAction Ignore
         Remove-Item "C:/etc/wmi-exporter"     -Recurse -Force -ErrorAction Ignore
+
+        $succeeded = Invoke-Uninstaller
+
+        $succeeded | Should -Be $true
+    }
+
+    # -------------------------------------------------------------------------
+    # Uninstall script and rancher-scripts directory cleanup
+    # -------------------------------------------------------------------------
+
+    It "removes the uninstall script from C:/rancher-scripts after uninstall" {
+        Log-Info "TEST: [removes the uninstall script from C:/rancher-scripts after uninstall]"
+
+        New-Item -Path "C:/rancher-scripts" -ItemType Directory -Force | Out-Null
+        New-Item -Path "C:/rancher-scripts/wins-agent-uninstall.ps1" -ItemType File -Force | Out-Null
+
+        Test-Path "C:/rancher-scripts/wins-agent-uninstall.ps1" | Should -Be $true
+
+        $succeeded = Invoke-Uninstaller
+
+        $succeeded | Should -Be $true
+        Test-Path "C:/rancher-scripts/wins-agent-uninstall.ps1" | Should -Be $false
+    }
+
+    It "removes C:/rancher-scripts when it is left empty after uninstall" {
+        Log-Info "TEST: [removes C:/rancher-scripts when it is left empty after uninstall]"
+
+        New-Item -Path "C:/rancher-scripts" -ItemType Directory -Force | Out-Null
+        New-Item -Path "C:/rancher-scripts/wins-agent-uninstall.ps1" -ItemType File -Force | Out-Null
+
+        $succeeded = Invoke-Uninstaller
+
+        $succeeded | Should -Be $true
+        Test-Path "C:/rancher-scripts" | Should -Be $false
+    }
+
+    It "keeps C:/rancher-scripts when other files remain after uninstall" {
+        Log-Info "TEST: [keeps C:/rancher-scripts when other files remain after uninstall]"
+
+        New-Item -Path "C:/rancher-scripts" -ItemType Directory -Force | Out-Null
+        New-Item -Path "C:/rancher-scripts/wins-agent-uninstall.ps1" -ItemType File -Force | Out-Null
+        New-Item -Path "C:/rancher-scripts/other-file.txt" -ItemType File -Force | Out-Null
+
+        $succeeded = Invoke-Uninstaller
+
+        $succeeded | Should -Be $true
+        Test-Path "C:/rancher-scripts" | Should -Be $true
+        Test-Path "C:/rancher-scripts/wins-agent-uninstall.ps1" | Should -Be $false
+        Test-Path "C:/rancher-scripts/other-file.txt" | Should -Be $true
+    }
+
+    It "does not fail when C:/rancher-scripts does not exist" {
+        Log-Info "TEST: [does not fail when C:/rancher-scripts does not exist]"
+
+        Remove-Item -Path "C:/rancher-scripts" -Recurse -Force -ErrorAction Ignore
 
         $succeeded = Invoke-Uninstaller
 
