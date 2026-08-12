@@ -12,6 +12,6 @@
   "2025": {
     "repo": "mcr.microsoft.com/windows/nanoserver",
     "tag": "ltsc2025",
-    "sha": "sha256:db550f3e611e12ae0e6492b50273321734bedb91ce8bd881e05556951ccea8f7"
+    "sha": "sha256:4249ba8974b8996812967d35c46c4e66afd771f929f96917ef6f7592a55edb12"
   }
 }
