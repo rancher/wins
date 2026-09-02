@@ -65,7 +65,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/sync v0.22.0
 	golang.org/x/sys v0.47.0
-	google.golang.org/grpc v1.83.0
+	google.golang.org/grpc v1.83.1
 	inet.af/tcpproxy v0.0.0-20240214030015-3ce58045626c // replaced to github.com/inetaf/tcpproxy
 	k8s.io/api v0.34.10
 	sigs.k8s.io/yaml v1.6.0
