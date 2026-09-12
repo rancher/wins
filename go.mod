@@ -4,7 +4,7 @@ go 1.26.4
 
 // replacements to match embedded system-agent
 replace (
-	github.com/fsnotify/fsnotify => github.com/fsnotify/fsnotify v1.9.0
+	github.com/fsnotify/fsnotify => github.com/fsnotify/fsnotify v1.10.1
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.68.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.43.0
