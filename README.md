@@ -200,6 +200,15 @@ If want both of them, please run the below command in `PowerShell`:
 > go run mage.go TestAll
 ```
 
+### Windows plan e2e suite
+
+`tests/plan/` is a separate Pester-based e2e suite that exercises `rancher-system-agent`'s
+plan-execution behavior end to end on a regular Windows machine: cancellation and process-tree
+kill, pause and resume from a checkpoint, failure/success bookkeeping, instruction execution,
+periodic instructions and probes, and plan file operations. It runs against an external
+Kubernetes cluster (only used to host the plan Secret) and is not part of CI. See
+[`tests/plan/README.md`](tests/plan/README.md) for prerequisites and how to run it.
+
 ## License
 
 Copyright (c) 2014-2026 [Rancher Labs, Inc.](http://rancher.com)
