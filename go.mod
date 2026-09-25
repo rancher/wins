@@ -1,6 +1,6 @@
 module github.com/rancher/wins
 
-go 1.26.4
+go 1.26.7
 
 // replacements to match embedded system-agent
 replace (
@@ -56,7 +56,7 @@ require (
 	github.com/magefile/mage v1.17.2
 	github.com/mattn/go-colorable v0.1.15
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/system-agent v0.16.0-rc.2
+	github.com/rancher/system-agent v0.16.0-rc.3
 	github.com/sirupsen/logrus v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
@@ -65,6 +65,12 @@ require (
 	google.golang.org/grpc v1.83.2 // indirect
 	k8s.io/api v0.37.0
 	sigs.k8s.io/yaml v1.6.0
+)
+
+require (
+	github.com/rancher/rancher/pkg/plan v0.0.0-20260828155108-93802792d0f6
+	k8s.io/apimachinery v0.37.0
+	k8s.io/client-go v0.37.0
 )
 
 require (
@@ -131,7 +137,6 @@ require (
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/rancher/lasso v0.2.10 // indirect
 	github.com/rancher/permissions v0.0.0-20240924180251-69b0dcb34065 // indirect
-	github.com/rancher/rancher/pkg/plan v0.0.0-20260817165558-c234bc1ccd80 // indirect
 	github.com/rancher/wharfie v0.7.1-0.20251014190711-8cfe84a9efaa // indirect
 	github.com/rancher/wrangler/v3 v3.8.0-rc.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
@@ -157,7 +162,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
@@ -172,9 +177,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/apiextensions-apiserver v0.37.0 // indirect
-	k8s.io/apimachinery v0.37.0 // indirect
 	k8s.io/apiserver v0.37.0 // indirect
-	k8s.io/client-go v0.37.0 // indirect
 	k8s.io/cloud-provider v0.34.0 // indirect
 	k8s.io/component-base v0.37.0 // indirect
 	k8s.io/component-helpers v0.37.0 // indirect
