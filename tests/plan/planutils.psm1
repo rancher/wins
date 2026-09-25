@@ -39,7 +39,7 @@ function Invoke-PlanCtl {
 
 function Invoke-PlanBootstrap {
     $json = Invoke-PlanCtl -PlanCtlArgs @("bootstrap")
-    return $json | ConvertFrom-Json
+    return (($json -join [Environment]::NewLine) | ConvertFrom-Json)
 }
 
 function Invoke-PlanApply {
@@ -89,7 +89,7 @@ function Invoke-PlanAnnotate {
 
 function Get-PlanOutcome {
     $json = Invoke-PlanCtl -PlanCtlArgs @("outcome")
-    return $json | ConvertFrom-Json
+    return (($json -join [Environment]::NewLine) | ConvertFrom-Json)
 }
 
 function Reset-Plan {
