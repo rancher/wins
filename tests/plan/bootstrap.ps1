@@ -101,6 +101,45 @@ function Build-LocalBinaries {
     Log-Info "Local build complete"
 }
 
+function Set-RestrictedPermissions {
+    param(
+        [parameter(Mandatory = $true)] [string]$Path,
+        [switch]$Directory
+    )
+
+    $acl = Get-Acl -LiteralPath $Path
+    $acl.SetAccessRuleProtection($true, $false)
+    foreach ($rule in $acl.GetAccessRules($true, $false, [System.Security.Principal.SecurityIdentifier])) {
+        $acl.RemoveAccessRuleSpecific($rule)
+    }
+
+    $administrators = New-Object System.Security.Principal.NTAccount("BUILTIN\Administrators")
+    $system = New-Object System.Security.Principal.NTAccount("NT AUTHORITY\SYSTEM")
+    $acl.SetOwner($administrators)
+    $acl.SetGroup($system)
+
+    foreach ($account in @($administrators, $system)) {
+        if ($Directory) {
+            $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+                $account,
+                [System.Security.AccessControl.FileSystemRights]::FullControl,
+                [System.Security.AccessControl.InheritanceFlags]'ObjectInherit,ContainerInherit',
+                [System.Security.AccessControl.PropagationFlags]::None,
+                [System.Security.AccessControl.AccessControlType]::Allow
+            )
+        }
+        else {
+            $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+                $account,
+                [System.Security.AccessControl.FileSystemRights]::FullControl,
+                [System.Security.AccessControl.AccessControlType]::Allow
+            )
+        }
+        $acl.AddAccessRule($rule)
+    }
+    Set-Acl -LiteralPath $Path -AclObject $acl
+}
+
 # Install-WinsService writes the wins config directly, deploys the freshly built binary, and
 # registers/starts rancher-wins, without going through install.ps1: there is no Rancher endpoint
 # to simulate here, only an external Kubernetes cluster reachable via $Kubeconfig.
@@ -114,8 +153,13 @@ function Install-WinsService {
     New-Item -Path $VarDir -ItemType Directory -Force | Out-Null
     New-Item -Path $BinDir -ItemType Directory -Force | Out-Null
 
+    Set-RestrictedPermissions -Path $VarDir -Directory
     $connectionInfoPath = Join-Path $VarDir "rancher2_connection_info.json"
+    if (Test-Path -LiteralPath $connectionInfoPath) {
+        Set-RestrictedPermissions -Path $connectionInfoPath
+    }
     Set-Content -Path $connectionInfoPath -Value $ConnectionInfoJson -NoNewline
+    Set-RestrictedPermissions -Path $connectionInfoPath
 
     $config = @"
 debug: true
