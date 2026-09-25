@@ -68,6 +68,7 @@ func (s *Service) GetState() (svc.State, error) {
 	if err != nil {
 		return 0, fmt.Errorf("could not query service %s: %w", s.Name, err)
 	}
+	logrus.Debugf("service %s is currently %s", s.Name, serviceStateToString(q.State))
 
 	return q.State, nil
 }
@@ -103,6 +104,8 @@ func (s *Service) Stop() error {
 		return fmt.Errorf("error getting state for %s service while attempting to send stop signal", s.Name)
 	}
 
+	logrus.Debugf("Stopping %s service", s.Name)
+
 	if state == windows.SERVICE_STOPPED {
 		logrus.Debugf("cannot stop service %s as it is not running", s.Name)
 		return nil
@@ -112,6 +115,8 @@ func (s *Service) Stop() error {
 	if err != nil {
 		return fmt.Errorf("failed to send Stop signal to %s: %w", s.Name, err)
 	}
+
+	logrus.Debugf("Stopped %s service", s.Name)
 
 	return s.WaitForState(svc.Stopped, getStateTransitionDelayInSeconds(), getStateTransitionAttempts())
 }
