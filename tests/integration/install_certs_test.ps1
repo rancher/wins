@@ -225,7 +225,9 @@ Describe "Install script certificate tests" {
                 # and cascade into every other test in this file.
                 Log-Info "Stopping mock server"
                 curl.exe -sS --max-time 5 http://localhost:8080/kill 2>&1 | Out-Null
-                Remove-Job -Id $job.Id -Force -ErrorAction SilentlyContinue
+                if ($null -ne $job) {
+                    Remove-Job -Id $job.Id -Force -ErrorAction SilentlyContinue
+                }
             }
         }
 
