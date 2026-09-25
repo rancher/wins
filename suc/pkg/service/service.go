@@ -88,11 +88,16 @@ func (s *Service) Restart() error {
 		}
 	}
 
-	if err = s.svc.Start(); err != nil {
-		return fmt.Errorf("failed to start the %s service while attempting to restart: %w", s.Name, err)
-	}
-
-	return s.WaitForState(svc.Running, getStateTransitionDelayInSeconds(), getStateTransitionAttempts())
+	return startWithRetry(
+		s.Name,
+		func() error {
+			return s.svc.Start()
+		},
+		s.GetState,
+		func() error {
+			return s.WaitForState(svc.Running, getStateTransitionDelayInSeconds(), getStateTransitionAttempts())
+		},
+	)
 }
 
 // Stop sends a svc.Stop control signal to the Service and waits
@@ -119,6 +124,48 @@ func (s *Service) Stop() error {
 // Close closes the Service
 func (s *Service) Close() {
 	s.svc.Close()
+}
+
+func startWithRetry(name string, start func() error, getState func() (svc.State, error), waitForRunning func() error) error {
+	return startWithRetryBackoff(
+		name,
+		start,
+		getState,
+		waitForRunning,
+		time.Second*getStateTransitionDelayInSeconds(),
+		getStateTransitionAttempts(),
+		time.Sleep,
+	)
+}
+
+func startWithRetryBackoff(name string, start func() error, getState func() (svc.State, error), waitForRunning func() error, retryDelay time.Duration, maxAttempts int, sleep func(time.Duration)) error {
+	var err error
+
+	for i := 0; i < maxAttempts; i++ {
+		err = start()
+		if err == nil {
+			return waitForRunning()
+		}
+
+		if !errors.Is(err, windows.ERROR_SERVICE_ALREADY_RUNNING) {
+			return fmt.Errorf("failed to start the %s service while attempting to restart: %w", name, err)
+		}
+
+		state, stateErr := getState()
+		if stateErr != nil {
+			return fmt.Errorf("failed to query %s service state after start returned already running: %w", name, stateErr)
+		}
+
+		if state == svc.Running || state == svc.StartPending {
+			logrus.Warnf("Start for %s returned already running while service state is %s; waiting for the service to report running", name, serviceStateToString(state))
+			return waitForRunning()
+		}
+
+		logrus.Warnf("Start for %s returned already running while service state is %s; retrying in %d seconds (%d/%d)", name, serviceStateToString(state), int(retryDelay/time.Second), i+1, maxAttempts)
+		sleep(retryDelay)
+	}
+
+	return fmt.Errorf("failed to start the %s service while attempting to restart: %w", name, err)
 }
 
 // WaitForState monitors the current state of the Service and waits for it to transition to the desiredState.
