@@ -116,6 +116,27 @@ func (s *Service) Stop() error {
 	return s.WaitForState(svc.Stopped, getStateTransitionDelayInSeconds(), getStateTransitionAttempts())
 }
 
+// Start sends a svc.Start control signal to the Service and waits
+// for it to enter the svc.Running state
+func (s *Service) Start() error {
+	state, err := s.GetState()
+	if err != nil {
+		return fmt.Errorf("error getting state for %s service while attempting to start: %w", s.Name, err)
+	}
+
+	if state == svc.Running {
+		logrus.Debugf("cannot start service %s as it is already running", s.Name)
+		return nil
+	}
+
+	err = s.svc.Start()
+	if err != nil {
+		return fmt.Errorf("failed to send Start signal to %s: %w", s.Name, err)
+	}
+
+	return s.WaitForState(svc.Running, getStateTransitionDelayInSeconds(), getStateTransitionAttempts())
+}
+
 // Close closes the Service
 func (s *Service) Close() {
 	s.svc.Close()
