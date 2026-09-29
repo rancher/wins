@@ -15,8 +15,9 @@ import (
 const (
 	stateTransitionAttempts       = 12
 	stateTransitionDelayInSeconds = 5
-	processExitDeadline           = 30 * time.Second
 )
+
+var ProcessExitDeadline = 30 * time.Second
 
 // Service is a wrapper around a mgr.Service which simplifies
 // common operations and bundles relevant configuration information.
@@ -144,11 +145,10 @@ func (s *Service) Stop() error {
 		return nil
 	}
 
-	// The SCM reports svc.Stopped to the caller as soon as it begins tearing down the service.
-	// However, SCM will report the service as running to future callers until the process backing
-	// the service has completed. This can potentially result in an ERROR_SERVICE_ALREADY_RUNNING error
-	// being returned during a rapid restart of the service. To avoid this, we not only wait on the SCM
-	// state transition but also on the completion of the underlying process.
+	// The SCM considers a service stopped as soon as it reports svc.Stopped, even if the process
+	// backing it is still running, and will start a new process alongside it. A lingering process
+	// may still hold resources the new one needs, such as ports, named pipes, or file locks. To
+	// avoid this, we not only wait on the SCM state transition but also on the exit of the process.
 	waiter, err := s.acquireProcessWaiter(serviceQuery.ProcessId)
 	if err != nil {
 		return fmt.Errorf("failed to open the process backing the %s service: %w", s.Name, err)
@@ -175,7 +175,7 @@ func (s *Service) Stop() error {
 	}
 
 	if waiter != nil {
-		if err = waiter.wait(processExitDeadline); err != nil {
+		if err = waiter.wait(ProcessExitDeadline); err != nil {
 			return fmt.Errorf("the %s service reported stopped but its process did not exit: %w", s.Name, err)
 		}
 	}
