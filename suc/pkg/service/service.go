@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const (
@@ -73,7 +75,9 @@ func Open(name string) (service *Service, serviceExists bool, err error) {
 }
 
 // Restart explicitly stops and then starts the Service.
-// Restart blocks for up to 60 seconds, or until the svc.State transitions to svc.Running
+// Restart waits for each stop/start transition using the
+// configured state transition timeout, or until the service
+// reaches svc.Running.
 func (s *Service) Restart() error {
 	logrus.Infof("Restarting %s service", s.Name)
 	serviceQuery, err := s.svc.Query()
@@ -133,7 +137,9 @@ func (s *Service) Start() error {
 // Stop sends a svc.Stop control signal to the Service, waits for it to enter the
 // svc.Stopped state, and then waits for the process backing it to exit. If the service
 // is already stopping, no control signal is sent and only the transition is awaited.
-// If the service is already stopped, this function is a no-op.
+// If the service is in another transitional state, such as svc.StartPending, the control
+// is resent until the service accepts it. If the service is already stopped, this
+// function is a no-op.
 func (s *Service) Stop() error {
 	serviceQuery, err := s.svc.Query()
 	if err != nil {
@@ -146,9 +152,9 @@ func (s *Service) Stop() error {
 	}
 
 	// The SCM considers a service stopped as soon as it reports svc.Stopped, even if the process
-	// backing it is still running, and will start a new process alongside it. A lingering process
-	// may still hold resources the new one needs, such as ports, named pipes, or file locks. To
-	// avoid this, we not only wait on the SCM state transition but also on the exit of the process.
+	// backing it is still running. A lingering process may still hold resources the new one needs,
+	// such as ports, named pipes, or file locks. To avoid this, we not only wait on the SCM state
+	// transition but also on the exit of the process.
 	waiter, err := s.acquireProcessWaiter(serviceQuery.ProcessId)
 	if err != nil {
 		return fmt.Errorf("failed to open the process backing the %s service: %w", s.Name, err)
@@ -161,13 +167,59 @@ func (s *Service) Stop() error {
 	logrus.Debugf("Stopping %s service", s.Name)
 	if serviceQuery.State == windows.SERVICE_STOP_PENDING {
 		logrus.Debugf("service %s is already stopping, waiting", s.Name)
-	} else if _, err = s.svc.Control(svc.Stop); err != nil {
-		// The service may have stopped on its own and reaped the underlying process between the query above and this control.
-		// All of these mean it is already on its way down, so we can just wait for it to fully stop.
-		if !errors.Is(err, windows.ERROR_SERVICE_NOT_ACTIVE) && !errors.Is(err, windows.ERROR_SERVICE_CANNOT_ACCEPT_CTRL) && !errors.Is(err, windows.ERROR_BROKEN_PIPE) {
-			return fmt.Errorf("failed to send Stop signal to %s: %w", s.Name, err)
+	} else {
+		delay := getStateTransitionDelay()
+		timeout := delay * time.Duration(getStateTransitionAttempts())
+
+		// ERROR_SERVICE_CANNOT_ACCEPT_CTRL is returned to control calls while the service is in a pending state, or while another
+		// control is still being delivered to it, even if it is still reported as running when queried.
+		// ERROR_INVALID_SERVICE_CONTROL is returned when the controls the service currently accepts exclude stop,
+		// which is common while svc.StartPending. If this error is returned after the service has finished transitioning
+		// it is treated as a fatal error. The state is queried periodically to tell these apart, and the control is
+		// resent until the service accepts it or is confirmed to be shutting down.
+		err = wait.PollUntilContextTimeout(context.Background(), delay, timeout, true, func(context.Context) (bool, error) {
+			_, ctrlErr := s.svc.Control(svc.Stop)
+			if ctrlErr == nil {
+				return true, nil
+			}
+
+			// The service stopped on its own, or its process exited, between the last query and this control.
+			if errors.Is(ctrlErr, windows.ERROR_SERVICE_NOT_ACTIVE) || errors.Is(ctrlErr, windows.ERROR_BROKEN_PIPE) {
+				logrus.Debugf("service %s is no longer running (%v), waiting for it to stop", s.Name, ctrlErr)
+				return true, nil
+			}
+
+			if !errors.Is(ctrlErr, windows.ERROR_SERVICE_CANNOT_ACCEPT_CTRL) && !errors.Is(ctrlErr, windows.ERROR_INVALID_SERVICE_CONTROL) {
+				return false, fmt.Errorf("failed to send Stop signal to %s: %w", s.Name, ctrlErr)
+			}
+
+			status, err := s.svc.Query()
+			if err != nil {
+				return false, fmt.Errorf("error getting status for %s service after it rejected a stop signal: %w", s.Name, err)
+			}
+
+			if status.State == svc.StopPending || status.State == svc.Stopped {
+				logrus.Debugf("service %s is already stopping, waiting", s.Name)
+				return true, nil
+			}
+
+			// The service may have finished transitioning between the control and the query above, so
+			// ERROR_INVALID_SERVICE_CONTROL is only permanent if it still does not accept a stop now.
+			transitioning := status.State == svc.StartPending || status.State == svc.ContinuePending || status.State == svc.PausePending
+			acceptsStop := status.Accepts&svc.AcceptStop != 0
+			if errors.Is(ctrlErr, windows.ERROR_INVALID_SERVICE_CONTROL) && !transitioning && !acceptsStop {
+				return false, fmt.Errorf("failed to send Stop signal to %s while %s: %w", s.Name, serviceStateToString(status.State), ctrlErr)
+			}
+
+			logrus.Debugf("service %s cannot accept a stop signal while %s (%v), retrying", s.Name, serviceStateToString(status.State), ctrlErr)
+			return false, nil
+		})
+		if wait.Interrupted(err) {
+			return fmt.Errorf("%s did not accept a Stop signal within %s", s.Name, timeout)
 		}
-		logrus.Debugf("service %s could not accept a stop control (%v), waiting for it to stop", s.Name, err)
+		if err != nil {
+			return err
+		}
 	}
 
 	if _, err = s.WaitForState(svc.Stopped, getStateTransitionDelay(), getStateTransitionAttempts()); err != nil {
@@ -192,29 +244,28 @@ func (s *Service) Close() {
 // WaitForState monitors the current state of the Service and waits for it to transition to the desiredState.
 // WaitForState will wait for the state to transition for up to (delay * maxAttempts)
 func (s *Service) WaitForState(desiredState svc.State, delay time.Duration, maxAttempts int) (svc.Status, error) {
-	transitionedSuccessfully := false
-	var err error
-	var state svc.State
 	var serviceQuery svc.Status
+	timeout := delay * time.Duration(maxAttempts)
 
 	logrus.Infof("Waiting for service %s to enter state %s", s.Name, serviceStateToString(desiredState))
 
-	for i := 0; i < maxAttempts; i++ {
+	err := wait.PollUntilContextTimeout(context.Background(), delay, timeout, true, func(context.Context) (bool, error) {
+		var err error
 		serviceQuery, err = s.svc.Query()
 		if err != nil {
-			return serviceQuery, fmt.Errorf("failed to query service %s: %w", s.Name, err)
+			return false, fmt.Errorf("failed to query service %s: %w", s.Name, err)
 		}
-		state = serviceQuery.State
-		if state == desiredState {
-			transitionedSuccessfully = true
-			break
+		if serviceQuery.State == desiredState {
+			return true, nil
 		}
-		logrus.Infof("Waiting for service %s to enter state %s, current state: %s", s.Name, serviceStateToString(desiredState), serviceStateToString(state))
-		time.Sleep(delay)
+		logrus.Infof("Waiting for service %s to enter state %s, current state: %s", s.Name, serviceStateToString(desiredState), serviceStateToString(serviceQuery.State))
+		return false, nil
+	})
+	if wait.Interrupted(err) {
+		return serviceQuery, fmt.Errorf("%s failed to transition to desired state of %s within expected timeframe of %s. last known state was %s", s.Name, serviceStateToString(desiredState), timeout, serviceStateToString(serviceQuery.State))
 	}
-
-	if !transitionedSuccessfully {
-		return serviceQuery, fmt.Errorf("%s failed to transition to desired state of %s within expected timeframe of %s. last known state was %s", s.Name, serviceStateToString(desiredState), delay*time.Duration(maxAttempts), serviceStateToString(state))
+	if err != nil {
+		return serviceQuery, err
 	}
 
 	logrus.Infof("Service %s successfully transitioned to state %s", s.Name, serviceStateToString(desiredState))

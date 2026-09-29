@@ -33,6 +33,8 @@ type testServiceOpts struct {
 	Linger time.Duration
 	// StopPending holds the service in the stop pending state before it reports stopped.
 	StopPending time.Duration
+	// StartPending holds the service in the start pending state before it reports running.
+	StartPending time.Duration
 }
 
 func (o testServiceOpts) args(name string) []string {
@@ -42,6 +44,9 @@ func (o testServiceOpts) args(name string) []string {
 	}
 	if o.StopPending > 0 {
 		args = append(args, "--stop-pending="+o.StopPending.String())
+	}
+	if o.StartPending > 0 {
+		args = append(args, "--start-pending="+o.StartPending.String())
 	}
 	return append(args, name)
 }

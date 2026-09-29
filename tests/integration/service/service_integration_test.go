@@ -46,6 +46,7 @@ func TestRestartWaitsForLingeringProcess(t *testing.T) {
 	}
 
 	oldPid := servicePID(t, s)
+	openProcessHandle(t, oldPid)
 
 	if err := s.Restart(); err != nil {
 		t.Fatalf("failed to stop service: %v", err)
@@ -241,5 +242,29 @@ func TestRestartAfterExternalStopWithLingeringProcess(t *testing.T) {
 
 	if newPid := servicePID(t, s); newPid == oldPid {
 		t.Fatalf("service did not get a new process after restart")
+	}
+}
+
+// TestStopWhileStartPending covers a stop requested during startup. The SCM rejects controls
+// while the service is start pending, so Stop has to resend the control once it is running.
+func TestStopWhileStartPending(t *testing.T) {
+	s := installTestService(t, testServiceOpts{StartPending: 5 * time.Second})
+	scm := openSCMHandle(t, s.Name)
+
+	if err := scm.Start(); err != nil {
+		t.Fatalf("failed to start service: %v", err)
+	}
+	waitForSCMState(t, scm, svc.StartPending, 5*time.Second)
+
+	if err := s.Stop(); err != nil {
+		t.Fatalf("failed to stop service while start pending: %v", err)
+	}
+
+	status, err := scm.Query()
+	if err != nil {
+		t.Fatalf("failed to query service: %v", err)
+	}
+	if status.State != svc.Stopped {
+		t.Fatalf("service is in state %d after Stop, expected stopped", status.State)
 	}
 }

@@ -12,8 +12,9 @@ import (
 // Flags must precede the positional service name, as the flag package stops
 // parsing at the first non-flag argument.
 var (
-	linger      = flag.Duration("linger", 0, "how long the process keeps running after the service reports stopped")
-	stopPending = flag.Duration("stop-pending", 0, "how long the service reports stop pending before reporting stopped")
+	linger       = flag.Duration("linger", 0, "how long the process keeps running after the service reports stopped")
+	stopPending  = flag.Duration("stop-pending", 0, "how long the service reports stop pending before reporting stopped")
+	startPending = flag.Duration("start-pending", 0, "how long the service reports start pending before reporting running")
 )
 
 type handler struct{}
@@ -23,6 +24,12 @@ func (h *handler) Execute(
 	requests <-chan svc.ChangeRequest,
 	status chan<- svc.Status,
 ) (bool, uint32) {
+
+	if *startPending > 0 {
+		// No controls are accepted while start pending, so the SCM rejects them with ERROR_SERVICE_CANNOT_ACCEPT_CTRL.
+		status <- svc.Status{State: svc.StartPending, WaitHint: uint32((*startPending + 5*time.Second).Milliseconds())}
+		time.Sleep(*startPending)
+	}
 
 	const accepted = svc.AcceptStop | svc.AcceptShutdown
 	status <- svc.Status{State: svc.Running, Accepts: accepted}
