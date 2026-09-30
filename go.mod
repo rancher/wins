@@ -56,6 +56,7 @@ require (
 	github.com/magefile/mage v1.17.2
 	github.com/mattn/go-colorable v0.1.15
 	github.com/pkg/errors v0.9.1
+	github.com/rancher/rancher/pkg/plan v0.0.0-20260828155108-93802792d0f6
 	github.com/rancher/system-agent v0.16.0-rc.3
 	github.com/sirupsen/logrus v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
@@ -64,13 +65,9 @@ require (
 	golang.org/x/sys v0.47.0
 	google.golang.org/grpc v1.83.2 // indirect
 	k8s.io/api v0.37.1
-	sigs.k8s.io/yaml v1.6.0
-)
-
-require (
-	github.com/rancher/rancher/pkg/plan v0.0.0-20260828155108-93802792d0f6
 	k8s.io/apimachinery v0.37.1
 	k8s.io/client-go v0.37.1
+	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
