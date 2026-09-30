@@ -237,6 +237,19 @@ func Test() error {
 	return nil
 }
 
+// ServiceIntegration runs the Go integration tests which install real Windows services.
+// It must be run from an elevated process on a Windows system.
+func ServiceIntegration() error {
+	mg.Deps(Setup)
+	log.Printf("[ServiceIntegration] Running service integration tests for wins version %s \n", version)
+	envs := map[string]string{"GOOS": g.OS, "GOARCH": g.Arch, "CGO_ENABLED": g.CGoEnabled, "MAGEFILE_VERBOSE": g.Verbose}
+	if err := sh.RunWithV(envs, "go", "test", "-tags", "integration", "-count=1", "-v", "-timeout", "10m", "./tests/integration/service/..."); err != nil {
+		return err
+	}
+	log.Printf("[ServiceIntegration] successfully ran service integration tests on wins version %s \n", version)
+	return nil
+}
+
 // Integration target must be run on a wins system
 // with Containers feature / docker installed
 func Integration() error {
@@ -263,7 +276,7 @@ func Integration() error {
 }
 
 func TestAll() error {
-	mg.SerialDeps(Test, Integration)
+	mg.SerialDeps(Test, ServiceIntegration, Integration)
 	return nil
 }
 

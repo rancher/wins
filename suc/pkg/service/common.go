@@ -22,17 +22,17 @@ func getStateTransitionAttempts() int {
 	return stateTransitionAttempts
 }
 
-func getStateTransitionDelayInSeconds() time.Duration {
+func getStateTransitionDelay() time.Duration {
 	env := os.Getenv("CATTLE_WINS_STATE_TRANSITION_SECONDS")
 	if env != "" {
 		i, err := strconv.Atoi(env)
 		if err != nil {
 			logrus.Debugf("failed to cast 'CATTLE_WINDOWS_STATE_TRANSITION_SECONDS' (%s) to an integer, returning default value of %d", env, stateTransitionDelayInSeconds)
-			return stateTransitionDelayInSeconds
+			return stateTransitionDelayInSeconds * time.Second
 		}
-		return time.Duration(i)
+		return time.Duration(i) * time.Second
 	}
-	return stateTransitionDelayInSeconds
+	return stateTransitionDelayInSeconds * time.Second
 }
 
 func UnorderedSlicesEqual[T comparable](s1 []T, s2 []T) bool {

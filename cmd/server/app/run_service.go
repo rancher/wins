@@ -209,12 +209,19 @@ func runService(ctx context.Context, agent *systemagent.Agent) error {
 
 	h := &serviceHandler{
 		ctx:   ctx,
-		doneC: make(chan struct{}),
-		errC:  make(chan error),
+		errC:  make(chan error, 1),
 		agent: agent,
 	}
+	return serve(h, run)
+}
+
+// serve runs the service handler and returns once run has returned. svc.Run only reports
+// SERVICE_STOPPED to the SCM after Execute returns, so exiting any earlier can leave the SCM
+// believing the service crashed while stopping, which triggers its recovery actions.
+func serve(h *serviceHandler, run func(string, svc.Handler) error) error {
+	runErrC := make(chan error, 1)
 	go func() {
-		h.errC <- run(defaults.WindowsServiceName, h)
+		runErrC <- run(defaults.WindowsServiceName, h)
 	}()
 
 	for {
@@ -223,15 +230,14 @@ func runService(ctx context.Context, agent *systemagent.Agent) error {
 			if err != nil {
 				return err
 			}
-		case <-h.doneC:
-			return nil
+		case err := <-runErrC:
+			return err
 		}
 	}
 }
 
 type serviceHandler struct {
 	ctx   context.Context
-	doneC chan struct{}
 	errC  chan error
 	agent *systemagent.Agent
 }
@@ -265,6 +271,5 @@ Loop:
 		}
 	}
 
-	close(h.doneC)
 	return false, 0
 }
