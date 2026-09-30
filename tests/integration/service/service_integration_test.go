@@ -214,8 +214,8 @@ func TestStopFailsWhenProcessOutlivesDeadline(t *testing.T) {
 }
 
 // TestRestartAfterExternalStopWithLingeringProcess covers a service stopped by someone else whose
-// process outlives the stop. The SCM does not block a start on the old process, so Restart
-// should bring up a second process alongside it.
+// process outlives the stop. The SCM no longer reports the process once the service has stopped,
+// so Restart must wait on the process it saw while the service was running before starting again.
 func TestRestartAfterExternalStopWithLingeringProcess(t *testing.T) {
 	s := installTestService(t, testServiceOpts{Linger: 5 * time.Second})
 
@@ -240,8 +240,45 @@ func TestRestartAfterExternalStopWithLingeringProcess(t *testing.T) {
 		t.Fatalf("failed to restart service: %v", err)
 	}
 
+	if !processExited(t, h) {
+		t.Fatalf("Restart started a new process before the old process %d exited", oldPid)
+	}
 	if newPid := servicePID(t, s); newPid == oldPid {
 		t.Fatalf("service did not get a new process after restart")
+	}
+}
+
+// TestStartAfterExternalStopWithLingeringProcess covers the same case as
+// TestRestartAfterExternalStopWithLingeringProcess, but calls Start directly without going through Stop.
+func TestStartAfterExternalStopWithLingeringProcess(t *testing.T) {
+	s := installTestService(t, testServiceOpts{Linger: 5 * time.Second})
+
+	if err := s.Start(); err != nil {
+		t.Fatalf("failed to start service: %v", err)
+	}
+
+	oldPid := servicePID(t, s)
+	h := openProcessHandle(t, oldPid)
+	scm := openSCMHandle(t, s.Name)
+
+	if _, err := scm.Control(svc.Stop); err != nil {
+		t.Fatalf("failed to send stop control: %v", err)
+	}
+	waitForSCMState(t, scm, svc.Stopped, 5*time.Second)
+
+	if processExited(t, h) {
+		t.Fatalf("process exited before the start was attempted, the linger window was missed")
+	}
+
+	if err := s.Start(); err != nil {
+		t.Fatalf("failed to start service: %v", err)
+	}
+
+	if !processExited(t, h) {
+		t.Fatalf("Start started a new process before the old process %d exited", oldPid)
+	}
+	if newPid := servicePID(t, s); newPid == oldPid {
+		t.Fatalf("service did not get a new process after start")
 	}
 }
 
