@@ -1,0 +1,66 @@
+name: Daily RC Tag
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ref: main
+            base-pattern: 'v0\.17\.'
+          - ref: release/v2.16
+            base-pattern: 'v0\.16\.'
+          - ref: release/v2.15
+            base-pattern: 'v0\.15\.'
+          - ref: release/v2.14
+            base-pattern: 'v0\.14\.'
+          - ref: release/v2.13
+            base-pattern: 'v0\.13\.'
+          - ref: release/v2.12
+            base-pattern: 'v0\.12\.'
+          - ref: release/v2.11
+            base-pattern: 'v0\.11\.'
+    concurrency:
+      group: daily-rc-tag-${{ matrix.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Read App secrets
+        uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
+        with:
+          secrets: |
+            secret/data/github/repo/${{ github.repository }}/github/pr-actions-write-app/credentials appId | APP_ID ;
+            secret/data/github/repo/${{ github.repository }}/github/pr-actions-write-app/credentials privateKey | PRIVATE_KEY
+      - name: Create App token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ env.APP_ID }}
+          private-key: ${{ env.PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: wins
+          permission-contents: write
+      - name: Checkout branch and tags
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ matrix.ref }}
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Configure tagger
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Create tag when branch changed
+        run: ./scripts/tag-rc-if-ref-changed "${{ matrix.base-pattern }}" origin "${{ matrix.ref }}"
+      - name: Push tags
+        run: git push --tags
