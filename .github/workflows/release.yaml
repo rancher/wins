@@ -237,7 +237,7 @@ jobs:
           gh release edit -R "${GITHUB_REPOSITORY}" "${GITHUB_REF_NAME}" ${FLAGS}
 
   dispatch:
-    name: Dispatch Rancher upgrade
+    name: Dispatch Rancher updatecli
     runs-on: ubuntu-latest
     needs:
       - finalize-github-release
@@ -278,14 +278,13 @@ jobs:
           esac
 
           printf 'rancher_ref=%s\n' "$rancher_ref" >> "$GITHUB_OUTPUT"
-      - name: Dispatch Wins upgrade
+      - name: Dispatch updatecli Wins update
         if: ${{ steps.rancher-ref.outputs.rancher_ref != 'notfound' }}
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          gh workflow run "Wins Upgrade" \
+          gh workflow run updatecli.yml \
             --repo rancher/rancher \
             --ref "${{ steps.rancher-ref.outputs.rancher_ref }}" \
-            -f wins_version="${GITHUB_REF_NAME}" \
-            -f source_author="${GITHUB_ACTOR}" \
-            -f source_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            -f target=wins-system-agent \
+            -f tag="${GITHUB_REF_NAME}"
