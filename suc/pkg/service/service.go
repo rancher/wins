@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	stateTransitionAttempts       = 12
-	stateTransitionDelayInSeconds = 5
+	stateTransitionAttempts       = 60
+	stateTransitionDelayInSeconds = 1
 )
 
 // Service is a wrapper around a mgr.Service which simplifies
@@ -89,7 +89,21 @@ func (s *Service) Restart() error {
 	}
 
 	if err = s.svc.Start(); err != nil {
-		return fmt.Errorf("failed to start the %s service while attempting to restart: %w", s.Name, err)
+		if !errors.Is(err, windows.ERROR_SERVICE_ALREADY_RUNNING) {
+			return fmt.Errorf("failed to start the %s service while attempting to restart: %w", s.Name, err)
+		}
+
+		// The service can be started by something else between Stop and Start, such as its recovery
+		// actions. That only counts as a successful start if the service is actually starting or running,
+		// as the same error is returned for a service which is still stopping.
+		currentState, stateErr := s.GetState()
+		if stateErr != nil {
+			return fmt.Errorf("failed to get state of service %s after it was reported as already running: %w", s.Name, stateErr)
+		}
+		if currentState != svc.StartPending && currentState != svc.Running {
+			return fmt.Errorf("failed to start the %s service while attempting to restart, service is %s: %w", s.Name, serviceStateToString(currentState), err)
+		}
+		logrus.Infof("Service %s was already started by another caller, waiting for it to be running", s.Name)
 	}
 
 	return s.WaitForState(svc.Running, getStateTransitionDelayInSeconds(), getStateTransitionAttempts())

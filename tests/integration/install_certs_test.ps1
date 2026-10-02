@@ -15,21 +15,32 @@ $StartMockRancherHandler = {
     $http.Prefixes.Add("http://localhost:8080/")
     $http.Start()
 
-    while($http.IsListening) {
-        $ctx = $http.GetContext()
-        if ($ctx.Request.RawUrl -eq "/cacerts") {
-            $buf = [System.Text.Encoding]::UTF8.GetBytes($certs)
-            $ctx.response.ContentLength64 = $buf.Length
-            $ctx.Response.OutputStream.Write($buf, 0, $buf.Length)
-            $ctx.Response.OutputStream.Close()
+    try {
+        while($http.IsListening) {
+            $ctx = $http.GetContext()
+            if ($ctx.Request.RawUrl -eq "/cacerts") {
+                $buf = [System.Text.Encoding]::UTF8.GetBytes($certs)
+                $ctx.response.ContentLength64 = $buf.Length
+                $ctx.Response.OutputStream.Write($buf, 0, $buf.Length)
+                $ctx.Response.OutputStream.Close()
+            }
+            # A dedicated kill endpoint works around a deadlock
+            # that is encountered when Stop-Job is invoked at the same itme
+            # that this function is waiting on GetContext()
+            #
+            # note: this must unwind the loop rather than call 'exit'. Terminating
+            # the job's runspace mid-flight leaves the job object in a state where
+            # Remove-Job throws a NullReferenceException from inside the job manager.
+            if ($ctx.Request.RawUrl -eq "/kill") {
+                $ctx.Response.OutputStream.Close()
+                break
+            }
         }
-        # A dedicated kill endpoint works around a deadlock
-        # that is encountered when Stop-Job is invoked at the same itme
-        # that this function is waiting on GetContext()
-        if ($ctx.Request.RawUrl -eq "/kill") {
-            $ctx.Response.OutputStream.Close()
-            exit 0
-        }
+    }
+    finally {
+        # always release port 8080 so a failure here can't cascade into other tests
+        $http.Stop()
+        $http.Close()
     }
 }
 
@@ -225,7 +236,14 @@ Describe "Install script certificate tests" {
                 # and cascade into every other test in this file.
                 Log-Info "Stopping mock server"
                 curl.exe -sS --max-time 5 http://localhost:8080/kill 2>&1 | Out-Null
-                Remove-Job -Id $job.Id -Force -ErrorAction SilentlyContinue
+                if ($null -ne $job) {
+                    try {
+                        $null = Wait-Job -Job $job -Timeout 10
+                        Remove-Job -Job $job -Force
+                    } catch {
+                        Log-Warn "Failed to clean up the mock Rancher server job: $($_.Exception.Message), process may have exited early"
+                    }
+                }
             }
         }
 
