@@ -268,7 +268,7 @@ jobs:
 
           case "${GITHUB_REF_NAME}" in
             v0.17.*) rancher_ref=main ;;
-            v0.16.*) rancher_ref=release/v2.16 ;;
+            v0.16.*) rancher_ref=main ;;
             v0.15.*) rancher_ref=release/v2.15 ;;
             v0.14.*) rancher_ref=release/v2.14 ;;
             v0.13.*) rancher_ref=release/v2.13 ;;

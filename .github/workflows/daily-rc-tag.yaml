@@ -17,8 +17,6 @@ jobs:
       matrix:
         include:
           - ref: main
-            base-pattern: 'v0\.17\.'
-          - ref: release/v2.16
             base-pattern: 'v0\.16\.'
           - ref: release/v2.15
             base-pattern: 'v0\.15\.'
