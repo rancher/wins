@@ -7,7 +7,7 @@ import (
 	"os"
 
 	planapi "github.com/rancher/rancher/pkg/plan"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 )
