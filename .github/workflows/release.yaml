@@ -40,7 +40,7 @@ jobs:
       - name: Install Dependencies
         run: |
           go install github.com/magefile/mage@69e6f824732575e57977f68f8f3dd78313d666e5 # v1.16
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@c0d3ddc9cf3faa61a4e378e879ece580256d76e5 # v2.12.2
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@114493f9b3e7257d29e4130f2b4a4aadefbb6845 # v2.14.0
       
       # added a start docker service step to ensure that the docker service is running before running the e2e tests
       - name: Start Docker Service
@@ -101,7 +101,7 @@ jobs:
       - name: Install Dependencies
         run: |
           go install github.com/magefile/mage@69e6f824732575e57977f68f8f3dd78313d666e5 # v1.16
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@c0d3ddc9cf3faa61a4e378e879ece580256d76e5 # v2.12.2
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@114493f9b3e7257d29e4130f2b4a4aadefbb6845 # v2.14.0
 
       # added a start docker service step to ensure that the docker service is running before running the e2e tests
       - name: Start Docker Service
@@ -161,7 +161,7 @@ jobs:
       - name: Install Dependencies
         run: |
           go install github.com/magefile/mage@69e6f824732575e57977f68f8f3dd78313d666e5 # v1.16
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@c0d3ddc9cf3faa61a4e378e879ece580256d76e5 # v2.12.2
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@114493f9b3e7257d29e4130f2b4a4aadefbb6845 # v2.14.0
 
       - name: build-binary
         run: |
