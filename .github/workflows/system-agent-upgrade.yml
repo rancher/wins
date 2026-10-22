@@ -1,0 +1,210 @@
+name: System Agent Upgrade
+
+on:
+  workflow_dispatch:
+    inputs:
+      system_agent_version:
+        type: string
+        description: "Published system-agent version tag to update to"
+        required: true
+      source_author:
+        type: string
+        description: "Optional username of the source for this workflow run"
+        required: false
+      source_url:
+        type: string
+        description: "Optional URL of the source for this workflow run"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  system-agent-upgrade:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+    env:
+      SYSTEM_AGENT_VERSION: ${{ inputs.system_agent_version }}
+      INPUT_SOURCE_AUTHOR: ${{ inputs.source_author }}
+      INPUT_SOURCE_URL: ${{ inputs.source_url }}
+    steps:
+      - name: Validate dispatch inputs
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" != "branch" ]]; then
+            echo "::error::Dispatch this workflow from a branch, not a tag."
+            exit 1
+          fi
+
+          if [[ ! "$SYSTEM_AGENT_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
+            echo "::error::system_agent_version must be a stable or release-candidate tag, such as v0.16.0 or v0.16.0-rc.3."
+            exit 1
+          fi
+
+          if [[ -n "$INPUT_SOURCE_AUTHOR" && ! "$INPUT_SOURCE_AUTHOR" =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,37}[A-Za-z0-9])?$ ]]; then
+            echo "::error::source_author must be a GitHub username."
+            exit 1
+          fi
+
+          if [[ -n "$INPUT_SOURCE_URL" && ! "$INPUT_SOURCE_URL" =~ ^https://[^[:space:]]+$ ]]; then
+            echo "::error::source_url must be an HTTPS URL without whitespace."
+            exit 1
+          fi
+
+      - name: Read App Secrets
+        uses: rancher-eio/read-vault-secrets@0da85151ad1f19ed7986c41587e45aac1ace74b6 # v3
+        with:
+          secrets: |
+            secret/data/github/repo/${{ github.repository }}/github/app-credentials appId | APP_ID ;
+            secret/data/github/repo/${{ github.repository }}/github/app-credentials privateKey | PRIVATE_KEY
+
+      - name: Create App Token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: app-token
+        with:
+          app-id: ${{ env.APP_ID }}
+          private-key: ${{ env.PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Check out repository code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Install Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Update system-agent dependency
+        run: |
+          go get "github.com/rancher/system-agent@${SYSTEM_AGENT_VERSION}"
+          go mod tidy
+
+          actual_version="$(go list -m -f '{{.Version}}' github.com/rancher/system-agent)"
+          if [[ "$actual_version" != "$SYSTEM_AGENT_VERSION" ]]; then
+            echo "::error::Expected system-agent $SYSTEM_AGENT_VERSION, but Go selected $actual_version."
+            exit 1
+          fi
+
+      - name: Check for dependency changes
+        id: changes
+        shell: bash
+        run: |
+          if git diff --quiet -- go.mod go.sum; then
+            echo "No go.mod or go.sum changes; no pull request is needed."
+            echo "changes_exist=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go.mod or go.sum changed:"
+            git diff --name-only -- go.mod go.sum
+            echo "changes_exist=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push update branch
+        id: branch
+        if: steps.changes.outputs.changes_exist == 'true'
+        shell: bash
+        run: |
+          branch="githubaction-system-agent-upgrade-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git switch --create "$branch"
+          git add -- go.mod go.sum
+          git commit -m "Update system-agent to ${SYSTEM_AGENT_VERSION}" \
+            -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+          git push origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        if: steps.changes.outputs.changes_exist == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        id: pull-request
+        env:
+          SYSTEM_AGENT_VERSION: ${{ env.SYSTEM_AGENT_VERSION }}
+          INPUT_SOURCE_AUTHOR: ${{ env.INPUT_SOURCE_AUTHOR }}
+          INPUT_SOURCE_URL: ${{ env.INPUT_SOURCE_URL }}
+          SOURCE_BRANCH: ${{ steps.branch.outputs.branch }}
+          BASE_BRANCH: ${{ github.ref_name }}
+          REPOSITORY: ${{ github.repository }}
+          WORKFLOW_RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const fs = require('fs')
+            const { SYSTEM_AGENT_VERSION, INPUT_SOURCE_AUTHOR, INPUT_SOURCE_URL, SOURCE_BRANCH } = process.env
+            const { BASE_BRANCH, REPOSITORY, WORKFLOW_RUN_ID, SERVER_URL } = process.env
+            const workflowRunURL = `${SERVER_URL}/${REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}`
+            let body = fs.readFileSync('.github/pull_request_template.md', 'utf8')
+
+            function addAfterComment(comment, details) {
+              if (!body.includes(comment)) {
+                throw new Error(`Expected PR template comment was not found: ${comment}`)
+              }
+              body = body.replace(comment, `${comment}\n\n${details}`)
+            }
+
+            function escapeMarkdown(value) {
+              return value.replace(/[\\`*_{}\[\]()#+.!|<>~-]/g, '\\$&')
+            }
+
+            const sourceDetails = [
+              `Updated to \`${SYSTEM_AGENT_VERSION}\` by the system-agent upgrade workflow.`,
+              `Workflow run: ${workflowRunURL}`,
+            ]
+            if (INPUT_SOURCE_URL) {
+              sourceDetails.push(`Source URL: ${escapeMarkdown(INPUT_SOURCE_URL)}`)
+            }
+            if (INPUT_SOURCE_AUTHOR) {
+              sourceDetails.push(`Source author: @${INPUT_SOURCE_AUTHOR}`)
+            }
+
+            body = body.replace('Issue:', 'Issue: No linked tracking issue (automated dependency update).')
+            addAfterComment(
+              '<!-- Include information of the changes, including collateral areas which have been affected by this PR as requirement or for convenience. -->',
+              'Updates the embedded `github.com/rancher/system-agent` dependency in `go.mod` and tidies `go.mod` and `go.sum`.'
+            )
+            addAfterComment(
+              '<!-- Outline technical changes which may pass unobserved or may help to understand the process of solving the issue -->',
+              `Ran \`go get github.com/rancher/system-agent@${SYSTEM_AGENT_VERSION}\` followed by \`go mod tidy\`.`
+            )
+            addAfterComment(
+              '<!-- Areas that should be tested can include Airgap checks, Rancher upgrades, K8s upgrade, etc. -->',
+              `The workflow verified that Go selected system-agent \`${SYSTEM_AGENT_VERSION}\`. Windows build and integration checks have not run in this workflow; review the pull request CI results.`
+            )
+            addAfterComment(
+              '<!-- Create a detailed list of areas to be analyzed which may be affected by the changes, which would require a prior research to avoid regressions. -->',
+              'Review system-agent plan execution and the Windows build/integration checks for compatibility with the updated dependency.'
+            )
+            addAfterComment(
+              '<!-- Attach screenshot or video of the changes and eventual comparison if you find it necessary -->',
+              'Not applicable to this dependency-only update.'
+            )
+            body = body.replace('Issue: No linked tracking issue (automated dependency update).', `Issue: No linked tracking issue (automated dependency update).\n\n${sourceDetails.join('\n\n')}`)
+
+            const { data: pullRequest } = await github.rest.pulls.create({
+              title: `[${BASE_BRANCH}] update system-agent to ${SYSTEM_AGENT_VERSION}`,
+              body,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: BASE_BRANCH,
+              head: SOURCE_BRANCH,
+            })
+
+            core.summary.addHeading('System-agent update pull request')
+              .addLink(pullRequest.html_url, pullRequest.html_url)
+            await core.summary.write()
+            return pullRequest.html_url
+
+      - name: Report pull request
+        if: steps.changes.outputs.changes_exist == 'true'
+        env:
+          PULL_REQUEST_URL: ${{ steps.pull-request.outputs.result }}
+        run: |
+          echo "Pull request: ${PULL_REQUEST_URL}" >> "$GITHUB_STEP_SUMMARY"
