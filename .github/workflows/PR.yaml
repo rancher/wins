@@ -24,7 +24,7 @@ jobs:
     - name: Install Go
       uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
-        go-version: 'stable'
+        go-version-file: 'go.mod'
         cache: 'false'
 
     - name: Install Dependencies
@@ -36,7 +36,7 @@ jobs:
       shell: pwsh
       run: |
         set PSModulePath=&&powershell -command "mage BuildAll"
-    
+
     # added a start docker service step to ensure that the docker service is running before running the e2e tests
     - name: Start Docker Service
       id: start-docker-service
