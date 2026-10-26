@@ -5,7 +5,7 @@ import (
 
 	"github.com/rancher/wins/cmd/server/app"
 	"github.com/rancher/wins/pkg/defaults"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func NewCommand() *cli.Command {
