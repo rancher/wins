@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/go/pkg/mod \
 COPY . .
 RUN --mount=type=cache,target=/root/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go run github.com/magefile/mage -d magefiles buildAll
+    go run github.com/magefile/mage buildAll
 
 FROM scratch AS artifacts
 COPY --from=build /src/artifacts/ /artifacts/
