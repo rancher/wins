@@ -1,16 +1,12 @@
 module github.com/rancher/wins
 
-go 1.26.7
+go 1.26.10
 
 // replacements to match embedded system-agent
 replace (
-	github.com/fsnotify/fsnotify => github.com/fsnotify/fsnotify v1.9.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.68.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.43.0
-	golang.org/x/oauth2 => golang.org/x/oauth2 v0.37.0
-	golang.org/x/sync => golang.org/x/sync v0.24.0
-	golang.org/x/sys => golang.org/x/sys v0.49.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.44.0
 )
 
 replace (
