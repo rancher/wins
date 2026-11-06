@@ -1,6 +1,6 @@
 module github.com/rancher/wins
 
-go 1.26.0
+go 1.26.10
 
 // replacements to match embedded system-agent
 replace (
@@ -58,7 +58,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.5.0
-	github.com/rancher/system-agent v0.13.3
+	github.com/rancher/system-agent v0.13.4-rc.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/sync v0.24.0
