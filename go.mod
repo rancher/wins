@@ -1,12 +1,12 @@
 module github.com/rancher/wins
 
-go 1.26.4
+go 1.26.10
 
 // replacements to match embedded system-agent
 replace (
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.68.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.45.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.43.0
 )
 
 replace (
@@ -59,7 +59,7 @@ require (
 	github.com/mattn/go-colorable v0.1.15
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.6.1
-	github.com/rancher/system-agent v0.15.3
+	github.com/rancher/system-agent v0.15.4-rc.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/urfave/cli/v2 v2.27.6
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
