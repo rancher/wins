@@ -1,16 +1,12 @@
 module github.com/rancher/wins
 
-go 1.26.7
+go 1.26.10
 
 // replacements to match embedded system-agent
 replace (
-	github.com/fsnotify/fsnotify => github.com/fsnotify/fsnotify v1.9.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.68.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp => go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc => go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.43.0
-	golang.org/x/oauth2 => golang.org/x/oauth2 v0.37.0
-	golang.org/x/sync => golang.org/x/sync v0.24.0
-	golang.org/x/sys => golang.org/x/sys v0.49.0
 )
 
 replace (
@@ -57,7 +53,7 @@ require (
 	github.com/mattn/go-colorable v0.1.15
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/rancher/pkg/plan v0.0.0-20260828155108-93802792d0f6
-	github.com/rancher/system-agent v0.16.0-rc.5
+	github.com/rancher/system-agent v0.16.0-rc.6
 	github.com/sirupsen/logrus v1.10.0
 	github.com/urfave/cli/v2 v2.27.7
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
