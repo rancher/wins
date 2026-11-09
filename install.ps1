@@ -20,13 +20,18 @@
       - CATTLE_LABELS
       - CATTLE_TAINTS
       Advanced Environment Variables
-      - CATTLE_AGENT_BINARY_URL (default: latest GitHub release)
+      - CATTLE_AGENT_BINARY_URL (default: pinned GitHub release)
+      - CATTLE_AGENT_UNINSTALL_URL (default: pinned GitHub release)
       - CATTLE_PRESERVE_WORKDIR (default: false)
       - CATTLE_REMOTE_ENABLED (default: true)
       - CATTLE_LOCAL_ENABLED (default: false)
       - CATTLE_ID (default: autogenerate)
       - CATTLE_AGENT_BINARY_LOCAL (default: false)
       - CATTLE_AGENT_BINARY_LOCAL_LOCATION (default: )
+      - CATTLE_AGENT_BINARY_CHECKSUM (default: hardcoded fallback checksum)
+      - CATTLE_AGENT_UNINSTALL_LOCAL (default: false)
+      - CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION (default: )
+      - CATTLE_AGENT_UNINSTALL_CHECKSUM (default: hardcoded fallback checksum)
       - CSI_PROXY_URL (default: )
       - CSI_PROXY_VERSION (default: )
       - CSI_PROXY_KUBELET_PATH (default: )
@@ -72,7 +77,10 @@ param (
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$FALLBACK = "v0.4.15"
+$FALLBACK = "v0.5.5"
+$FALLBACK_BINARY_SUM = "cb42373cad3260d3b628de3d18cad13c0825577337499e4b9a05dc8926300512"
+$FALLBACK_UNINSTALL_SUM  = "bcc0f990176079f7dc69e668907230ac785d4676e037eef5b70cf3316e614adc"
+$RANCHER_SCRIPTS_PATH = "C:/rancher-scripts"
 
 function Invoke-WinsInstaller {
     [CmdletBinding()]
@@ -139,6 +147,22 @@ function Invoke-WinsInstaller {
         $writer.Flush()
         $stringAsStream.Position = 0
         return (Get-FileHash -InputStream $stringAsStream -Algorithm SHA256).Hash.ToLower()
+    }
+
+    function Set-FallbackVersion {
+        param (
+            [Parameter(Mandatory=$true)]
+            [string]
+            $Reason
+        )
+        Write-LogInfo $Reason
+        $env:VERSION = $FALLBACK
+        if (-Not $env:CATTLE_AGENT_BINARY_CHECKSUM) {
+            $env:CATTLE_AGENT_BINARY_CHECKSUM = $FALLBACK_BINARY_SUM
+        }
+        if (-Not $env:CATTLE_AGENT_UNINSTALL_CHECKSUM) {
+            $env:CATTLE_AGENT_UNINSTALL_CHECKSUM = $FALLBACK_UNINSTALL_SUM
+        }
     }
 
     function Get-Args {
@@ -268,24 +292,31 @@ function Invoke-WinsInstaller {
             }
 
             if (-Not $env:CATTLE_AGENT_BINARY_URL) {
-                $rateLimit = $(curl.exe --connect-timeout 60 --max-time 300 $env:CURL_CAFLAG -sfL "https://api.github.com/rate_limit") | ConvertFrom-Json
-               
-                if ($rateLimit.rate.remaining -eq 0) {
-                    Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
-                    $env:VERSION = $FALLBACK
-                }
-                else {
-                    try {
-                        $env:VERSION = $(curl.exe --connect-timeout 60 $env:CURL_CAFLAG -sfL "https://api.github.com/repos/rancher/wins/releases/latest" | ConvertFrom-Json).tag_name
-                    }
-                    catch {
-                        Write-LogInfo "Error contacting GitHub to retrieve the latest version, falling back to version: $FALLBACK"
-                        $env:VERSION = $FALLBACK
-                    }
-                }
-
+                Set-FallbackVersion "Using pinned fallback version ${FALLBACK} for the default upstream agent binary"
                 $env:CATTLE_AGENT_BINARY_URL = "https://github.com/rancher/wins/releases/download/$env:VERSION/wins.exe"
                 $env:BINARY_SOURCE = "upstream"
+            }
+        }
+
+        if ($env:CATTLE_AGENT_UNINSTALL_LOCAL -eq "true") {
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION) {
+                Write-LogFatal "No local uninstall location was specified"
+            }
+            $env:UNINSTALL_SOURCE = "local"
+        }
+        else {
+            $env:UNINSTALL_SOURCE = "remote"
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_URL -and $env:CATTLE_AGENT_BINARY_BASE_URL) {
+                $env:CATTLE_AGENT_UNINSTALL_URL = "$env:CATTLE_AGENT_BINARY_BASE_URL/wins-agent-uninstall.ps1"
+            }
+
+            if (-Not $env:CATTLE_AGENT_UNINSTALL_URL) {
+                if ($env:VERSION) {
+                    Write-LogInfo "Version $env:VERSION used for downloading the wins binary, will reuse for uninstall script"
+                }
+                Set-FallbackVersion "Using pinned fallback version ${FALLBACK} for the default upstream agent uninstall script."
+                $env:CATTLE_AGENT_UNINSTALL_URL = "https://raw.githubusercontent.com/rancher/wins/refs/tags/$env:VERSION/uninstall.ps1"
+                $env:UNINSTALL_SOURCE = "upstream"
             }
         }
 
@@ -342,46 +373,96 @@ function Invoke-WinsInstaller {
         }
     }
 
-    function Invoke-WinsAgentDownload() {
-        if (-Not (Test-Path "$env:CATTLE_AGENT_BIN_PREFIX/bin")) {
-            New-Item -Path "$env:CATTLE_AGENT_BIN_PREFIX/bin" -ItemType Directory -Force | Out-Null
+    function Invoke-RancherFileDownload {
+        [CmdletBinding()]
+        param (
+            [Parameter(Mandatory=$true)]
+            [string]
+            $Name,            # human-readable name for log messages, e.g. "wins binary"
+
+            [Parameter(Mandatory=$true)]
+            [string]
+            $DestinationPath, # full destination file path
+
+            [Parameter(Mandatory=$true)]
+            [string]
+            $Source,          # "local", "remote", or "upstream"
+
+            [Parameter(Mandatory=$false)]
+            [string]
+            $Url,             # download URL (required when Source != "local")
+
+            [Parameter(Mandatory=$false)]
+            [string]
+            $LocalPath,       # source path (required when Source == "local")
+
+            [Parameter(Mandatory=$false)]
+            [string]
+            $Checksum         # expected SHA256 (optional; always verified when provided)
+        )
+
+        if (-Not (Test-Path (Split-Path $DestinationPath))) {
+            New-Item -Path (Split-Path $DestinationPath) -ItemType Directory -Force | Out-Null
         }
-        
-        if ($env:CATTLE_AGENT_BINARY_LOCAL -eq "true") {
-            Write-LogInfo "Using local Wins installer from $($env:CATTLE_AGENT_BINARY_LOCAL_LOCATION)"
-            Copy-Item -Path $env:CATTLE_AGENT_BINARY_LOCAL_LOCATION -Destination "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe"
+
+        if ($Source -eq "local") {
+            Write-LogInfo "Using local $Name from $LocalPath"
+            Copy-Item -Path $LocalPath -Destination $DestinationPath -Force
         }
         else {
-            Write-LogInfo "Downloading Wins from $($env:CATTLE_AGENT_BINARY_URL)"
+            Write-LogInfo "Downloading $Name from $Url"
+            $env:CURL_BIN_CAFLAG = ""
             if ($env:BINARY_SOURCE -ne "upstream") {
                 $env:CURL_BIN_CAFLAG = $env:CURL_CAFLAG
             }
-            else {
-                $env:CURL_BIN_CAFLAG = ""
-            }
 
-            $retries = 0  
+            $retries = 0
             while ($retries -lt 6) {
-                $responseCode = $(curl.exe --connect-timeout 60 --max-time 300 --write-out "%{http_code}\n" $env:CURL_BIN_CAFLAG -sfL "$($env:CATTLE_AGENT_BINARY_URL)" -o "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe")
-                
-                switch ( $responseCode ) {
-                    { "ok200", 200 } {
-                        Write-LogInfo "Successfully downloaded the wins binary." 
-                        $retries = 99
-                        break
-                    }
-                    default {
-                        Write-LogError "$responseCode received while downloading the wins binary. Sleeping for 5 seconds and trying again." 
-                        Start-Sleep -Seconds 5
-                        $retries++
-                        continue
-                    }
+                $responseCode = curl.exe --connect-timeout 60 --max-time 300 --write-out "%{http_code}" $env:CURL_BIN_CAFLAG -sL $Url -o $DestinationPath
+
+                if ($responseCode -eq "200") {
+                    Write-LogInfo "Successfully downloaded $Name."
+                    break
+                } else {
+                    Write-LogError "$responseCode received while downloading $Name. Sleeping for 5 seconds and trying again."
+                    Start-Sleep -Seconds 5
+                    $retries++
                 }
             }
         }
-        if (-Not (Test-Path "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe")) {
-            Write-LogFatal "Wins.exe doesn't appear to have been installed."
+
+        if (-Not (Test-Path $DestinationPath)) {
+            Write-LogFatal "$Name doesn't appear to have been installed at $DestinationPath"
         }
+
+        if ($Checksum) {
+            Write-LogInfo "Verifying checksum for $Name"
+            $actual = (Get-FileHash -Path $DestinationPath -Algorithm SHA256).Hash.ToLower()
+            if ($actual -ne $Checksum.ToLower()) {
+                Write-LogFatal "Checksum validation failed for $Name"
+            }
+            Write-LogInfo "Checksum verification passed for $Name"
+        }
+    }
+
+    function Invoke-WinsAgentDownload {
+        Invoke-RancherFileDownload `
+            -Name            "wins binary" `
+            -DestinationPath "$env:CATTLE_AGENT_BIN_PREFIX/bin/wins.exe" `
+            -Source          $env:BINARY_SOURCE `
+            -Url             $env:CATTLE_AGENT_BINARY_URL `
+            -LocalPath       $env:CATTLE_AGENT_BINARY_LOCAL_LOCATION `
+            -Checksum        $env:CATTLE_AGENT_BINARY_CHECKSUM
+    }
+
+    function Invoke-WinsUninstallScriptDownload {
+        Invoke-RancherFileDownload `
+            -Name            "uninstall script" `
+            -DestinationPath "$RANCHER_SCRIPTS_PATH/wins-agent-uninstall.ps1" `
+            -Source          $env:UNINSTALL_SOURCE `
+            -Url             $env:CATTLE_AGENT_UNINSTALL_URL `
+            -LocalPath       $env:CATTLE_AGENT_UNINSTALL_LOCAL_LOCATION `
+            -Checksum        $env:CATTLE_AGENT_UNINSTALL_CHECKSUM
     }
 
     function Test-CaCheckSum() {
@@ -420,42 +501,61 @@ function Invoke-WinsInstaller {
     # Import-Certificates imports one or more
     # certificates stored in the file specified by $ENV:RANCHER_CERT.
     # In the event that $env:RANCHER_CERT contains multiple certificate
-    # blocks, a regular expression is used to iterate across all blocks
-    # and import them individually.
+    # blocks, a regular expression is used to iterate across all valid x509 blocks
+    # and import them individually. Errant non-certificate blocks and any lingering
+    #  whitespace are ignored.
     function Import-Certificates() {
-        $rawCerts = Get-Content $env:RANCHER_CERT -Raw
-        # splits blocks, handles
-        # CLRF line endings if present
-        $pattern  = "(?<=-\r?\n)(?=-+)"
-        $allCerts = $rawCerts -split $pattern
-
-        if ($allCerts.Length -eq 0) {
-            Write-LogWarn "No Certs found in certs file, check that $env:RANCHER_CERT exists and that the correct certificate is configured at $( $env:CATTLE_SERVER )/cacerts."
+        if (-Not (Test-Path $env:RANCHER_CERT)) {
+            Write-LogWarn "Certificate file not found at $env:RANCHER_CERT. Check that CATTLE_CA_CHECKSUM is correct and $($env:CATTLE_SERVER)/cacerts is reachable."
             return
         }
 
-        if ($allCerts.Length -eq 1) {
-            Write-LogInfo "Detected single certificate"
-            Import-Certificate -FilePath $env:RANCHER_CERT -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
+        $certBlocks = [regex]::Matches(
+            (Get-Content $env:RANCHER_CERT -Raw),
+            '-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----'
+        )
+
+        if ($certBlocks.Count -eq 0) {
+            Write-LogWarn "No valid certificate blocks found in $env:RANCHER_CERT. Check that the correct certificate is configured at $($env:CATTLE_SERVER)/cacerts."
             return
         }
 
-        # Import-Certificate does not automatically handle chains included in a single file,
-        # so we need to manually extract and import each certificate into the Root store.
-        Write-LogInfo "Detected certificate chain"
+        Write-LogInfo "Found $($certBlocks.Count) certificate(s) in $env:RANCHER_CERT"
 
-        $collection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
-        ForEach($cert in $allCerts) {
-            Write-LogInfo "Adding a certificate entry from the provided chain to the collection..."
-            $x5092 = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Text.Encoding]::UTF8.GetBytes($cert))
-            $collection.Add($x5092)
-        }
-
-        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new([System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
+        $certStore = [System.Security.Cryptography.X509Certificates.X509Store]::new(
+            [System.Security.Cryptography.X509Certificates.StoreName]::Root, "LocalMachine")
         $certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed)
-        Write-LogInfo "Adding collection to certificate store"
-        $certStore.AddRange($collection)
-        $certStore.Close()
+
+        try {
+            $imported = 0
+            foreach ($block in $certBlocks) {
+                $x509 = $null
+                try {
+                    $x509 = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
+                        [System.Text.Encoding]::UTF8.GetBytes($block.Value))
+                    Write-LogInfo "Importing certificate: ThumbPrint='$($x509.Thumbprint)'"
+                    $certStore.Add($x509)
+                    $imported++
+                }
+                catch {
+                    Write-LogWarn "Failed to import a certificate block. Error: $($_.Exception.Message)"
+                } finally {
+                    if ($null -ne $x509) {
+                        $x509.Dispose()
+                    }
+                }
+            }
+
+            if ($imported -eq 0) {
+                Write-LogWarn "No certificates were successfully imported from $env:RANCHER_CERT"
+            }
+            else {
+                Write-LogInfo "Successfully imported $imported of $($certBlocks.Count) certificate(s) into the Root store"
+            }
+        }
+        finally {
+            $certStore.Close()
+        }
     }
 
     function Test-RancherConnection {
@@ -545,13 +645,6 @@ function Invoke-WinsInstaller {
     function Set-WinsConfig() {
         $winsConfig =
 @"
-white_list:
-  processPaths:
-    - $($env:CATTLE_AGENT_CONFIG_DIR)/powershell.exe
-    - C:/etc/wmi-exporter/wmi-exporter.exe
-    - C:/etc/windows-exporter/windows-exporter.exe
-  proxyPorts:
-    - 9796
 "@
         # Overwrite the existing contents of the file using 'Set-Content'
         Set-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $winsConfig
@@ -592,7 +685,49 @@ csi-proxy:
         Add-Content -Path $env:CATTLE_AGENT_CONFIG_DIR/config -Value $proxyConfig
     }
 
-    function Stop-Agent() { 
+    function Start-Agent() {
+        [CmdletBinding()]
+        param (
+            [Parameter()]
+            [string]
+            $ServiceName
+        )
+        if (-Not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
+            Write-LogInfo "$ServiceName service not found, registering now."
+            Push-Location c:\usr\local\bin
+            try {
+                if ($env:CATTLE_ENABLE_WINS_DELAYED_START -eq "true") {
+                    wins.exe srv app run --register --delayed-start
+                } else {
+                    wins.exe srv app run --register
+                }
+            } catch {
+                Write-LogFatal "Failed to execute wins.exe: $($_.Exception.Message)"
+            }
+            Pop-Location
+            Start-Sleep -s 5
+        }
+
+        Write-LogInfo "Starting $ServiceName service."
+        try {
+            Start-Service -Name $ServiceName
+        } catch {
+            Write-LogFatal "$ServiceName failed to start: $($_.Exception.Message)"
+        }
+
+        $timeout = 120
+        $elapsed = 0
+        while ((Get-Service $ServiceName).Status -ne 'Running') {
+            if ($elapsed -ge $timeout) {
+                Write-LogFatal "$ServiceName did not reach 'Running' state within $timeout seconds."
+            }
+            Write-LogInfo "Waiting for $ServiceName service to start (${elapsed}s elapsed)."
+            Start-Sleep -s 5
+            $elapsed += 5
+        }
+    }
+
+    function Stop-Agent() {
         [CmdletBinding()]
         param (
             [Parameter()]
@@ -786,6 +921,7 @@ csi-proxy:
         Test-RancherConnection
         Stop-Agent -ServiceName $serviceName
         Invoke-WinsAgentDownload
+        Invoke-WinsUninstallScriptDownload
         Copy-WinsForCharts
         Set-WinsConfig
 
@@ -816,35 +952,7 @@ csi-proxy:
             }
         }
                 
-        try {
-            Write-LogInfo "Checking if $serviceName service exists."
-            Get-Service -Name $serviceName
-        }
-        catch {
-            Write-LogInfo "$serviceName service not found, enabling agent service."
-            Push-Location c:\usr\local\bin
-            if ($env:CATTLE_ENABLE_WINS_DELAYED_START -eq "true") {
-                wins.exe srv app run --register --delayed-start
-            } else {
-                wins.exe srv app run --register
-            }
-            Pop-Location
-            Start-Sleep -s 5
-        }
-
-        try
-        {
-            Write-LogInfo "Starting $serviceName service."
-            Start-Service -Name $serviceName
-        } catch {
-            Write-LogInfo "$serviceName failed to start. Check the $serviceName logs for more information"
-            Write-LogInfo "Command: Get-WinEvent -ProviderName $serviceName | select-object TimeCreated,Message | Format-Table -wrap"
-            exit 1
-        }
-        while ((Get-Service $serviceName).Status -ne 'Running') {
-            Write-LogInfo "Waiting for $serviceName service to start."
-            Start-Sleep -s 5
-        }
+        Start-Agent -ServiceName $serviceName
     }
 
     Confirm-WindowsFeatures -RequiredFeatures @("Containers")

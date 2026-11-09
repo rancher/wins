@@ -3,7 +3,6 @@ package tls
 import (
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -34,7 +33,7 @@ func (c *Config) SetupGenericTLSConfigFromFile() (*x509.CertPool, error) {
 		return nil, fmt.Errorf("[SetupGenericTLSConfigFromFile] unable to read certificate %s from %s: %v", localCertPath.Name(), c.CertFilePath, err)
 	}
 
-	certs, err := ioutil.ReadFile(c.CertFilePath)
+	certs, err := os.ReadFile(c.CertFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("[SetupGenericTLSConfigFromFile] failed to read local cert file %q: %v", c.CertFilePath, err)
 	}

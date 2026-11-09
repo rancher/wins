@@ -40,28 +40,3 @@ func GetBinaryPath(binaryName string) (string, error) {
 
 	return "", err
 }
-
-func GetBinarySHA1Hash(binaryName string) (string, error) {
-	path, err := GetBinaryPath(binaryName)
-	if err != nil {
-		return "", err
-	}
-	actualChecksum, err := GetFileSHA1Hash(path)
-	if err != nil {
-		return "", err
-	}
-
-	return actualChecksum, nil
-}
-
-func EnsureBinary(binaryName string, expectedChecksum string) error {
-	actualChecksum, err := GetBinarySHA1Hash(binaryName)
-	if err != nil {
-		return errors.Wrap(err, "could not get checksum")
-	}
-	if expectedChecksum != actualChecksum {
-		return errors.Errorf("could not match (expect checksum %q, but get %q)", expectedChecksum, actualChecksum)
-	}
-
-	return nil
-}

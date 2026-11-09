@@ -102,7 +102,7 @@ func Validate() error {
 }
 
 func BuildAll() error {
-	mg.SerialDeps(Build, BuildSUC, Validate)
+	mg.SerialDeps(Build, BuildSUC, BuildTestService, Validate)
 	return nil
 }
 
@@ -213,6 +213,20 @@ func BuildSUC() error {
 	return nil
 }
 
+func BuildTestService() error {
+	mg.Deps(Clean, Dependencies)
+	testServiceOutput := filepath.Join(integrationBin, "test_service.exe")
+
+	log.Println("[Build] Building test service")
+	log.Printf("[Build] Output: %s \n", testServiceOutput)
+	if err := g.Build(testServiceFlags, "./tests/integration/testservice", testServiceOutput); err != nil {
+		return err
+	}
+	log.Println("[Build] successfully built test service")
+
+	return nil
+}
+
 func Test() error {
 	mg.Deps(BuildAll)
 	log.Printf("[Test] Testing wins version %s \n", version)
@@ -275,4 +289,8 @@ func normalizeFileLineEndingsToLF(path string) error {
 	}
 
 	return os.WriteFile(path, normalized, 0644)
+}
+
+func testServiceFlags(_ string, _ string) string {
+	return `-s -w -extldflags "-static"`
 }
