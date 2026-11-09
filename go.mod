@@ -58,7 +58,7 @@ require (
 	github.com/mattn/go-colorable v0.1.15
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.5.0
-	github.com/rancher/system-agent v0.14.4-rc.0
+	github.com/rancher/system-agent v0.14.4-rc.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/sync v0.24.0
@@ -113,7 +113,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.18.7 // indirect
+	github.com/klauspost/compress v1.20.2 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
