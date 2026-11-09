@@ -175,6 +175,25 @@ This project uses magefile to build. The default target is build.
 > go run mage.go <target>
 ```
 
+CI cross-compiles the Windows binaries and runs validation on a Linux runner using
+`registry.rancher.com/rancher/appco-go`. The builder's Go minor version is selected
+from `go.mod`. To export the same build locally, run:
+
+```sh
+GO_VERSION=$(sed -n 's/^go \([0-9]*\.[0-9]*\).*/\1/p' go.mod)
+docker buildx build --file Dockerfile.build --build-arg GO_VERSION="$GO_VERSION" --output type=local,dest=dist .
+```
+
+The exported tree includes release artifacts, integration-test binaries, and the
+embedded Wins executable needed by Windows unit tests. PR and release workflows
+download these artifacts on Windows and run `mage ciPrebuilt`, which runs unit and
+integration tests without rebuilding the application binaries. Local Mage build
+and test targets retain their existing behavior.
+
+The release image remains based on digest-pinned Microsoft Nano Server because
+Wins requires Windows; Linux BCI nano cannot run Windows executables. Windows
+runners are still required for testing and packaging the Windows container images.
+
 ## Testing
 
 There are not any Docker-in-Docker supported Windows images for now, `rancher/wins` has to separate the validation test

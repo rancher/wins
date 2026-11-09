@@ -21,5 +21,7 @@ cmake-build-release/
 # Output of the go coverage tool, specifically when used with ginkgo
 *.coverprofile
 
+dist/
+
 # MAC file
 .DS_Store
