@@ -168,18 +168,24 @@ func unregisterService() error {
 }
 
 func runService(ctx context.Context, server *apis.Server, agent *systemagent.Agent) error {
+	logrus.Infof("runService: Starting rancher-wins service")
+
 	// If the process is not currently executing as a Windows service, assume that this is an interactive session.
 	// debug.Run runs the binary that the service points to directly on the user's console and reacts to user actions
 	// e.g. clicking on Ctrl-C
 	run := debug.Run
 	isWindowsService, err := svc.IsWindowsService()
 	if err != nil {
+		logrus.Errorf("runService: Failed to check if running as Windows service: %v", err)
 		return err
 	}
+	logrus.Infof("runService: Is Windows service = %v", isWindowsService)
+
 	if isWindowsService {
 		// If we can detect that this is a Windows service that is already running, execute it as a Service instead
 		// after configuring logrus to print logs to Event Tracing for Windows (ETW) and the service's Event Log
 
+		logrus.Infof("runService: Configuring as Windows service - setting up ETW and Event Log hooks")
 		run = svc.Run
 
 		logrus.SetOutput(ioutil.Discard)
@@ -187,14 +193,18 @@ func runService(ctx context.Context, server *apis.Server, agent *systemagent.Age
 		// ETW tracing
 		etw, err := logs.NewEtwProviderHook(defaults.WindowsServiceName)
 		if err != nil {
+			logrus.Errorf("runService: Failed to create ETW provider logrus hook: %v", err)
 			return errors.Wrap(err, "could not create ETW provider logrus hook")
 		}
+		logrus.Infof("runService: ETW provider hook created successfully")
 		logrus.AddHook(etw)
 
 		el, err := logs.NewEventLogHook(defaults.WindowsServiceName)
 		if err != nil {
+			logrus.Errorf("runService: Failed to create eventlog logrus hook: %v", err)
 			return errors.Wrap(err, "could not create eventlog logrus hook")
 		}
+		logrus.Infof("runService: Event log hook created successfully")
 		logrus.AddHook(el)
 
 		// Creates a Win32 event defined on a Global scope at stackdump-{pid} that can be signaled by
@@ -203,11 +213,16 @@ func runService(ctx context.Context, server *apis.Server, agent *systemagent.Age
 		// will dump the current stack trace into {windowsTemporaryDirectory}/{default.WindowsServiceName}.{pid}.stack.logs
 		cwd, err := os.Getwd()
 		if err != nil {
+			logrus.Errorf("runService: Failed to get current working directory: %v", err)
 			return err
 		}
+		logrus.Infof("runService: Setting up stack dump handler in directory: %s", cwd)
 		profilings.SetupDumpStacks(defaults.WindowsServiceName, os.Getpid(), cwd)
+	} else {
+		logrus.Infof("runService: Running in interactive/debug mode")
 	}
 
+	logrus.Infof("runService: Starting service handler")
 	h := &serviceHandler{
 		ctx:   ctx,
 		doneC: make(chan struct{}),
@@ -216,6 +231,7 @@ func runService(ctx context.Context, server *apis.Server, agent *systemagent.Age
 		agent: agent,
 	}
 	go func() {
+		logrus.Infof("runService: Executing run handler")
 		h.errC <- run(defaults.WindowsServiceName, h)
 	}()
 
@@ -223,9 +239,12 @@ func runService(ctx context.Context, server *apis.Server, agent *systemagent.Age
 		select {
 		case err := <-h.errC:
 			if err != nil {
+				logrus.Errorf("runService: Service error occurred: %v", err)
 				return err
 			}
+			logrus.Infof("runService: Service completed without error")
 		case <-h.doneC:
+			logrus.Infof("runService: Service done signal received")
 			return nil
 		}
 	}
@@ -240,20 +259,36 @@ type serviceHandler struct {
 }
 
 func (h *serviceHandler) Execute(_ []string, r <-chan svc.ChangeRequest, s chan<- svc.Status) (bool, uint32) {
+	logrus.Infof("serviceHandler.Execute: Starting service handler execution")
 	s <- svc.Status{State: svc.StartPending, Accepts: 0}
 
 	// start wins server
 	ctx, cancel := context.WithCancel(h.ctx)
 	defer cancel()
 	go func() {
-		h.errC <- h.srv.Serve(ctx)
+		logrus.Infof("serviceHandler.Execute: Starting wins server")
+		err := h.srv.Serve(ctx)
+		if err != nil {
+			logrus.Errorf("serviceHandler.Execute: wins server error: %v", err)
+		} else {
+			logrus.Infof("serviceHandler.Execute: wins server stopped cleanly")
+		}
+		h.errC <- err
 	}()
 
 	// start system agent
 	go func() {
-		h.errC <- h.agent.Run(ctx)
+		logrus.Infof("serviceHandler.Execute: Starting system agent")
+		err := h.agent.Run(ctx)
+		if err != nil {
+			logrus.Errorf("serviceHandler.Execute: system agent error: %v", err)
+		} else {
+			logrus.Infof("serviceHandler.Execute: system agent stopped cleanly")
+		}
+		h.errC <- err
 	}()
 
+	logrus.Infof("serviceHandler.Execute: Service marked as Running")
 	s <- svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown | svc.AcceptParamChange}
 
 	// The following loop configures the Windows service to respond to ChangeRequests from the Windows Service Manager
@@ -263,17 +298,21 @@ Loop:
 	for c := range r {
 		switch c.Cmd {
 		case svc.Interrogate:
+			logrus.Debugf("serviceHandler.Execute: Interrogate request received")
 			// Update the service's current status to the one provided by the ChangeRequest
 			s <- c.CurrentStatus
 		case svc.Stop, svc.Shutdown:
+			logrus.Infof("serviceHandler.Execute: Stop/Shutdown request received (cmd=%d)", c.Cmd)
 			// Cleanup before finishing execution
 			s <- svc.Status{State: svc.StopPending, Accepts: 0}
 			// stop wins server
+			logrus.Infof("serviceHandler.Execute: Closing wins server")
 			h.srv.Close()
 			break Loop
 		}
 	}
 
+	logrus.Infof("serviceHandler.Execute: Service handler loop exited, closing doneC")
 	close(h.doneC)
 	return false, 0
 }
