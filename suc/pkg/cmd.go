@@ -62,7 +62,12 @@ func Run(_ *cli.Context) error {
 		}
 	}
 
-	if errs != nil && len(errs) > 0 {
+	_, err = host.UpgradeCSIProxyBinary()
+	if err != nil {
+		errs = append(errs, fmt.Errorf("failed to upgrade csi proxy: %w", err))
+	}
+
+	if len(errs) > 0 {
 		logrus.Errorf("Attempting to restore initial state due to error(s) encountered while updating rancher-wins: %v", errors.Join(errs...))
 		err = state.RestoreInitialState(initialState)
 		if err != nil {
