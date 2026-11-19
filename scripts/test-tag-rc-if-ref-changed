@@ -72,6 +72,13 @@ run_tagger
 test "$(git -C "$runner_repo" tag --list 'v0.17.1-rc.*' | wc -l)" -eq 2 ||
   fail "created a duplicate tag"
 
+setup_repo v0.17.0
+git -C "$source_repo" tag --no-sign -a v0.17.0-rc.1 -m v0.17.0-rc.1
+commit_to_branch release-change
+run_tagger
+test "$(git -C "$runner_repo" tag --list 'v0.17.1-rc.0')" = v0.17.1-rc.0 ||
+  fail "did not prefer a final tag over its RC tags"
+
 setup_repo v0.16.2-rc.1
 commit_to_branch release-change
 run_tagger 'v0\.16\.'
