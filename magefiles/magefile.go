@@ -229,6 +229,10 @@ func BuildTestService() error {
 
 func Test() error {
 	mg.Deps(BuildAll)
+	return test()
+}
+
+func test() error {
 	log.Printf("[Test] Testing wins version %s \n", version)
 	if err := g.Test(flags, "./..."); err != nil {
 		return err
@@ -241,6 +245,10 @@ func Test() error {
 // with Containers feature / docker installed
 func Integration() error {
 	mg.Deps(BuildAll)
+	return integration()
+}
+
+func integration() error {
 	log.Printf("[Integration] Starting Integration Test for wins version %s \n", version)
 
 	// make sure the docker files have access to the exe
@@ -269,6 +277,12 @@ func TestAll() error {
 
 func CI() {
 	mg.Deps(TestAll)
+}
+
+// CIPrebuilt tests artifacts produced by the AppCo Go build without rebuilding them.
+func CIPrebuilt() {
+	mg.Deps(Setup)
+	mg.SerialDeps(test, integration)
 }
 
 func flags(version string, commit string) string {
