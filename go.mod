@@ -2,6 +2,8 @@ module github.com/rancher/wins
 
 go 1.26.10
 
+toolchain go1.26.11
+
 // replacements to match embedded system-agent
 replace (
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
@@ -58,7 +60,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/remotedialer v0.5.0
-	github.com/rancher/system-agent v0.13.4-rc.2
+	github.com/rancher/system-agent v0.13.4-rc.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/sync v0.24.0
