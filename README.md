@@ -175,6 +175,37 @@ This project uses magefile to build. The default target is build.
 > go run mage.go <target>
 ```
 
+## Updating the embedded system-agent
+
+The `System Agent Upgrade` workflow updates `github.com/rancher/system-agent`
+to a published stable or release-candidate tag, runs `go mod tidy`, and opens a
+pull request containing any `go.mod` and `go.sum` changes. Dispatch it from the
+Wins branch that should receive the pull request; the dispatched branch is also
+used as the PR base. If the dependency files do not change, no branch or pull
+request is created.
+
+For example, a release workflow in another repository can invoke it with:
+
+```sh
+gh workflow run system-agent-upgrade.yml \
+  --repo rancher/wins \
+  --ref main \
+  -f system_agent_version=v0.16.0-rc.4 \
+  -f source_url=https://github.com/rancher/system-agent/releases/tag/v0.16.0-rc.4
+```
+
+`system_agent_version` is required and must be a `vX.Y.Z` or `vX.Y.Z-rc.N`
+tag. `source_url` and `source_author` are optional and are included in the PR
+for provenance. Set `--ref` to the Wins target branch, such as `main` or
+`release/v0.16`. The calling workflow must authenticate with `actions: write`
+permission on `rancher/wins` to dispatch workflows.
+
+The receiving workflow uses OIDC to read the GitHub App ID and private key at
+`secret/data/github/repo/${{ github.repository }}/github/app-credentials`. The
+App must be installed on the repository and have contents and pull-request
+write permissions. These Vault and App settings are prerequisites; they are not
+provisioned by this repository workflow.
+
 ## Testing
 
 There are not any Docker-in-Docker supported Windows images for now, `rancher/wins` has to separate the validation test
