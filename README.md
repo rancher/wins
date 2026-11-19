@@ -14,13 +14,19 @@
 
 | Wins Branch     | Rancher Release Line | Tag Format |
 |-----------------|----------------------|------------|
-| `main`          | `main`               | `vX.Y.Z`   |
+| `main`          | `main`               | `v0.17.x`  |
 | `release/v2.16` | `v2.16`              | `v0.16.x`  |
 | `release/v2.15` | `v2.15`              | `v0.15.x`  |
 | `release/v2.14` | `v2.14`              | `v0.14.x`  |
 | `release/v2.13` | `v2.13`              | `v0.13.x`  |
 | `release/v2.12` | `v2.12`              | `v0.12.x`  |
 | `release/v2.11` | `v2.11`              | `v0.11.x`  |
+
+Release candidates are created daily for each supported branch when the branch has changed since
+its latest valid tag. Each tag series requires a manually published stable baseline tag before the
+automation can begin; stable tags continue to be published manually. Once a recognized Wins tag is
+published, the release workflow dispatches Rancher's Wins upgrade workflow for the corresponding
+Rancher branch.
 
 ## How to use
 

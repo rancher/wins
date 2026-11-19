@@ -12,6 +12,7 @@
     "release/v2.16"
   ],
   "prHourlyLimit": 2,
+  "prConcurrentLimit": 5,
   "reviewers": [
     "HarrisonWAffel"
   ],
@@ -28,6 +29,37 @@
     }
   ],
   "packageRules": [
+    {
+      "description": "Disable auto-merge except for severe security updates",
+      "matchJsonata": [
+        "true"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Automerge eligible security updates",
+      "matchDepTypes": [
+        "!devDependencies",
+        "!dev-dependencies",
+        "!test"
+      ],
+      "matchJsonata": [
+        "($exists(vulnerabilityFixVersion) or $exists(isVulnerabilityAlert)) and (vulnerabilitySeverity = 'HIGH' or vulnerabilitySeverity = 'CRITICAL')"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "automerge": true
+    },
+    {
+      "matchBaseBranches": [
+        "main"
+      ],
+      "extends": [
+        "github>rancher/renovate-config//rancher-main#main"
+      ]
+    },
     {
       "matchBaseBranches": [
         "release/v2.11"
