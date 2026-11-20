@@ -7,17 +7,12 @@
 
 ## Release Lines
 
-+ `release/v2.13`, `v0.13.x`
-  + Rancher v2.13 release line; release candidates use `v0.13.Z-rc.N`.
 + `release/v0.4.x`, `v0.4.x` 
   + Currently in maintenance mode, intended for use by Rancher versions <= 2.9.x
 + `main`, `v0.5.x`
   + Currently accepting new features, intended for use by Rancher versions >= v2.10.x
 
 While Rancher versions <= v2.9.x are supported, CVEs must be addressed in both rancher-wins release lines and bumped in the relevant Rancher branches.   
-
-The daily RC workflow creates a candidate when this branch changes after its latest valid tag.
-It requires a manually published stable baseline tag; stable releases remain manual.
 
 ## How to use
 
