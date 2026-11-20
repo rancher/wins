@@ -12,7 +12,7 @@ import (
 
 	planapi "github.com/rancher/rancher/pkg/plan"
 	"github.com/rancher/system-agent/pkg/k8splan"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
