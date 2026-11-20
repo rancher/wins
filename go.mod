@@ -1,8 +1,8 @@
 module github.com/rancher/wins
 
-go 1.26.10
+go 1.27.0
 
-toolchain go1.26.11
+toolchain go1.27.4
 
 // replacements to match embedded system-agent
 replace (
