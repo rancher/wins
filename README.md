@@ -19,10 +19,6 @@
 
 While Rancher versions <= v2.9.x are supported, CVEs must be addressed in both rancher-wins release lines and bumped in the relevant Rancher branches.   
 
-Release candidates for `release/v2.15` use the `v0.15.Z-rc.N` format. The daily RC workflow
-creates a candidate when this branch changes after its latest valid tag. It requires a manually
-published stable baseline tag; stable releases remain manual.
-
 ## How to use
 
 ### Modules
