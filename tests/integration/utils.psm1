@@ -551,6 +551,42 @@ function Get-StringChecksum {
     return $hash
 }
 
+function Get-RancherWinsEventLogs {
+    param (
+        [parameter(Mandatory = $false)] [int]$MinutesBack = 15
+    )
+    
+    Log-Info "Attempting to capture rancher-wins service event logs from the last $MinutesBack minutes"
+    
+    try {
+        $logSinceDate = (Get-Date).AddMinutes(-$MinutesBack)
+        
+        $events = Get-EventLog -LogName Application -Source 'rancher-wins' -After $logSinceDate -ErrorAction SilentlyContinue
+        
+        if ($null -eq $events) {
+            Log-Warn "No rancher-wins event logs found in the last $MinutesBack minutes"
+            return
+        }
+        
+        Log-Info "===== RANCHER-WINS EVENT LOGS (Last $MinutesBack minutes) ====="
+        foreach ($event in $events) {
+            $eventLevel = switch ($event.EntryType) {
+                "Error" { "[ERROR]" }
+                "Warning" { "[WARN]" }
+                "Information" { "[INFO]" }
+                default { "[$($event.EntryType)]" }
+            }
+            
+            Log-Info "$eventLevel $($event.TimeGenerated) - $($event.Message)"
+        }
+        Log-Info "===== END RANCHER-WINS EVENT LOGS ====="
+    }
+    catch {
+        Log-Warn "Failed to retrieve rancher-wins event logs: $($_.Exception.Message)"
+        Log-Warn "This diagnostic information will not prevent test execution"
+    }
+}
+
 Export-ModuleMember -Function Setup-CertFiles
 Export-ModuleMember -Function Cleanup-CertFile
 Export-ModuleMember -Function Log-Info
@@ -576,3 +612,4 @@ Export-ModuleMember -Function Add-CorruptCertBlock
 Export-ModuleMember -Function Remove-LastCertEnd
 Export-ModuleMember -Function Add-PKCSBundleMetadata
 Export-ModuleMember -Function Get-StringChecksum
+Export-ModuleMember -Function Get-RancherWinsEventLogs

@@ -23,6 +23,7 @@ Describe "SUC rancher-wins Config File Updater" {
     }
 
     AfterAll {
+        Get-RancherWinsEventLogs -MinutesBack 15
         Remove-RancherWinsService
     }
 
@@ -54,6 +55,7 @@ Describe "SUC rancher-wins Service Configurator" {
     }
 
     AfterAll {
+        Get-RancherWinsEventLogs -MinutesBack 15
         Remove-RancherWinsService
         Remove-DummyRKE2Service
     }
